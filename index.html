@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DM-Менеджер — СорокинФит</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f2f1ef;
+  --surface: #ffffff;
+  --s2: #f7f6f4;
+  --border: #e4e2de;
+  --text: #1a1916;
+  --sec: #6b6860;
+  --muted: #9e9b94;
+  --red: #c0392b;
+  --green: #1a7a4a;
+  --blue: #2563eb;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.6; }
+
+/* NAV */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(242,241,239,0.96); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px; height: 48px;
+  display: flex; align-items: center; gap: 6px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.topbar::-webkit-scrollbar { display: none; }
+.topbar-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px; letter-spacing: .04em; white-space: nowrap; margin-right: 12px; flex-shrink: 0; }
+.topbar-sep { width: 1px; height: 16px; background: var(--border); flex-shrink: 0; margin: 0 3px; }
+
+/* TABS */
+.tab-bar {
+  display: flex; border-bottom: 2px solid var(--border);
+  margin-bottom: 36px; overflow-x: auto; scrollbar-width: none;
+  position: sticky; top: 48px; z-index: 90;
+  background: rgba(242,241,239,0.97); backdrop-filter: blur(8px);
+  padding: 0 28px; margin-left: -28px; margin-right: -28px;
+  padding-bottom: 0;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab-btn {
+  font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+  padding: 11px 20px; border: none; background: transparent;
+  color: var(--muted); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  letter-spacing: .03em; transition: all .15s; white-space: nowrap;
+  flex-shrink: 0;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--text); border-bottom-color: var(--text); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* LAYOUT */
+.wrap { padding: 32px 28px 80px; max-width: 1380px; margin: 0 auto; }
+
+/* HERO */
+.hero { margin-bottom: 40px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+.hero-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.hero-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 30px; line-height: 1.1; margin-bottom: 12px; }
+.hero-desc { font-size: 13.5px; color: var(--sec); max-width: 560px; line-height: 1.7; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 14px; }
+.tag { font-size: 10.5px; font-weight: 500; padding: 3px 9px; border-radius: 20px; border: 1px solid var(--border); color: var(--sec); }
+.tag.dark { background: var(--text); color: #f2f1ef; border-color: var(--text); }
+
+/* SECTION */
+.sec-head { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.sec-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text); flex-shrink: 0; }
+.sec-label { font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.section { margin-bottom: 48px; }
+
+/* GRID */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.g5 { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; }
+.span2 { grid-column: span 2; }
+.span3 { grid-column: span 3; }
+
+@media(max-width:1100px) { .g4,.g5 { grid-template-columns: repeat(2,1fr); } .span3 { grid-column: span 1; } }
+@media(max-width:700px) { .g2,.g3,.g4,.g5 { grid-template-columns: 1fr; } .span2,.span3 { grid-column: span 1; } .hero-title { font-size: 22px; } .wrap { padding: 20px 14px 60px; } }
+
+/* CARD */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+.card.dark { background: var(--text); border-color: var(--text); color: #f2f1ef; }
+.card.muted { background: var(--s2); }
+.c-label { font-size: 9.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+.dark .c-label { color: rgba(242,241,239,.45); }
+.c-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13.5px; margin-bottom: 11px; line-height: 1.3; }
+.dark .c-title { color: #f2f1ef; }
+.c-body { font-size: 12px; color: var(--sec); line-height: 1.65; }
+.dark .c-body { color: rgba(242,241,239,.65); }
+
+/* QUOTE */
+.q {
+  background: #f0eeeb; border: 1px solid #dbd8d2;
+  border-left: 3px solid var(--text); border-radius: 5px;
+  padding: 8px 11px; font-style: italic; font-size: 12px;
+  color: var(--text); margin: 7px 0; line-height: 1.55;
+}
+.dark .q { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); border-left-color: rgba(255,255,255,.5); color: rgba(242,241,239,.85); }
+.ql { font-size: 10.5px; font-weight: 600; color: var(--sec); margin: 10px 0 3px; }
+.dark .ql { color: rgba(242,241,239,.45); }
+
+/* STEPS */
+.steps { display: flex; flex-direction: column; gap: 9px; }
+.step { display: flex; gap: 9px; align-items: flex-start; }
+.step-n { width: 20px; height: 20px; border-radius: 50%; background: var(--text); color: #f2f1ef; font-family: 'Syne', sans-serif; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.dark .step-n { background: rgba(255,255,255,.15); }
+.step-t { font-weight: 600; font-size: 12px; color: var(--text); margin-bottom: 1px; }
+.dark .step-t { color: #f2f1ef; }
+.step-d { font-size: 11px; color: var(--sec); }
+.dark .step-d { color: rgba(242,241,239,.5); }
+
+/* LISTS */
+.cl, .xl, .dl { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.cl li, .xl li, .dl li { font-size: 12px; color: var(--sec); display: flex; gap: 6px; align-items: flex-start; line-height: 1.5; }
+.cl li::before { content: "✓"; color: var(--green); font-weight: 700; flex-shrink: 0; }
+.xl li::before { content: "✕"; color: var(--red); font-weight: 700; flex-shrink: 0; }
+.dl li::before { content: "•"; color: var(--muted); flex-shrink: 0; }
+
+/* STAGE BOX */
+.sb { border: 1px solid var(--border); border-radius: 5px; padding: 7px 11px; margin: 5px 0; }
+.sb .sb-t { font-weight: 600; font-size: 11px; }
+.sb .sb-d { font-size: 11px; color: var(--sec); margin-top: 1px; }
+
+/* FLOW */
+.flow { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin: 8px 0; }
+.fn { background: var(--s2); border: 1px solid var(--border); border-radius: 5px; padding: 5px 10px; font-size: 11.5px; font-weight: 500; }
+.fa { color: var(--muted); font-size: 13px; }
+
+/* PNUM */
+.pnum { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; color: var(--border); line-height: 1; margin-bottom: 6px; }
+
+/* DIVIDER */
+.div { height: 1px; background: var(--border); margin: 12px 0; }
+
+/* NON-NEG */
+.nn-list { display: flex; flex-direction: column; gap: 6px; }
+.nn { display: flex; gap: 7px; align-items: flex-start; font-size: 12px; }
+.nn-num { font-family: 'Syne', sans-serif; font-size: 9px; font-weight: 700; color: #f2f1ef; background: var(--text); width: 16px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.nn-t { color: var(--sec); line-height: 1.5; }
+.nn-t strong { color: var(--text); }
+.card.dark .nn-t { color: rgba(242,241,239,0.82) !important; }
+.card.dark .nn-t strong { color: #f2f1ef !important; }
+
+/* SCENARIO TABLE */
+.stab { width: 100%; border-collapse: collapse; font-size: 12px; }
+.stab th { background: var(--text); color: #f2f1ef; padding: 7px 10px; text-align: left; font-family: 'Syne', sans-serif; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.stab td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+.stab tr:last-child td { border-bottom: none; }
+.stab tr:hover td { background: var(--s2); }
+
+/* =================== DIALOGUE STYLES =================== */
+.dial-intro { margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+.dial-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 26px; margin-bottom: 8px; }
+.dial-desc { font-size: 13px; color: var(--sec); max-width: 600px; line-height: 1.7; }
+
+.dial-case { margin-bottom: 52px; padding-bottom: 44px; border-bottom: 1px solid var(--border); }
+.dial-case:last-child { border-bottom: none; }
+.dial-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; }
+.dial-num { font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 800; letter-spacing: .12em; color: #f2f1ef; background: var(--text); padding: 3px 9px; border-radius: 3px; flex-shrink: 0; margin-top: 2px; }
+.dial-case-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 3px; }
+.dial-case-desc { font-size: 12px; color: var(--sec); line-height: 1.55; }
+
+.dial-body { display: grid; grid-template-columns: 340px 1fr; gap: 18px; align-items: start; }
+@media(max-width:860px) { .dial-body { grid-template-columns: 1fr; } }
+
+/* CHAT */
+.chat-win { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; position: sticky; top: 58px; }
+.chat-hdr { background: var(--text); padding: 11px 14px; display: flex; align-items: center; gap: 9px; }
+.chat-av { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; color: #f2f1ef; flex-shrink: 0; }
+.chat-name { font-size: 11.5px; font-weight: 600; color: #f2f1ef; }
+.chat-sub { font-size: 10px; color: rgba(255,255,255,.45); }
+.chat-msgs { padding: 14px; display: flex; flex-direction: column; gap: 5px; max-height: 520px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+.msg { display: flex; flex-direction: column; max-width: 88%; }
+.msg.them { align-self: flex-start; }
+.msg.us { align-self: flex-end; }
+.msg-from { font-size: 8.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; padding: 0 3px; }
+.msg.us .msg-from { text-align: right; color: rgba(37,99,235,.6); }
+.msg-bub { padding: 8px 11px; border-radius: 11px; font-size: 12px; line-height: 1.55; }
+.msg.them .msg-bub { background: var(--s2); border: 1px solid var(--border); border-bottom-left-radius: 3px; color: var(--text); }
+.msg.us .msg-bub { background: var(--text); color: #f2f1ef; border-bottom-right-radius: 3px; }
+.msg.us.hi .msg-bub { background: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.18); }
+.msg.them.hi .msg-bub { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
+.msg-step { font-size: 8.5px; color: var(--muted); padding: 1px 3px; margin-top: 2px; }
+.msg.us .msg-step { text-align: right; color: rgba(37,99,235,.5); }
+.msg-sys { align-self: center; font-size: 10px; color: var(--muted); background: var(--s2); border: 1px solid var(--border); border-radius: 20px; padding: 2px 9px; text-align: center; margin: 3px 0; }
+
+/* ANNOTATIONS */
+.anns { display: flex; flex-direction: column; gap: 10px; }
+.ann { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.ann.key { border-color: var(--text); border-width: 1.5px; }
+.ann-hdr { padding: 8px 13px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid var(--border); background: var(--s2); }
+.ann.key .ann-hdr { background: var(--text); border-color: transparent; }
+.ann-badge { font-size: 8.5px; font-weight: 700; letter-spacing: .08em; color: var(--muted); background: var(--border); padding: 2px 6px; border-radius: 3px; flex-shrink: 0; }
+.ann.key .ann-badge { background: rgba(255,255,255,.15); color: rgba(242,241,239,.6); }
+.ann-pr { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--sec); }
+.ann.key .ann-pr { color: rgba(242,241,239,.55); }
+.ann-body { padding: 11px 13px; }
+.ann-q { font-size: 11.5px; font-style: italic; background: #f0eeeb; border: 1px solid #dbd8d2; border-left: 3px solid var(--text); border-radius: 4px; padding: 7px 9px; margin-bottom: 7px; line-height: 1.5; }
+.ann.key .ann-q { background: rgba(37,99,235,.05); border-color: rgba(37,99,235,.15); border-left-color: var(--blue); }
+.ann-why { font-size: 12px; color: var(--sec); line-height: 1.65; }
+.ann-why strong { color: var(--text); font-weight: 600; }
+.ann-no { margin-top: 7px; padding: 6px 9px; background: rgba(192,57,43,.06); border: 1px solid rgba(192,57,43,.15); border-radius: 4px; font-size: 11px; color: var(--red); line-height: 1.5; }
+.ann-no::before { content: "✕ Не говорите: "; font-weight: 700; }
+.ann-sep { display: flex; align-items: center; gap: 7px; padding: 3px 0; }
+.ann-sep-l { flex: 1; height: 1px; background: var(--border); }
+.ann-sep-t { font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); white-space: nowrap; }
+
+.dial-result { margin-top: 14px; padding: 12px 14px; background: var(--text); border-radius: 8px; color: #f2f1ef; font-size: 12px; display: flex; align-items: flex-start; gap: 9px; line-height: 1.55; }
+.dr-icon { font-size: 16px; flex-shrink: 0; }
+.dr-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 10px; color: rgba(242,241,239,.5); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
+
+/* =================== MATERIALS TAB =================== */
+.mat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+@media(max-width:900px) { .mat-grid { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:560px) { .mat-grid { grid-template-columns: 1fr; } }
+
+.mat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.mat-card-hdr { background: var(--text); padding: 12px 15px; }
+.mat-card-hdr .kw { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 15px; color: #f2f1ef; letter-spacing: .03em; margin-bottom: 2px; }
+.mat-card-hdr .kw-desc { font-size: 10.5px; color: rgba(242,241,239,.5); }
+.mat-card-body { padding: 14px 15px; }
+.mat-card-body .mat-desc { font-size: 12px; color: var(--sec); margin-bottom: 12px; line-height: 1.55; }
+.mat-link { display: flex; align-items: center; gap: 7px; padding: 8px 10px; background: var(--s2); border: 1px solid var(--border); border-radius: 6px; text-decoration: none; color: var(--text); font-size: 11.5px; font-weight: 500; transition: all .15s; margin-bottom: 6px; }
+.mat-link:hover { background: var(--border); }
+.mat-link .ml-icon { font-size: 14px; flex-shrink: 0; }
+.mat-link .ml-label { flex: 1; }
+.mat-link .ml-copy { font-size: 10px; color: var(--muted); padding: 2px 7px; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; cursor: pointer; }
+.mat-link .ml-copy:hover { background: var(--text); color: #f2f1ef; border-color: var(--text); }
+
+.mat-group-title { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 20px 0 8px; }
+
+.bonus-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 15px; display: flex; gap: 12px; align-items: flex-start; }
+.bonus-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.bonus-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+.bonus-desc { font-size: 11.5px; color: var(--sec); line-height: 1.5; margin-bottom: 8px; }
+.placeholder-slot { padding: 8px 11px; background: rgba(255,193,7,.08); border: 1.5px dashed rgba(255,193,7,.5); border-radius: 6px; font-size: 11px; color: #9a7500; font-style: italic; }
+
+.cases-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-top: 8px; }
+@media(max-width:900px) { .cases-grid { grid-template-columns: repeat(2,1fr); } }
+.case-item { background: var(--s2); border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; }
+.case-item .ci-num { font-family: 'Syne', sans-serif; font-size: 9px; font-weight: 800; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px; }
+.case-item .ci-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 6px; line-height: 1.4; }
+.case-item .placeholder-slot { margin-top: 4px; }
+
+/* COPY TOAST */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #f2f1ef; padding: 10px 16px; border-radius: 7px; font-size: 12px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 999; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topbar">
+  <span class="topbar-logo">СорокинФит · DM-Менеджер</span>
+  <div class="topbar-sep"></div>
+  <span style="font-size:11px;color:var(--muted);white-space:nowrap">Экспресс-Ползунок · 6 700–13 700 ₽ · Только мужчины</span>
+</nav>
+
+<div class="wrap">
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('playbook',this)">📋 Плейбук</button>
+  <button class="tab-btn" onclick="switchTab('dialogues',this)">💬 Диалоги</button>
+  <button class="tab-btn" onclick="switchTab('materials',this)">📦 Материалы</button>
+  <button class="tab-btn" onclick="switchTab('search',this)">🔍 Поиск</button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 1 — ПЛЕЙБУК
+══════════════════════════════════════════ -->
+<div class="tab-panel active" id="tab-playbook">
+
+<div class="hero">
+  <div class="hero-eyebrow">Операционная система · ДМ-менеджмент</div>
+  <h1 class="hero-title">DM-Менеджер<br>СорокинФит</h1>
+  <p class="hero-desc">Полный плейбук работы с входящими заявками. Цель — продать Экспресс-Ползунок или перевести на личное ведение Команды СорокинФит. Все сообщения от лица Дениса, на «Вы».</p>
+  <div class="tags">
+    <span class="tag dark">Только мужчины</span>
+    <span class="tag dark">На «Вы» с большой буквы</span>
+    <span class="tag">РАЗБОР → лид-магнит → кодовые слова</span>
+    <span class="tag">→ ЭП 6 700–13 700 ₽</span>
+    <span class="tag">→ КСФ личное ведение</span>
+  </div>
+</div>
+
+<!-- ВОРОНКА -->
+<div class="section" id="funnel">
+  <div class="sec-head"><div class="sec-dot"></div><span class="sec-label">Как работает воронка — понять раз и навсегда</span></div>
+  <div class="g2">
+    <div class="card dark">
+      <div class="c-label">Полный путь клиента</div>
+      <div class="c-title">От контента до оплаты</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div><div class="step-t">Контент Instagram / ВКонтакте</div><div class="step-d">Человек видит пост или Рилс Дениса</div></div></div>
+        <div class="step"><div class="step-n">2</div><div><div class="step-t">Кодовое слово «РАЗБОР»</div><div class="step-d">Пишет в комментарии или директ → получает ссылку на Telegram-бот</div></div></div>
+        <div class="step"><div class="step-n">3</div><div><div class="step-t">Лид-магнит в боте</div><div class="step-d">40-минутное видео. Внутри — призывы написать кодовые слова в личку «Денису»</div></div></div>
+        <div class="step"><div class="step-n">4</div><div><div class="step-t">Кодовое слово в личку</div><div class="step-d">ТРЕНИРОВКА / ТЕСТОСТЕРОН / АНАЛИЗЫ / БАДЫ / ТЕХНИКА</div></div></div>
+        <div class="step"><div class="step-n">5</div><div><div class="step-t">Менеджер подключается СРАЗУ</div><div class="step-d">Пока человек активен. Выдаёт материал + один вопрос</div></div></div>
+        <div class="step"><div class="step-n">6</div><div><div class="step-t">Диалог → продажа ЭП</div><div class="step-d">Или перевод на Команду СорокинФит если целевой</div></div></div>
+        <div class="step"><div class="step-n">7</div><div><div class="step-t">Нет ответа → дожим</div><div class="step-d">Через час → через день → всё. Не преследуем</div></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Что продаём — знать наизусть</div>
+      <div class="c-title">Экспресс-Ползунок</div>
+      <div class="c-body" style="margin-bottom:10px">Адаптивная система для мужчин за 30. Питание, тренировки, восстановление — всё под реальный ритм жизни.</div>
+
+      <table class="stab">
+        <tr><th>Тариф</th><th>Цена</th><th>Ключевое</th></tr>
+        <tr><td><b>СТАРТ</b></td><td>6 700 ₽</td><td>Тренировки + ЕИГ + 5 бонусов</td></tr>
+        <tr><td><b>НЕЗАМЕНИМЫЙ ⭐</b></td><td>9 700 ₽</td><td>+ питание + план 30 дней + 7 бонусов</td></tr>
+        <tr><td><b>ВСЁ И СРАЗУ</b></td><td>13 700 ₽</td><td>+ бот «Сорокин 24/7» + гарантия 200%</td></tr>
+      </table>
+
+      <div class="div"></div>
+      <div class="ql">Рассрочка</div>
+      <div class="c-body">Беспроцентная 6 мес. на «Всё и сразу» — 2 283 ₽/мес</div>
+      <div class="ql">Гарантии</div>
+      <div class="c-body">30 дней — возврат 100% по любой причине<br>60 дней — возврат 200% (только «Всё и сразу», выполнил все условия)</div>
+      <div class="div"></div>
+      <div class="c-body" style="font-size:11px;color:var(--muted)">Ссылка на оплату: <b>sorokin-fit.com/express</b> — отправляем только после явного «да» от человека.</div>
+    </div>
+  </div>
+</div>
+
+<!-- КОДОВЫЕ СЛОВА -->
+<div class="section" id="codewords">
+  <div class="sec-head"><div class="sec-dot"></div><span class="sec-label">Часть 1 — Входящие кодовые слова</span></div>
+  <div class="g3">
+    <div class="card dark span2">
+      <div class="c-label">Принцип подключения</div>
+      <div class="c-title">Человек написал кодовое слово — подключаемся сразу</div>
+      <div class="c-body" style="margin-bottom:12px">Первое сообщение: выдаём материал + одно допущение + один вопрос. Называем самую вероятную боль на основе кодового слова — не спрашиваем «что вас беспокоит?»</div>
+      <div style="background:rgba(255,255,255,.06);border-radius:6px;padding:10px 12px;font-size:11.5px;color:rgba(242,241,239,.7)">
+        ⚠️ По кодовому слову «РАЗБОР» автоматизация уже скидывает ссылку на бота. После этого нативно спрашиваем: <em>«Кстати, как Вам видео после просмотра?»</em> — не в начале разговора, а через 20–30% диалога, когда уже есть контакт.
+      </div>
+    </div>
+    <div class="card muted">
+      <div class="c-label">Маршрутизация</div>
+      <div class="c-title">Кого куда</div>
+      <div class="ql">→ Экспресс-Ползунок:</div>
+      <ul class="dl"><li>Хочет систему, разберётся сам</li><li>Бюджет ограничен</li><li>Нет срочного дедлайна</li></ul>
+      <div class="ql">→ Команда СорокинФит (ведение):</div>
+      <ul class="dl"><li>«Хочу чтобы вели лично»</li><li>Пробовал всё — не работает</li><li>Чёткий запрос, серьёзный бюджет</li></ul>
+    </div>
+  </div>
+
+  <div class="g5" style="margin-top:10px">
+    <div class="card">
+      <div class="c-label">Кодовое слово</div>
+      <div class="c-title" style="font-size:20px;margin-bottom:6px">ТРЕНИРОВКА</div>
+      <div class="q">«Держите программу 👆 Обычно за тренировками обращаются в двух случаях — либо вообще не знают с чего начать, либо уже занимаются, но результат не тот. У Вас что из этого?»</div>
+    </div>
+    <div class="card">
+      <div class="c-label">Кодовое слово</div>
+      <div class="c-title" style="font-size:20px;margin-bottom:6px">ТЕСТОСТЕРОН</div>
+      <div class="q">«Держите гайд 👆 Тестостерон обычно начинает интересовать когда чувствуешь — энергия уже не та. Либо в зале топчешься, либо просто общий драйв пропал. Что из этого ближе?»</div>
+    </div>
+    <div class="card">
+      <div class="c-label">Кодовое слово</div>
+      <div class="c-title" style="font-size:20px;margin-bottom:6px">АНАЛИЗЫ</div>
+      <div class="q">«Держите гайд 👆 Анализами обычно интересуются либо когда что-то конкретно не так с самочувствием, либо просто хочется понять что происходит внутри. У Вас какая ситуация?»</div>
+    </div>
+    <div class="card">
+      <div class="c-label">Кодовое слово</div>
+      <div class="c-title" style="font-size:20px;margin-bottom:6px">БАДЫ</div>
+      <div class="q">«Держите список 👆 Добавки чаще ищут когда перепробовали многое и ничего не работает — или наоборот, только начинают подходить к здоровью системно. Вы где сейчас?»</div>
+    </div>
+    <div class="card">
+      <div class="c-label">Кодовое слово</div>
+      <div class="c-title" style="font-size:20px;margin-bottom:6px">ТЕХНИКА</div>
+      <div class="q">«Держите разбор 👆 Техника нужна либо когда только начинаешь и боишься травм, либо занимаешься давно но ощущение что что-то делаешь не так. Что у Вас?»</div>
+    </div>
+  </div>
+</div>
+
+<!-- СЦЕНАРИИ -->
+<div class="section" id="scenarios">
+  <div class="sec-head"><div class="sec-dot"></div><span class="sec-label">Части 2–3 — Главный вопрос и сценарии</span></div>
+
+  <div class="g2" style="margin-bottom:10px">
+    <div class="card dark">
+      <div class="c-label">Часть 2 — Главный вопрос</div>
+      <div class="c-title">После первого ответа — всегда задаём</div>
+      <div class="q">«Понятно) А какой у Вас вообще запрос — что хотите изменить прежде всего?»</div>
+      <div class="c-body" style="margin-top:8px">Слушаем. Читаем эмоцию, а не текст.</div>
+    </div>
+    <div class="card">
+      <div class="c-label">Читаем эмоцию</div>
+      <div class="c-title">Что за этим стоит</div>
+      <table class="stab" style="font-size:11px">
+        <tr><th>Говорит</th><th>Эмоция</th><th>Как отвечаем</th></tr>
+        <tr><td>«Делаю всё правильно, но нет результата»</td><td>Фрустрация</td><td>«Понимаю, как раздражает когда стараешься а результата нет. Сколько уже так?»</td></tr>
+        <tr><td>«Начинал, бросал, снова»</td><td>Стыд + усталость</td><td>«Это замкнутый круг из которого сложно выйти без системы. Что каждый раз происходит?»</td></tr>
+        <tr><td>«Уже пробовал, не помогло»</td><td>Скептицизм</td><td>«Понятно почему скептически. Что конкретно пробовали?»</td></tr>
+        <tr><td>«Хочу быть примером для детей»</td><td>Вина + действие</td><td>«Самое сильное — когда мужчины говорят что не хотят быть уставшим папой на диване»</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="c-label">Сценарий 1</div>
+      <div class="c-title">«Хочу убрать живот / похудеть»</div>
+      <div class="c-body" style="margin-bottom:6px">Самый частый запрос — 47% аудитории.</div>
+      <div class="q">«Живот — это почти всегда не про количество тренировок, а про то как выстроен обмен веществ и питание. Вы уже что-то пробовали или это первый серьёзный подход?»</div>
+      <div class="ql">Если пробовали и не сработало:</div>
+      <div class="q">«Дело не в слабости воли — дело в том что система не была выстроена под Ваш реальный ритм жизни. Что конкретно не сработало?»</div>
+      <div class="ql">Если первый раз:</div>
+      <div class="q">«Хорошо что взялись сейчас. Главное — не повторить путь большинства, которые начинают с жёстких диет, потом срываются. Как выглядит обычная неделя?»</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Сценарий 2</div>
+      <div class="c-title">«Нет энергии / усталость / нет драйва»</div>
+      <div class="c-body" style="margin-bottom:6px">24% аудитории — упадок сил.</div>
+      <div class="q">«Хроническая усталость у мужчин после 35 — это почти всегда про гормональный фон и восстановление, а не про лень. Работа как устроена — офис, вахта, сменный?»</div>
+      <div class="ql">Если вахта / 12-часовой день:</div>
+      <div class="q">«После 12-часовой смены думать о тренировках действительно тяжело. Именно поэтому система должна строиться вокруг реального расписания. Когда последний раз чувствовали что всё хорошо с энергией?»</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Сценарий 3</div>
+      <div class="c-title">«Хочу набрать мышцы / масса не идёт»</div>
+      <div class="c-body" style="margin-bottom:6px">47% аудитории имеют запрос по массе.</div>
+      <div class="q">«Силовые растут, а масса нет — это почти всегда про питание, а не про тренировки. Сколько белка в день примерно едите?»</div>
+      <div class="ql">Если не считает:</div>
+      <div class="q">«Вот именно — «стараюсь есть нормально» без понимания конкретных цифр, это и есть причина почему масса не идёт. Это поправимо. Тренируетесь сейчас?»</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Сценарий 4</div>
+      <div class="c-title">«Болит спина / суставы / травма»</div>
+      <div class="c-body" style="margin-bottom:6px">29% аудитории. Частая причина бросать тренировки.</div>
+      <div class="q">«С этим как раз работаем — в системе есть адаптивный план под любые ограничения. При грыже наоборот нужно укреплять мышечный корсет, просто делать это грамотно. Что именно болит и давно ли?»</div>
+      <div class="c-body" style="margin-top:7px;font-size:11px;color:var(--muted)">⚠️ Не говорим «вам лучше к врачу». Говорим что система адаптируется — это правда.</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Сценарий 5</div>
+      <div class="c-title">«Нет времени» / вахта</div>
+      <div class="q">«Скажите честно — 20–30 минут три раза в неделю у Вас есть? Потому что система построена именно под тех у кого нет времени. Там не нужен зал на час.»</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Сценарий 6</div>
+      <div class="c-title">Сразу спрашивает цену</div>
+      <div class="c-body" style="margin-bottom:6px">Никогда не называем цену первым предложением.</div>
+      <div class="q">«Есть несколько вариантов под разные ситуации. Чтобы сориентировать точнее — скажите, какая у Вас сейчас главная задача по телу?»</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Сценарий 7</div>
+      <div class="c-title">Хочет личное ведение / КСФ</div>
+      <div class="c-body" style="margin-bottom:6px">Не пытаемся продать ЭП. Сразу на ведение.</div>
+      <div class="q">«Да, есть формат личной работы с командой. Начинаем с разбора Вашей ситуации — питание, анализы, тренировки — и выстраиваем всё индивидуально.»</div>
+      <div class="c-body" style="margin-top:6px;color:var(--muted);font-size:11px">🎤 Отправляем заранее записанное голосовое про ведение КСФ</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Сценарий 8</div>
+      <div class="c-title">Уже покупал у Дениса</div>
+      <div class="q">«Отлично, значит Вы уже знаете качество. Для тех кто уже с нами — есть особые условия. Расскажите что сейчас хотите — посмотрим что подойдёт.»</div>
+      <div class="c-body" style="margin-top:6px;font-size:11px;color:var(--muted)">Презентуем ЭП как новый продукт с бонусом за лояльность — согласовать с Денисом</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Сценарий 9 — Дожим</div>
+      <div class="c-title">Написал слово и пропал</div>
+      <div class="ql">Через 1 час:</div>
+      <div class="q">«Кстати, проверил — материал дошёл? Там есть один момент который у большинства мужчин сразу вызывает вопросы.»</div>
+      <div class="ql">Через 1 день:</div>
+      <div class="q">«[Имя], напишите когда будет удобно — пришлю кое-что конкретно под Вашу ситуацию.»</div>
+      <div class="c-body" style="margin-top:6px;font-size:11px;color:var(--muted)">После 2-го дожима — не пишем. Оставляем в базе.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ПОГРУЖЕНИЕ -->
+<div class="section" id="deepen">
+  <div class="sec-head"><div class="sec-dot"></div><span class="sec-label">Часть 4 — Погружение в ситуацию</span></div>
+  <div class="g2">
+    <div class="card">
+      <div class="c-label">Что нужно узнать — по одному вопросу</div>
+      <div class="c-title">Вопросы для глубокого погружения</div>
+      <ul class="dl">
+        <li>«Сколько Вам лет и есть дети?»</li>
+        <li>«Вы занимаетесь чем-то сейчас или пока нет?»</li>
+        <li>«Что уже пробовали — диеты, зал, что-то ещё?»</li>
+        <li>«Сколько времени это уже продолжается?»</li>
+        <li>«Как устроен рабочий день — офис, вахта?»</li>
+      </ul>
+      <div class="div"></div>
+      <div class="c-body" style="font-weight:600;font-size:11.5px">Дети — мощнейший триггер. Используйте:</div>
+      <div class="q">«Это прекрасно. У меня у самого в этом году родилась дочка... Готов всё сделать ради неё. У Вас также?»</div>
+    </div>
+    <div class="card dark">
+      <div class="c-label">Золотые фразы ЦА — их слова</div>
+      <div class="c-title">Используйте дословно — человек слышит себя</div>
+      <div class="ql">Про живот:</div>
+      <ul class="dl" style="margin-bottom:8px">
+        <li>«живот растёт вопреки всем стараниям»</li>
+        <li>«делаю всё как надо, а живот всё равно не уходит»</li>
+        <li>«проклятый живот с боками никак не уходит»</li>
+      </ul>
+      <div class="ql">Про энергию:</div>
+      <ul class="dl" style="margin-bottom:8px">
+        <li>«просыпаюсь уже уставшим, энергии хватает только до обеда»</li>
+        <li>«пропала былая агрессия и азарт»</li>
+        <li>«кофе уже не помогает»</li>
+      </ul>
+      <div class="ql">Про детей:</div>
+      <ul class="dl">
+        <li>«не хочу к совершеннолетию ребёнка разваливаться»</li>
+        <li>«не уставшего папу на диване»</li>
+        <li>«хочу чтобы им не было стыдно со мной»</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- РЕФРЕЙМЫ + ПРЕДЛОЖЕНИЕ -->
+<div class="section" id="reframes">
+  <div class="sec-head"><div class="sec-dot"></div><span class="sec-label">Части 5–6 — Рефреймы и предложение ЭП</span></div>
+  <div class="g3" style="margin-bottom:10px">
+    <div class="card">
+      <div class="c-label">Рефрейм</div>
+      <div class="c-title">«Живот не уходит несмотря на диету»</div>
+      <div class="q">«Это метаболическая яма — тело перестаёт нормально сжигать жир из-за хронического стресса. Диета здесь не работает именно потому что проблема не в еде. Как у Вас со сном и рабочей нагрузкой?»</div>
+    </div>
+    <div class="card">
+      <div class="c-label">Рефрейм</div>
+      <div class="c-title">«Силовые растут, масса нет»</div>
+      <div class="q">«Силовые растут, а масса нет — это почти всегда про питание и восстановление. Плюс после 35 гормональный фон уже не тот. Анализы когда последний раз сдавали?»</div>
+    </div>
+    <div class="card">
+      <div class="c-label">Рефрейм</div>
+      <div class="c-title">«Было хорошо, потом откат»</div>
+      <div class="q">«Классика — достигли результата, жизнь подкинула стресс, и всё вернулось. Это не слабость воли — это отсутствие системы удержания. Сколько раз уже был такой цикл?»</div>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="card dark">
+      <div class="c-label">Предложение ЭП — шаги</div>
+      <div class="c-title">Когда и как предлагать</div>
+      <div class="c-body" style="margin-bottom:10px">Предлагаем только когда понятны три вещи: запрос, ситуация, барьер. Не раньше.</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div><div class="step-t">Скидываем кейс</div><div class="step-d">По его ситуации. После «да хочу посмотреть» — ссылка на видео-разбор</div></div></div>
+        <div class="step"><div class="step-n">2</div><div><div class="step-t">Позиционирование</div><div class="step-d">«У меня есть система — Экспресс-Ползунок. Это не общая программа — конкретный план под Ваш ритм»</div></div></div>
+        <div class="step"><div class="step-n">3</div><div><div class="step-t">Тест на серьёзность</div><div class="step-d">«Вы настроены реально разобраться, или пока смотрите что есть?»</div></div></div>
+        <div class="step"><div class="step-n">4</div><div><div class="step-t">Permission Close</div><div class="step-d">«Если хотите — скину ссылку, там всё расписано. Интересно посмотреть?»</div></div></div>
+        <div class="step"><div class="step-n">5</div><div><div class="step-t">Ссылка</div><div class="step-d">После «да» → ссылка + «большинство берут всё и сразу, там питание и тренировки в связке»</div></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Кейсы по категориям</div>
+      <div class="c-title">Скидываем перед оффером</div>
+      <ul class="dl">
+        <li>Похудение / живот</li>
+        <li>Набор мышц</li>
+        <li>Нет энергии / восстановление</li>
+        <li>Возраст 45+</li>
+        <li>Вахта / нет времени</li>
+        <li>Боли / травмы</li>
+      </ul>
+      <div class="div"></div>
+      <div class="q">«У меня есть пара историй мужчин с похожей ситуацией — хотите скину? Там видно, что конкретно изменилось и как быстро.»</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">После покупки</div>
+      <div class="c-title">Закрытие и пост-продажа</div>
+      <div class="q">«Отлично. Держите ссылку — sorokin-fit.com/express. Как оплатите — напишите, доступ придёт на почту, а я расскажу как получить ещё один бонус :)»</div>
+      <div class="ql">После оплаты:</div>
+      <div class="q">«[Имя], плату вижу, доступ пришёл Вам на почту. Уверен в Вашем результате!»</div>
+      <div class="ql">Горячий лид на КСФ:</div>
+      <div class="q">«Судя по тому что Вы описали — я бы на Вашем месте подумал про индивидуальное ведение. Это другой уровень, личная работа + анализы + план под Вашу ситуацию.»</div>
+      <div class="c-body" style="margin-top:6px;color:var(--muted);font-size:11px">🎤 Отправляем голосовое про ведение КСФ (если «да»)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ВОЗРАЖЕНИЯ -->
+<div class="section" id="objections">
+  <div class="sec-head"><div class="sec-dot"></div><span class="sec-label">Часть 7 — Работа с возражениями</span></div>
+
+  <div class="g2" style="margin-bottom:10px">
+    <div class="card dark">
+      <div class="c-label">Принцип</div>
+      <div class="c-title">Каждое возражение — сигнал о покупке</div>
+      <div class="c-body" style="margin-bottom:10px">Они говорят не «нет» — они просят дать им причину сказать «да».</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div><div class="step-t">Подтверди что сказали</div><div class="step-d">Никогда не атакуй возражение в лоб</div></div></div>
+        <div class="step"><div class="step-n">2</div><div><div class="step-t">Переверни через ЕГО ситуацию и слова</div><div class="step-d">Используй его цифры, его боль, его слова</div></div></div>
+        <div class="step"><div class="step-n">3</div><div><div class="step-t">Конкретный следующий шаг</div><div class="step-d">Никогда не заканчивай без вопроса</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="c-label">Быстрая шпаргалка</div>
+      <div class="c-title">Первый вопрос на возражение</div>
+      <table class="stab" style="font-size:11.5px">
+        <tr><th>Говорит</th><th>Первый вопрос</th></tr>
+        <tr><td>«Дорого»</td><td>«Что сейчас тратите на здоровье в месяц?»</td></tr>
+        <tr><td>«Не уверен в результате»</td><td>«Что нужно увидеть чтобы это имело смысл?»</td></tr>
+        <tr><td>«Нет денег»</td><td>«Если бы вопрос цены решился — это то что нужно?»</td></tr>
+        <tr><td>«Нет времени»</td><td>«Про тренировки или про то чтобы разобраться?»</td></tr>
+        <tr><td>«Надо подумать»</td><td>«Что конкретно хотите обдумать?»</td></tr>
+        <tr><td>«Уже пробовал»</td><td>«Что конкретно пробовали и что не сработало?»</td></tr>
+        <tr><td>«С тренером занимаюсь»</td><td>«Результат который хотели — он идёт?»</td></tr>
+        <tr><td>«Онлайн не верю»</td><td>«Что останавливает — что онлайн или в результате сомневаетесь?»</td></tr>
+        <tr><td>«Что внутри?»</td><td>Отвечаем + ссылка sorokin-fit.com/express</td></tr>
+        <tr><td>«Проблемы со здоровьем»</td><td>«Что конкретно у Вас?»</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="c-label">Возражение 1</div>
+      <div class="c-title">«Дорого»</div>
+      <div class="ql">Шаг 1 — уточняем:</div>
+      <div class="q">«Понимаю. Скажите — Вы сейчас вообще что-то тратите на здоровье, зал, питание? Хотя бы примерно в месяц?»</div>
+      <div class="ql">Шаг 2 — считаем на его цифрах:</div>
+      <div class="q">«То есть Вы уже тратите [его цифра] в месяц — и при этом [его боль]. ЭП стоит [тариф] один раз. Это меньше чем уже вкладываете за [N месяцев] — только с конкретным результатом.»</div>
+      <div class="ql">Шаг 3 — гарантия:</div>
+      <div class="q">«Плюс гарантия 200% — если выполните систему и результата не будет, возвращаю двойную стоимость. По сути Вы ничем не рискуете.»</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Возражение 2–3</div>
+      <div class="c-title">«Не уверен в результате» / «Нет денег»</div>
+      <div class="ql">Не уверен:</div>
+      <div class="q">«Скажите конкретно — что нужно увидеть, чтобы это имело смысл? Какой результат за какое время считали бы успехом?»</div>
+      <div class="q">«Хотите скину пару историй мужчин с похожим запросом — конкретные цифры до и после?»</div>
+      <div class="ql">Нет денег:</div>
+      <div class="q">«Если бы вопрос цены решился — это то что Вам нужно? Есть рассрочка 2 283 ₽/мес, это меньше одного похода к диетологу.»</div>
+      <div class="ql">Минимальный вход:</div>
+      <div class="q">«Есть тариф СТАРТ за 6 700 ₽ — основная механика без питания. Можно начать с минимума и докупить потом.»</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Возражения 4–6</div>
+      <div class="c-title">«Нет времени» / «Надо подумать» / «Уже пробовал»</div>
+      <div class="ql">Нет времени:</div>
+      <div class="q">«20–30 минут три раза в неделю у Вас есть? Система построена именно под тех у кого нет времени — есть программа для вахты и командировок, без зала.»</div>
+      <div class="ql">Надо подумать:</div>
+      <div class="q">«Конечно. Скажите что конкретно хотите обдумать — сама система, цена, или что-то не ясно? Помогу прямо сейчас.»</div>
+      <div class="ql">Уже пробовал:</div>
+      <div class="q">«Проблема была не в Вас — в том что стандартный подход не учитывал Вашу биохимию и ритм жизни. Здесь начинаем с Вашей конкретной ситуации. Это другая история.»</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Возражение 7–9</div>
+      <div class="c-title">«С тренером» / «Онлайн» / «Сам разберусь»</div>
+      <div class="ql">Уже с тренером:</div>
+      <div class="q">«Отлично — дисциплина есть. Результат который хотели — он идёт? Мы не трогаем то что работает — добавляем то чего не хватает.»</div>
+      <div class="ql">Не верю в онлайн:</div>
+      <div class="q">«Система работает в любом месте — в зале, дома, в командировке. Результат зависит от системы, а не от формата. Хотите скину кейсы мужчин которые делали дома?»</div>
+      <div class="ql">Сам разберусь:</div>
+      <div class="q">«Вы явно не из тех кто сдаётся. Вопрос не в том разберётесь ли — вопрос сколько ещё времени уйдёт. У Вас сколько уже попыток было?»</div>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Возражение 10–11</div>
+      <div class="c-title">«Что внутри?» / Проблемы со здоровьем</div>
+      <div class="ql">Что внутри:</div>
+      <div class="q">«Внутри пять программ: тренировки под Ваш ритм, питание без отдельных кастрюль от семьи, план на 30 дней, техника и восстановление. Плюс 8 бонусов — программы для вахты и командировок, матрица замен, бот-помощник и закрытое сообщество. На сайте всё подробно — sorokin-fit.com/express»</div>
+      <div class="ql">Грыжа / боли / суставы:</div>
+      <div class="q">«При грыже и болях наоборот нужно укреплять — просто делать это грамотно. В системе отдельные программы под ограничения. Что конкретно у Вас?»</div>
+      <div class="ql">Спрашивает про фармакологию:</div>
+      <div class="q">«В Экспресс-Ползунке честно — это не разбирается, там только натуральные методы. Если хотите работать с фармакологией индивидуально — это формат личного ведения. Вам интересно в эту сторону?»</div>
+    </div>
+
+    <div class="card dark">
+      <div class="c-label">Стоимость ожидания</div>
+      <div class="c-title">Когда говорят «потом» / «не сейчас»</div>
+      <div class="q">«Понимаю. [Его боль] — это сколько уже длится? Месяц, полгода, год? Потому что «лучший момент» обычно так и не наступает, а тело за это время не стоит на месте.»</div>
+      <div class="c-body" style="margin-top:8px">Если называет конкретную дату — фиксируем и пишем в этот день.<br>Если «не знаю» — переходим к стоимости ожидания.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ПСИХОЛОГИЯ + ПРАВИЛА -->
+<div class="section" id="psychology">
+  <div class="sec-head"><div class="sec-dot"></div><span class="sec-label">Психология · Правила стиля · 10 нерушимых</span></div>
+  <div class="g5" style="margin-bottom:10px">
+    <div class="card"><div class="pnum">1</div><div class="c-title">Ссылайтесь на их слова</div><div class="c-body">Каждое сообщение отвечает на что-то конкретное из их текста. Никогда не вводите новые темы. Люди доверяют, когда слышат свои слова обратно.</div></div>
+    <div class="card"><div class="pnum">2</div><div class="c-title">Подтверждайте, не атакуйте</div><div class="c-body">Когда человек что-то говорит — подтвердите это. «Вы, наверное, правы...» Найдите правду и стройте на ней.</div></div>
+    <div class="card"><div class="pnum">3</div><div class="c-title">Задавайте вопросы, зная ответ</div><div class="c-body">Спрашиваете не чтобы узнать — чтобы ОНИ это произнесли. Когда признают боль — она становится точкой которую хотят исправить.</div></div>
+    <div class="card"><div class="pnum">4</div><div class="c-title">Длинный ввод = длинный вывод</div><div class="c-body">Вдумчивые сообщения, показывающие понимание ситуации, порождают развёрнутые ответы. Больше информации = легче закрыть.</div></div>
+    <div class="card"><div class="pnum">5</div><div class="c-title">«Ожидаете» vs «Нуждаетесь»</div><div class="c-body">Всегда «что Вы ожидаете?» — «нуждаетесь» подразумевает дефицит. Ставьте человека в позицию силы. Власть + скромность = невозможно отказать.</div></div>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="c-label">Правила стиля</div>
+      <div class="c-title">Как писать — читать раз, соблюдать всегда</div>
+      <div class="c-body" style="font-weight:600;margin-bottom:5px">Обязательно:</div>
+      <ul class="cl" style="margin-bottom:10px">
+        <li>На «Вы» с большой буквы — всегда, без исключений</li>
+        <li>Строчные буквы, разговорный тон</li>
+        <li>2–4 предложения, один вопрос за сообщение</li>
+        <li>Используем их точные слова и числа</li>
+        <li>1–2 эмодзи максимум за разговор</li>
+      </ul>
+      <div class="c-body" style="font-weight:600;margin-bottom:5px">Запрещено:</div>
+      <ul class="xl">
+        <li>Слово «курс» — аудитория обожглась</li>
+        <li>Тире (—) в сообщениях</li>
+        <li>«У нас в программе есть...»</li>
+        <li>Несколько вопросов подряд</li>
+        <li>Ссылку на оплату без явного «да»</li>
+        <li>Перечислять оффер списком</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="c-label">Ключевые фразы</div>
+      <div class="c-title">Копируйте напрямую</div>
+      <div class="ql">Эмпатия:</div>
+      <div class="q">«понимаю» / «чувствую»</div>
+      <div class="q">«это очень раздражает» / «у меня было то же самое»</div>
+      <div class="q">«могу полностью представить» / «это очень распространённо.. честно»</div>
+      <div class="ql">Открытость:</div>
+      <div class="q">«спасибо что так прямо — это очень облегчает»</div>
+      <div class="q">«ценю честность — прозрачность делает всё проще для нас обоих»</div>
+      <div class="ql">Мягкий отход:</div>
+      <div class="q">«просто думал помочь, больше не буду докучать))»</div>
+    </div>
+
+    <div class="card dark">
+      <div class="c-label">10 нерушимых правил</div>
+      <div class="c-title">Нарушил — вылетаешь</div>
+      <div class="nn-list">
+        <div class="nn"><div class="nn-num">1</div><div class="nn-t"><strong>Никогда не звучите роботом.</strong> Максимум 4 предложения в сообщении.</div></div>
+        <div class="nn"><div class="nn-num">2</div><div class="nn-t"><strong>Никогда не называйте цену в DM.</strong> Только после Permission Close.</div></div>
+        <div class="nn"><div class="nn-num">3</div><div class="nn-t"><strong>Ссылку на сайт — только после явного «интересно».</strong></div></div>
+        <div class="nn"><div class="nn-num">4</div><div class="nn-t"><strong>Не тратить время на мёртвые лиды.</strong> 2 дожима — и всё.</div></div>
+        <div class="nn"><div class="nn-num">5</div><div class="nn-t"><strong>Всегда заканчивать вопросом.</strong> Держите разговор живым.</div></div>
+        <div class="nn"><div class="nn-num">6</div><div class="nn-t"><strong>Перед переводом на КСФ — готовить сводку</strong> для куратора.</div></div>
+        <div class="nn"><div class="nn-num">7</div><div class="nn-t"><strong>Всегда отправляйте кейс перед оффером.</strong></div></div>
+        <div class="nn"><div class="nn-num">8</div><div class="nn-t"><strong>Воскресенье:</strong> 3–4 ч на базу лидов. Трекер обновлён.</div></div>
+        <div class="nn"><div class="nn-num">9</div><div class="nn-t"><strong>Каждое утро:</strong> 50 исходящих DM / ответов на сторис до всего.</div></div>
+        <div class="nn"><div class="nn-num">10</div><div class="nn-t"><strong>Если сомневаетесь:</strong> их слова, один вопрос, живой тон.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-playbook -->
+
+
+<!-- ══════════════════════════════════════════
+     TAB 2 — ДИАЛОГИ
+══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-dialogues">
+
+<div class="dial-intro">
+  <div class="hero-eyebrow">Примеры переписок · Разбор</div>
+  <h2 class="dial-title">Как ведётся диалог в директе</h2>
+  <p class="dial-desc">6 разобранных переписок от лица Дениса с мужчинами. Каждое ключевое сообщение — с аннотацией: почему именно это, что за принцип, чего не говорим. Изучайте паттерны.</p>
+  <div class="tags" style="margin-top:12px">
+    <span class="tag">01 · ТРЕНИРОВКА → ЭП</span>
+    <span class="tag">02 · ТЕСТОСТЕРОН → ЭП</span>
+    <span class="tag">03 · Горячий → КСФ</span>
+    <span class="tag">04 · Скептик → ЭП</span>
+    <span class="tag">05 · Дожим</span>
+    <span class="tag">06 · Лид-магнит → диалог</span>
+    <span class="tag">07 · «Хочу ведение» → КСФ</span>
+  </div>
+</div>
+
+<!-- ── ДИАЛОГ 1 ── -->
+<div class="dial-case">
+  <div class="dial-head">
+    <div class="dial-num">01</div>
+    <div>
+      <div class="dial-case-title">ТРЕНИРОВКА → продажа Экспресс-Ползунка</div>
+      <div class="dial-case-desc">Мужчина написал кодовое слово. Менеджер выдаёт материал, узнаёт ситуацию, обнаруживает плато — ведёт к ЭП.</div>
+      <div class="tags" style="margin-top:5px"><span class="tag dark">Входящий</span><span class="tag">ТРЕНИРОВКА</span><span class="tag">→ ЭП</span><span class="tag">Антон, 36 лет, офис</span></div>
+    </div>
+  </div>
+  <div class="dial-body">
+    <div class="chat-win">
+      <div class="chat-hdr"><div class="chat-av">А</div><div><div class="chat-name">Антон</div><div class="chat-sub">написал «тренировка» · 36 лет</div></div></div>
+      <div class="chat-msgs">
+        <div class="msg them"><div class="msg-from">Антон</div><div class="msg-bub">тренировка</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите программу 👆 Обычно за тренировками обращаются в двух случаях — либо вообще не знают с чего начать, либо уже занимаются, но результат не тот. У Вас что из этого?</div><div class="msg-step">Шаг 1 · материал + допущение + вопрос</div></div>
+        <div class="msg them"><div class="msg-from">Антон</div><div class="msg-bub">второе, хожу в зал полгода, живот вроде меньше не становится</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Понятно) А какой у Вас вообще запрос — что хотите изменить прежде всего?</div><div class="msg-step">Часть 2 · главный вопрос</div></div>
+        <div class="msg them hi"><div class="msg-from">Антон</div><div class="msg-bub">ну живот убрать в первую очередь, и вообще форму привести. работа сидячая, сижу весь день</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Полгода без изменений при регулярных тренировках — это классическое плато. Тело адаптировалось. Здесь вопрос не в нагрузке — почти всегда в питании. Что сейчас с едой, считаете что-то или на интуиции?</div><div class="msg-step">Рефрейм + один вопрос</div></div>
+        <div class="msg them"><div class="msg-from">Антон</div><div class="msg-bub">на интуиции, стараюсь есть нормально но не заморачиваюсь особо</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Вот именно. «Есть нормально» без понимания нужного дефицита — это и есть причина плато. Не нужно взвешивать каждый грамм, нужна система. У меня есть пара историй мужчин с похожей ситуацией — хотите скину? Там видно что изменилось и как быстро.</div><div class="msg-step">Объясняем причину + предлагаем кейс</div></div>
+        <div class="msg them"><div class="msg-from">Антон</div><div class="msg-bub">да интересно</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите — [ссылка на кейс: похудение / живот] Там мужчина с похожей историей, офис, то же плато. Посмотрите, там коротко.</div><div class="msg-step">Кейс после «да»</div></div>
+        <div class="msg them"><div class="msg-from">Антон</div><div class="msg-bub">посмотрел, это реально работает?</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Да, это система Экспресс-Ползунок — конкретный план под Ваш ритм: питание, тренировки, восстановление. Там есть отдельный блок для тех у кого сидячая работа. Вы настроены реально разобраться с этим, или пока смотрите?</div><div class="msg-step">Тест на серьёзность</div></div>
+        <div class="msg them"><div class="msg-from">Антон</div><div class="msg-bub">настроен, надоело уже</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Хорошо) Если хотите — скину ссылку, там всё расписано. Интересно посмотреть?</div><div class="msg-step">Permission Close</div></div>
+        <div class="msg them"><div class="msg-from">Антон</div><div class="msg-bub">да давайте</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите — sorokin-fit.com/express. Там три тарифа, большинство берут «Всё и сразу» — там питание и тренировки в связке. Если будут вопросы — пишите.</div></div>
+      </div>
+    </div>
+    <div class="anns">
+      <div class="ann-sep"><div class="ann-sep-l"></div><div class="ann-sep-t">Разбор</div><div class="ann-sep-l"></div></div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Шаг 1</div><div class="ann-pr">🔑 Материал + допущение + вопрос</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Обычно обращаются в двух случаях — либо не знают с чего начать, либо уже занимаются, но результат не тот»</div>
+          <div class="ann-why">Мы <strong>не спрашиваем «чем могу помочь?»</strong> — называем две самые вероятные боли. Человек узнаёт себя в одной из них и сразу отвечает. Это убирает сопротивление и создаёт ощущение что нас уже понимают.</div>
+          <div class="ann-no">«Держите программу! Если будут вопросы — пишите» — это тупик, разговор умирает.</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-hdr"><div class="ann-badge">Главный вопрос</div><div class="ann-pr">После первого ответа — всегда</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«А какой у Вас вообще запрос — что хотите изменить прежде всего?»</div>
+          <div class="ann-why">Антон сказал «живот меньше не становится» — это сигнал, но не полная картина. Главный вопрос открывает настоящий запрос и даёт материал для всего дальнейшего разговора.</div>
+        </div>
+      </div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Рефрейм</div><div class="ann-pr">🔑 Называем причину до оффера</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Полгода без изменений — это классическое плато. Здесь вопрос не в нагрузке — почти всегда в питании»</div>
+          <div class="ann-why">Мы <strong>объясняем почему</strong> это происходит раньше, чем что-то предлагаем. Антон думает «этот человек разбирается» — это и есть доверие. После этого он готов слушать предложение.</div>
+          <div class="ann-no">«У нас есть система которая поможет!» сразу после первого ответа — слишком рано, доверия нет.</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-hdr"><div class="ann-badge">Кейс</div><div class="ann-pr">Перед оффером — всегда кейс</div></div>
+        <div class="ann-body">
+          <div class="ann-why">Кейс по его конкретной ситуации делает три вещи: показывает реальный результат, создаёт идентификацию («это как я»), и даёт человеку самому прийти к выводу что это работает — без нашего убеждения.</div>
+        </div>
+      </div>
+      <div class="dial-result"><div class="dr-icon">✓</div><div><div class="dr-title">Итог</div>ТРЕНИРОВКА → 9 сообщений → ссылка на ЭП. Ключ: объяснили причину плато, скинули кейс, получили «настроен» — и только тогда Permission Close.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ДИАЛОГ 2 ── -->
+<div class="dial-case">
+  <div class="dial-head">
+    <div class="dial-num">02</div>
+    <div>
+      <div class="dial-case-title">ТЕСТОСТЕРОН → нет энергии → Экспресс-Ползунок</div>
+      <div class="dial-case-desc">Мужчина написал кодовое слово про тестостерон. Оказывается главная проблема — отсутствие энергии и драйва. Ведём через эмоцию к продаже.</div>
+      <div class="tags" style="margin-top:5px"><span class="tag dark">Входящий</span><span class="tag">ТЕСТОСТЕРОН</span><span class="tag">→ ЭП</span><span class="tag">Игорь, 41 год, вахта</span></div>
+    </div>
+  </div>
+  <div class="dial-body">
+    <div class="chat-win">
+      <div class="chat-hdr"><div class="chat-av">И</div><div><div class="chat-name">Игорь</div><div class="chat-sub">написал «тестостерон» · 41 год</div></div></div>
+      <div class="chat-msgs">
+        <div class="msg them"><div class="msg-from">Игорь</div><div class="msg-bub">тестостерон</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите гайд 👆 Тестостерон обычно начинает интересовать когда чувствуешь — энергия уже не та что была. Либо в зале топчешься, либо просто общий драйв пропал. Что из этого ближе к Вашей ситуации?</div></div>
+        <div class="msg them hi"><div class="msg-from">Игорь</div><div class="msg-bub">и то и другое если честно. просыпаюсь уже уставшим, кофе уже не помогает особо. в зале хожу но без огня как раньше</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Понятно) А какой у Вас вообще запрос — что хотите изменить прежде всего?</div></div>
+        <div class="msg them"><div class="msg-from">Игорь</div><div class="msg-bub">хочу вернуть энергию и тонус. раньше работало всё по-другому, сейчас вахта 15/15, нагрузки много</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Услышал. После вахты думать о системе действительно тяжело — именно поэтому она должна строиться вокруг реального расписания, а не идеального. Хроническая усталость у мужчин после 40 — это почти всегда про гормональный фон и восстановление. Есть дети?</div><div class="msg-step">Эмпатия + рефрейм + вопрос про детей</div></div>
+        <div class="msg them"><div class="msg-from">Игорь</div><div class="msg-bub">да, двое, 8 и 12 лет</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Самое честное что слышу — когда мужчины говорят что не хотят быть уставшим папой на диване. У меня у самого в этом году родилась дочка, готов всё сделать ради неё. У Вас также?</div><div class="msg-step">Триггер «дети»</div></div>
+        <div class="msg them"><div class="msg-from">Игорь</div><div class="msg-bub">да именно, не хочу к их совершеннолетию разваливаться</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">У меня есть пара историй мужчин с похожей ситуацией — вахта, нет энергии, хотели вернуть форму. Хотите скину? Там видно что конкретно изменилось.</div></div>
+        <div class="msg them"><div class="msg-from">Игорь</div><div class="msg-bub">давайте</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите — [ссылка на кейс: вахта / нет времени] Там мужчина на похожем режиме. В системе есть отдельный протокол для вахты — без привязки к залу. Вы настроены реально взяться за это?</div></div>
+        <div class="msg them"><div class="msg-from">Игорь</div><div class="msg-bub">да, уже устал от этого состояния</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Хорошо. Если хотите — скину ссылку на систему, там всё подробно расписано. Интересно?</div></div>
+        <div class="msg them"><div class="msg-from">Игорь</div><div class="msg-bub">да</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите — sorokin-fit.com/express Там тариф «Всё и сразу» — там питание, тренировки и протокол восстановления в связке, плюс программа для вахты отдельно. Если вопросы — пишите.</div></div>
+      </div>
+    </div>
+    <div class="anns">
+      <div class="ann-sep"><div class="ann-sep-l"></div><div class="ann-sep-t">Разбор</div><div class="ann-sep-l"></div></div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Сигнал</div><div class="ann-pr">🔑 Читаем эмоцию — «просыпаюсь уже уставшим»</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Хроническая усталость у мужчин после 40 — это почти всегда про гормональный фон»</div>
+          <div class="ann-why">Игорь написал «просыпаюсь уже уставшим, кофе не помогает» — это их дословные слова из анкет ЦА. <strong>Используем их язык обратно</strong>. Плюс сразу снимаем самообвинение: «не про лень» — это про гормоны. Человек расслабляется и открывается.</div>
+          <div class="ann-no">«Понял, это бывает! Нужно просто больше двигаться» — пустая банальность без понимания.</div>
+        </div>
+      </div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Триггер</div><div class="ann-pr">🔑 Дети — самый мощный якорь</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«У меня у самого в этом году родилась дочка, готов всё сделать ради неё. У Вас также?»</div>
+          <div class="ann-why">Дети переводят разговор с «хочу форму» на «не хочу разваливаться рядом с детьми». Это <strong>эмоциональный якорь</strong> который работает гораздо сильнее логики. Личное раскрытие от нас создаёт взаимность — он тоже открывается.</div>
+        </div>
+      </div>
+      <div class="dial-result"><div class="dr-icon">✓</div><div><div class="dr-title">Итог</div>ТЕСТОСТЕРОН → триггер «дети» → кейс вахта → ссылка ЭП. Ключ: нашли эмоциональный якорь и использовали его честно.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ДИАЛОГ 3 ── -->
+<div class="dial-case">
+  <div class="dial-head">
+    <div class="dial-num">03</div>
+    <div>
+      <div class="dial-case-title">Горячий целевой → Команда СорокинФит</div>
+      <div class="dial-case-desc">Мужчина сразу говорит «хочу чтобы вели лично». Не пытаемся продать ЭП — сразу переводим на ведение.</div>
+      <div class="tags" style="margin-top:5px"><span class="tag dark">Входящий</span><span class="tag">АНАЛИЗЫ</span><span class="tag">→ КСФ</span><span class="tag">Максим, 44 года, предприниматель</span></div>
+    </div>
+  </div>
+  <div class="dial-body">
+    <div class="chat-win">
+      <div class="chat-hdr"><div class="chat-av">М</div><div><div class="chat-name">Максим</div><div class="chat-sub">написал «анализы» · 44 года</div></div></div>
+      <div class="chat-msgs">
+        <div class="msg them"><div class="msg-from">Максим</div><div class="msg-bub">анализы</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите гайд 👆 Анализами обычно интересуются либо когда что-то конкретно не так с самочувствием, либо хочется понять что происходит внутри. У Вас какая ситуация?</div></div>
+        <div class="msg them"><div class="msg-from">Максим</div><div class="msg-bub">сдал недавно, много что не в норме. хочу разобраться комплексно — питание, тренировки, гормоны. есть личная работа с Денисом?</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Да, есть формат личной работы с командой. Начинаем с разбора Вашей ситуации — питание, анализы, тренировки — и выстраиваем всё индивидуально с постоянной поддержкой. Расскажите подробнее о ситуации — что конкретно не в норме в анализах?</div><div class="msg-step">Не питчим ЭП — сразу на ведение</div></div>
+        <div class="msg them"><div class="msg-from">Максим</div><div class="msg-bub">тестостерон низкий, инсулин повышен, лишний вес лет 5 уже. пробовал тренеров — ничего толком. хочу чтобы реально вели и был результат</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Понял. Пять лет без результата при попытках — это не про усилия, это про систему которая работала бы под Вашу конкретную биохимию. Именно это и делает ведение — анализы разбираем, план строим под Вас. Хотите расскажу подробнее как это устроено?</div></div>
+        <div class="msg them"><div class="msg-from">Максим</div><div class="msg-bub">да</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">🎤 [Отправляем заранее записанное голосовое про ведение КСФ]</div><div class="msg-step">Голосовое про ведение КСФ</div></div>
+      </div>
+    </div>
+    <div class="anns">
+      <div class="ann-sep"><div class="ann-sep-l"></div><div class="ann-sep-t">Разбор</div><div class="ann-sep-l"></div></div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Ключевой момент</div><div class="ann-pr">🔑 Горячий сигнал — не игнорируем</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Есть личная работа с Денисом?»</div>
+          <div class="ann-why">Максим <strong>сам назвал то что хочет</strong> — личную работу. В этот момент предлагать ЭП — ошибка. Мы слышим человека и идём туда куда он уже готов. Это уважение к его запросу и более короткий путь к высокому чеку.</div>
+          <div class="ann-no">«Есть несколько вариантов: Экспресс-Ползунок за 6 700, ведение за...» — меню убивает импульс и запутывает.</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-hdr"><div class="ann-badge">Голосовое</div><div class="ann-pr">🎤 Заготовленное голосовое про КСФ</div></div>
+        <div class="ann-body">
+          <div class="ann-why">Голосовое — более личный формат чем текст. Создаёт ощущение прямого контакта с Денисом. <strong>Только заранее записанные и согласованные.</strong> Никаких спонтанных голосовых.</div>
+        </div>
+      </div>
+      <div class="dial-result"><div class="dr-icon">🎯</div><div><div class="dr-title">Итог</div>Горячий лид → 5 сообщений → голосовое про КСФ. Ключ: услышали «хочу личную работу» — не пытались продать дешевле.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ДИАЛОГ 4 ── -->
+<div class="dial-case">
+  <div class="dial-head">
+    <div class="dial-num">04</div>
+    <div>
+      <div class="dial-case-title">Скептик «Уже пробовал» → преодоление → ЭП</div>
+      <div class="dial-case-desc">Мужчина скептически настроен — пробовал много всего, не сработало. Работаем с возражением через конкретику.</div>
+      <div class="tags" style="margin-top:5px"><span class="tag dark">Входящий</span><span class="tag">БАДЫ</span><span class="tag">→ ЭП</span><span class="tag">Дмитрий, 38 лет</span></div>
+    </div>
+  </div>
+  <div class="dial-body">
+    <div class="chat-win">
+      <div class="chat-hdr"><div class="chat-av">Д</div><div><div class="chat-name">Дмитрий</div><div class="chat-sub">написал «бады» · 38 лет</div></div></div>
+      <div class="chat-msgs">
+        <div class="msg them"><div class="msg-from">Дмитрий</div><div class="msg-bub">бады</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите список 👆 Добавки чаще всего ищут когда перепробовали многое и ничего не работает — или наоборот, только начинают подходить к здоровью системно. Вы где сейчас?</div></div>
+        <div class="msg them hi"><div class="msg-from">Дмитрий</div><div class="msg-bub">первое. уже столько всего пробовал — диеты разные, тренер был онлайн, программы покупал. толку мало. честно скептически отношусь ко всему этому</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Понятно почему скептически — и это честно. Скажите что конкретно пробовали и что именно не сработало?</div><div class="msg-step">Не защищаемся — просим конкретику</div></div>
+        <div class="msg them"><div class="msg-from">Дмитрий</div><div class="msg-bub">диеты — срывался через месяц. тренер давал программу но без питания толком, так 3 месяца и бросил. программа онлайн — там всё общее, не под меня</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Услышал. Диеты срываются потому что они не встраиваются в реальную жизнь. Тренер без питания — это половина уравнения. Программа «для всех» — и не работает ни для кого конкретно. Это не Вы делали что-то не так — это были инструменты которые не подходили под Вашу ситуацию. Сколько времени это уже продолжается?</div><div class="msg-step">Валидируем + объясняем причину</div></div>
+        <div class="msg them"><div class="msg-from">Дмитрий</div><div class="msg-bub">лет пять наверное пытаюсь</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Пять лет попыток — это уже не вопрос мотивации. Это точно про систему которая бы работала конкретно под Вас. Главный запрос что — похудеть, набрать, энергия?</div></div>
+        <div class="msg them"><div class="msg-from">Дмитрий</div><div class="msg-bub">похудеть и вообще в форму. живот убрать. дети уже подшучивают 😅</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Понял. У меня есть пара историй мужчин которые тоже пять лет пробовали разное. Хотите скину? Там конкретно видно что изменилось.</div></div>
+        <div class="msg them"><div class="msg-from">Дмитрий</div><div class="msg-bub">ну давайте посмотрю</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите — [ссылка на кейс: похудение]. Там мужчина с похожей историей. Посмотрите и напишите что думаете.</div></div>
+        <div class="msg them"><div class="msg-from">Дмитрий</div><div class="msg-bub">посмотрел. ладно, убедили. сколько стоит?</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Есть несколько тарифов — скину ссылку, там всё расписано. Там и гарантия 200% если выполните систему и не будет результата, Денис возвращает двойную стоимость. То есть по сути ничем не рискуете. Держите — sorokin-fit.com/express</div><div class="msg-step">Цена + гарантия как закрытие</div></div>
+      </div>
+    </div>
+    <div class="anns">
+      <div class="ann-sep"><div class="ann-sep-l"></div><div class="ann-sep-t">Разбор</div><div class="ann-sep-l"></div></div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Возражение</div><div class="ann-pr">🔑 Скептицизм — не атакуем, просим конкретику</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Понятно почему скептически. Скажите что конкретно пробовали и что не сработало?»</div>
+          <div class="ann-why">Большинство сеттеров начинают доказывать что их продукт лучше. Это вызывает защитную реакцию. Мы делаем наоборот — <strong>принимаем скептицизм как разумный</strong> и просим конкретику. Это разоружает.</div>
+          <div class="ann-no">«Ну наш продукт совсем другой! Смотрите на отзывы» — защитная реакция, человек закрывается.</div>
+        </div>
+      </div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Рефрейм</div><div class="ann-pr">🔑 Снимаем самообвинение — причина в инструменте</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Это не Вы делали что-то не так — это были инструменты которые не подходили под Вашу ситуацию»</div>
+          <div class="ann-why">Дмитрий провёл 5 лет в попытках. Внутри — стыд и ощущение «со мной что-то не так». Мы перекладываем вину <strong>с человека на инструмент</strong>. Это не просто доброта — это правда. И это открывает готовность попробовать ещё раз.</div>
+        </div>
+      </div>
+      <div class="dial-result"><div class="dr-icon">✓</div><div><div class="dr-title">Итог</div>Скептик → конкретика вместо защиты → рефрейм вины → кейс → «ладно убедили». Гарантия 200% как финальный закрыватель сомнений.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ДИАЛОГ 5 ── -->
+<div class="dial-case">
+  <div class="dial-head">
+    <div class="dial-num">05</div>
+    <div>
+      <div class="dial-case-title">Дожим — написал слово и пропал</div>
+      <div class="dial-case-desc">Мужчина написал кодовое слово, получил материал, не ответил на вопрос. Правильный дожим без давления.</div>
+      <div class="tags" style="margin-top:5px"><span class="tag dark">Дожим</span><span class="tag">ТЕХНИКА</span><span class="tag">2 касания максимум</span><span class="tag">Роман, 33 года</span></div>
+    </div>
+  </div>
+  <div class="dial-body">
+    <div class="chat-win">
+      <div class="chat-hdr"><div class="chat-av">Р</div><div><div class="chat-name">Роман</div><div class="chat-sub">написал «техника» · молчит</div></div></div>
+      <div class="chat-msgs">
+        <div class="msg them"><div class="msg-from">Роман</div><div class="msg-bub">техника</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите разбор 👆 Техника нужна либо когда только начинаешь и боишься травм, либо занимаешься давно но ощущение что что-то делаешь не так. Что у Вас?</div></div>
+        <div class="msg-sys">Роман не ответил</div>
+        <div class="msg-sys">Прошёл 1 час</div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Кстати, проверил — материал дошёл? Там есть один момент который у большинства мужчин сразу вызывает вопросы.</div><div class="msg-step">Дожим 1 — через час</div></div>
+        <div class="msg-sys">Роман не ответил</div>
+        <div class="msg-sys">Прошёл 1 день</div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Роман, напишите когда будет удобно — пришлю кое-что конкретно под Вашу ситуацию.</div><div class="msg-step">Дожим 2 — через день</div></div>
+        <div class="msg-sys">Роман ответил</div>
+        <div class="msg them hi"><div class="msg-from">Роман</div><div class="msg-bub">да извините, был занят. посмотрел материал, хочу спросить</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Конечно, спрашивайте) Что интересует?</div></div>
+      </div>
+    </div>
+    <div class="anns">
+      <div class="ann-sep"><div class="ann-sep-l"></div><div class="ann-sep-t">Разбор</div><div class="ann-sep-l"></div></div>
+      <div class="ann">
+        <div class="ann-hdr"><div class="ann-badge">Дожим 1</div><div class="ann-pr">Через 1 час — интрига, не напоминалка</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Там есть один момент который у большинства мужчин сразу вызывает вопросы»</div>
+          <div class="ann-why">Мы не пишем «вы посмотрели?» — это давление. Мы создаём <strong>интригу</strong> («один момент») и говорим что у других это вызвало вопросы. Это активирует любопытство без ощущения что его преследуют.</div>
+          <div class="ann-no">«Вы посмотрели материал?» — звучит как контроль. «Напоминаю что мы...» — агрессивный спам.</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-hdr"><div class="ann-badge">Дожим 2</div><div class="ann-pr">Через день — персональное, без давления</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Роман, напишите когда будет удобно — пришлю кое-что конкретно под Вашу ситуацию»</div>
+          <div class="ann-why">Обращаемся по имени. Говорим «когда будет удобно» — уважение к его времени. «Конкретно под Вашу ситуацию» — намекаем на персонализацию без объяснений. После этого дожима — не пишем больше.</div>
+        </div>
+      </div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Правило</div><div class="ann-pr">🔑 Максимум 2 дожима — потом тишина</div></div>
+        <div class="ann-body">
+          <div class="ann-why">Третье сообщение без ответа — это уже преследование. Оставляем человека в базе. Он нагреется через контент Дениса и вернётся сам. Важно не сжечь мост.</div>
+        </div>
+      </div>
+      <div class="dial-result"><div class="dr-icon">✓</div><div><div class="dr-title">Итог</div>Дожим через час (интрига) → дожим через день (персонально) → Роман вернулся сам. Не каждый так вернётся — но те кто не вернулись, остаются в базе и придут позже.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ДИАЛОГ 6 ── -->
+<div class="dial-case">
+  <div class="dial-head">
+    <div class="dial-num">06</div>
+    <div>
+      <div class="dial-case-title">Лид-магнит → кодовое слово → уточнение про видео</div>
+      <div class="dial-case-desc">Мужчина посмотрел лид-магнит (40 мин видео), написал кодовое слово. Нативно выясняем посмотрел ли видео — и используем это в разговоре.</div>
+      <div class="tags" style="margin-top:5px"><span class="tag dark">Входящий</span><span class="tag">После лид-магнита</span><span class="tag">→ ЭП</span><span class="tag">Сергей, 39 лет</span></div>
+    </div>
+  </div>
+  <div class="dial-body">
+    <div class="chat-win">
+      <div class="chat-hdr"><div class="chat-av">С</div><div><div class="chat-name">Сергей</div><div class="chat-sub">написал «разбор» → смотрел бота · 39 лет</div></div></div>
+      <div class="chat-msgs">
+        <div class="msg-sys">Автоматизация — после «РАЗБОР» человек получил ссылку на Telegram-бот</div>
+        <div class="msg them hi"><div class="msg-from">Сергей</div><div class="msg-bub">тренировка</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите программу 👆 Обычно за тренировками обращаются когда либо не знают с чего начать, либо занимаются, но результат не тот. У Вас что из этого?</div></div>
+        <div class="msg them"><div class="msg-from">Сергей</div><div class="msg-bub">занимаюсь, но результата особо нет. хочу разобраться с питанием</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Понятно) А какой у Вас вообще запрос — что хотите изменить прежде всего?</div></div>
+        <div class="msg them"><div class="msg-from">Сергей</div><div class="msg-bub">хочу похудеть кг на 10-12, живот убрать. занимаюсь уже 4 месяца а результат слабый</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Четыре месяца усилий и слабый результат — понимаю как это раздражает. Кстати, Вы смотрели видео в боте? Там как раз про питание есть один момент который большинство упускают.</div><div class="msg-step">~30% диалога — нативно спрашиваем про видео</div></div>
+        <div class="msg them hi"><div class="msg-from">Сергей</div><div class="msg-bub">посмотрел, да. про метаболизм интересно было. но не совсем понял как это применить на практике</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Это самый частый вопрос после видео — понял теорию, а как на практике. Именно для этого и есть система — там конкретный план под Ваш ритм, не общая теория. Что пробовали с питанием раньше?</div><div class="msg-step">Используем видео как точку входа к системе</div></div>
+        <div class="msg them"><div class="msg-from">Сергей</div><div class="msg-bub">считал калории месяц, потом бросил. неудобно постоянно</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Подсчёт калорий — это неудобно и не нужен в таком виде. Там другой подход — без взвешивания каждого грамма, но с пониманием принципов. Хотите скину пару историй мужчин с похожей ситуацией?</div></div>
+        <div class="msg them"><div class="msg-from">Сергей</div><div class="msg-bub">да давайте</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите — [ссылка на кейс: похудение / живот] Там мужчина с аналогичным запросом. Вы настроены серьёзно взяться?</div></div>
+        <div class="msg them"><div class="msg-from">Сергей</div><div class="msg-bub">да, уже устал от этого</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Хорошо. Если хотите — скину ссылку на систему. Интересно?</div></div>
+        <div class="msg them"><div class="msg-from">Сергей</div><div class="msg-bub">давайте</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите — sorokin-fit.com/express. Как оплатите — напишите, доступ придёт на почту, и я расскажу как получить ещё один бонус :)</div></div>
+      </div>
+    </div>
+    <div class="anns">
+      <div class="ann-sep"><div class="ann-sep-l"></div><div class="ann-sep-t">Разбор</div><div class="ann-sep-l"></div></div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Лид-магнит</div><div class="ann-pr">🔑 Спрашиваем про видео нативно, не в начале</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Кстати, Вы смотрели видео в боте? Там про питание есть один момент который большинство упускают»</div>
+          <div class="ann-why">Спрашиваем <strong>примерно на 30% диалога</strong> — не первым сообщением. К этому моменту уже есть контакт. Если смотрел — это точка входа («не понял как применить» → мы закрываем этот гэп). Если не смотрел — предлагаем сначала посмотреть.</div>
+          <div class="ann-no">«Здравствуйте! Вы посмотрели видео в боте?» — первым сообщением выглядит как контроль.</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-hdr"><div class="ann-badge">Если не смотрел</div><div class="ann-pr">Альтернативная ветка</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Посмотрите сначала — там за 40 минут разбираются вещи которые большинство не знают. После будет гораздо понятнее о чём говорим»</div>
+          <div class="ann-why">Если не смотрел — отправляем смотреть. Лид-магнит сам продаёт — он снимает возражения и объясняет подход. После просмотра человек возвращается уже более тёплым.</div>
+        </div>
+      </div>
+      <div class="dial-result"><div class="dr-icon">✓</div><div><div class="dr-title">Итог</div>Лид-магнит + кодовое слово → нативный вопрос про видео → «теорию понял, практики нет» → ЭП как практический инструмент. Ключ: видео становится частью аргументации, а не просто шагом воронки.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="dial-case">
+  <div class="dial-head">
+    <div class="dial-num">07</div>
+    <div>
+      <div class="dial-case-title">«Хочу план / ведение» — запрос на личную работу</div>
+      <div class="dial-case-desc">Мужчина пишет сам — не по кодовому слову, а с конкретным запросом на план или индивидуальную работу. Квалифицируем и маршрутизируем.</div>
+      <div class="tags" style="margin-top:5px"><span class="tag dark">Входящий</span><span class="tag">Прямой запрос</span><span class="tag">→ ЭП или КСФ</span><span class="tag">Павел, 42 года</span></div>
+    </div>
+  </div>
+  <div class="dial-body">
+    <div class="chat-win">
+      <div class="chat-hdr"><div class="chat-av">П</div><div><div class="chat-name">Павел</div><div class="chat-sub">написал сам · 42 года</div></div></div>
+      <div class="chat-msgs">
+        <div class="msg them hi"><div class="msg-from">Павел</div><div class="msg-bub">Денис, хочу получить индивидуальный план питания и тренировок. Подскажете что у вас есть?</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Да, есть несколько форматов — зависит от ситуации. Чтобы понять что подойдёт именно Вам — скажите, какая сейчас главная задача по телу?</div><div class="msg-step">Не даём меню — сначала узнаём запрос</div></div>
+        <div class="msg them"><div class="msg-from">Павел</div><div class="msg-bub">хочу похудеть кг на 15 и набрать мышцы. сейчас вешу 95, рост 180. занимался раньше, давно уже бросил</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Понятно. 15 кг и набрать мышцы — это реально, вопрос в том как это выстроить последовательно. Почему бросили раньше — не было времени, результата не было, или что-то ещё?</div><div class="msg-step">Узнаём причину прошлой остановки</div></div>
+        <div class="msg them"><div class="msg-from">Павел</div><div class="msg-bub">работа навалилась, семья. просто не успевал. сейчас ситуация немного получше, хочу вернуться</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Услышал. «Не успевал» — это обычно не про время, а про то что система не встроена в реальное расписание. Если раньше это требовало отдельного блока из жизни — неудивительно что слетело. Есть дети?</div><div class="msg-step">Рефрейм причины + триггер «дети»</div></div>
+        <div class="msg them"><div class="msg-from">Павел</div><div class="msg-bub">да, двое. 5 и 9 лет. хочу успевать с ними что-то делать, а сейчас сил нет особо</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Понял Вас. «Сил нет» при детях — это очень знакомая история. У меня у самого недавно дочка, готов на всё ради неё. Вы сейчас больше к чему — хотите сами по системе разобраться, или нужно чтобы Вас вели и следили за прогрессом?</div><div class="msg-step">Квалификация: ЭП или КСФ</div></div>
+        <div class="msg them"><div class="msg-from">Павел</div><div class="msg-bub">наверное сначала попробую сам, если будет нормальная система. если не пойдёт — тогда уже с поддержкой</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Хорошо. Тогда у меня есть пара историй мужчин с похожей ситуацией — хотите скину? Там видно что конкретно изменилось и как быстро.</div><div class="msg-step">→ ЭП. Перед оффером — кейс</div></div>
+        <div class="msg them"><div class="msg-from">Павел</div><div class="msg-bub">давайте</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите — [ссылка на кейс: похудение / живот] Там мужчина с похожим запросом, двое детей, работа. Посмотрите.</div></div>
+        <div class="msg them"><div class="msg-from">Павел</div><div class="msg-bub">посмотрел. интересно. и что там за система у вас?</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Называется Экспресс-Ползунок — это конкретный план под Ваш ритм: питание без отдельной готовки от семьи, тренировки 20–30 мин, протокол восстановления. Всё встраивается в реальную жизнь, без подвигов. Вы настроены серьёзно взяться?</div></div>
+        <div class="msg them"><div class="msg-from">Павел</div><div class="msg-bub">да, настроен</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Хорошо) Скину ссылку — там всё подробно расписано, три варианта. Интересно посмотреть?</div></div>
+        <div class="msg them"><div class="msg-from">Павел</div><div class="msg-bub">да</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Держите — sorokin-fit.com/express. Большинство берут «Всё и сразу» — там питание и тренировки в связке. Если вопросы будут — пишите, отвечу.</div></div>
+      </div>
+    </div>
+    <div class="anns">
+      <div class="ann-sep"><div class="ann-sep-l"></div><div class="ann-sep-t">Разбор</div><div class="ann-sep-l"></div></div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Старт</div><div class="ann-pr">🔑 Прямой запрос — не даём меню сразу</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Есть несколько форматов — зависит от ситуации. Скажите, какая главная задача по телу?»</div>
+          <div class="ann-why">Павел спрашивает «что у вас есть» — это приглашение выдать прайс. Мы не делаем этого. <strong>Сначала узнаём ситуацию</strong> — потом предлагаем то, что подходит. Иначе человек выбирает по цене, а не по ценности.</div>
+          <div class="ann-no">«У нас есть три тарифа: СТАРТ за 6 700, НЕЗАМЕНИМЫЙ за 9 700, ВСЁ И СРАЗУ за 13 700» — это убивает разговор и создаёт ценовое возражение до того как он почувствовал ценность.</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-hdr"><div class="ann-badge">Квалификация</div><div class="ann-pr">Ключевой вопрос: сам или с поддержкой</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Хотите сами по системе разобраться, или нужно чтобы Вас вели?»</div>
+          <div class="ann-why">Этот вопрос определяет маршрут — ЭП или КСФ. Павел сказал «попробую сам» — значит ЭП. Если бы сказал «нужна поддержка» — сразу на ведение. <strong>Не навязываем дорогой формат тому кто не готов.</strong></div>
+        </div>
+      </div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Продукт</div><div class="ann-pr">🔑 Называем ЭП только когда маршрут ясен</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Называется Экспресс-Ползунок — конкретный план под Ваш ритм»</div>
+          <div class="ann-why">Мы называем продукт только после: кейса, теста на серьёзность («настроены?»), и явного «да». До этого — только ситуация и ценность. Название продукта в правильный момент не вызывает сопротивления.</div>
+        </div>
+      </div>
+      <div class="dial-result"><div class="dr-icon">✓</div><div><div class="dr-title">Итог</div>Прямой запрос «хочу план» → квалификация (сам или ведение) → ЭП → кейс → «настроен» → ссылка. Ключ: не выдали прайс на старте, узнали ситуацию, выбрали правильный маршрут.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ДИАЛОГ 7 ── -->
+<div class="dial-case">
+  <div class="dial-head">
+    <div class="dial-num">07</div>
+    <div>
+      <div class="dial-case-title">«Хочу ведение» / «Есть личная работа с Денисом?»</div>
+      <div class="dial-case-desc">Мужчина пишет прямо: хочет личную работу, ведение или индивидуальный план. Не пытаемся продать ЭП — слышим запрос, уточняем ситуацию, ведём на КСФ.</div>
+      <div class="tags" style="margin-top:5px"><span class="tag dark">Входящий</span><span class="tag">Прямой запрос</span><span class="tag">→ КСФ</span><span class="tag">Алексей, 42 года</span></div>
+    </div>
+  </div>
+  <div class="dial-body">
+    <div class="chat-win">
+      <div class="chat-hdr"><div class="chat-av">А</div><div><div class="chat-name">Алексей</div><div class="chat-sub">прямой запрос на ведение · 42 года</div></div></div>
+      <div class="chat-msgs">
+        <div class="msg them hi"><div class="msg-from">Алексей</div><div class="msg-bub">Здравствуйте. Смотрел видео Дениса, хочу индивидуальную работу. Есть личное ведение?</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Да, есть формат личной работы с командой. Начинаем с разбора Вашей ситуации — питание, анализы, тренировки — и выстраиваем всё индивидуально с постоянной поддержкой. Расскажите подробнее — что сейчас хотите изменить?</div><div class="msg-step">Не питчим ЭП — сразу подтверждаем ведение + один вопрос</div></div>
+        <div class="msg them"><div class="msg-from">Алексей</div><div class="msg-bub">лишний вес, нет энергии. работаю много, нет времени разбираться самому. хочу чтобы всё сделали под меня</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Понял. «Нет времени разбираться самому» — это как раз то под что ведение и создавалось. Сколько лет, и как давно это состояние — нет энергии, лишний вес?</div><div class="msg-step">Подтверждаем запрос его словами + квалифицируем</div></div>
+        <div class="msg them"><div class="msg-from">Алексей</div><div class="msg-bub">42 года, лет пять уже наверное. раньше и занимался и следил, потом бизнес пошёл в гору, всё остальное на второй план</div></div>
+        <div class="msg us"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Слышу. Когда бизнес требует всего — тело уходит на второй план, это честно. Пять лет — это уже не «немного поднакопилось», тут нужна полноценная перестройка с учётом Вашей биохимии. Анализы сдавали в последнее время?</div><div class="msg-step">Эмпатия + масштаб проблемы + вопрос про анализы</div></div>
+        <div class="msg them"><div class="msg-from">Алексей</div><div class="msg-bub">нет, давно не сдавал. наверное надо</div></div>
+        <div class="msg us hi"><div class="msg-from">Денис · менеджер</div><div class="msg-bub">Именно с этого и начинаем в ведении — анализы, картина изнутри, потом план под Вашу конкретику. Расскажу подробнее как это устроено — это займёт 2 минуты.</div><div class="msg-step">Плавный переход к голосовому</div></div>
+        <div class="msg them"><div class="msg-from">Алексей</div><div class="msg-bub">да, интересно</div></div>
+        <div class="msg us"><div class="msg-from">Алексей</div><div class="msg-bub">🎤 [Отправляем заранее записанное голосовое про ведение КСФ]</div><div class="msg-step">Голосовое про ведение КСФ</div></div>
+      </div>
+    </div>
+    <div class="anns">
+      <div class="ann-sep"><div class="ann-sep-l"></div><div class="ann-sep-t">Разбор</div><div class="ann-sep-l"></div></div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Правило 1</div><div class="ann-pr">🔑 Слышим запрос — не перенаправляем</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Да, есть формат личной работы с командой»</div>
+          <div class="ann-why">Алексей сказал «хочу личное ведение» — первое слово должно быть «Да». <strong>Не начинаем объяснять про ЭП</strong>, не говорим «есть несколько форматов». Человек уже принял решение о типе продукта. Наша задача — подтвердить и уточнить ситуацию.</div>
+          <div class="ann-no">«Есть разные варианты — есть программа за 6 700, а есть ведение. Смотря что Вам нужно...» — ставим под сомнение его запрос, теряем доверие.</div>
+        </div>
+      </div>
+      <div class="ann key">
+        <div class="ann-hdr"><div class="ann-badge">Правило 2</div><div class="ann-pr">🔑 «Нет времени разбираться» — это его слова</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Нет времени разбираться самому — это как раз то под что ведение и создавалось»</div>
+          <div class="ann-why">Алексей сказал «нет времени разбираться самому» — мы берём эту фразу и используем её как описание ведения. Человек слышит свои слова и думает: <strong>«Именно про меня»</strong>. Это сильнее любого питча.</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-hdr"><div class="ann-badge">Квалификация</div><div class="ann-pr">Анализы — естественный мост к ведению</div></div>
+        <div class="ann-body">
+          <div class="ann-q">«Анализы сдавали в последнее время?»</div>
+          <div class="ann-why">Вопрос про анализы делает две вещи: квалифицирует серьёзность запроса и позиционирует ведение как «системный подход с биохимией» — это выше воспринимаемой ценности чем просто «тренировки онлайн».</div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-hdr"><div class="ann-badge">Переход</div><div class="ann-pr">Голосовое — только после «интересно»</div></div>
+        <div class="ann-body">
+          <div class="ann-why">Не отправляем голосовое сразу — сначала получаем «да, интересно». Это Permission Close для следующего шага. Голосовое от Дениса создаёт личный контакт и доносит ценность ведения лучше любого текста.</div>
+        </div>
+      </div>
+      <div class="dial-result"><div class="dr-icon">🎯</div><div><div class="dr-title">Итог</div>Прямой запрос на ведение → подтверждение «да» → квалификация через анализы → голосовое КСФ. Ключ: ни разу не упомянули ЭП — человек хотел другое, мы его услышали.</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-dialogues -->
+
+
+<!-- ══════════════════════════════════════════
+     TAB 3 — МАТЕРИАЛЫ
+══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-materials">
+
+<div class="dial-intro">
+  <div class="hero-eyebrow">Материалы · Ссылки · Кейсы</div>
+  <h2 class="dial-title">Все материалы в одном месте</h2>
+  <p class="dial-desc">Ссылки на закрытые материалы по кодовым словам, бонусы для лс, и разборы кейсов по группам. Копируйте и отправляйте напрямую отсюда.</p>
+</div>
+
+<div class="mat-group-title">По кодовым словам — скидываем сразу при подключении</div>
+<div class="mat-grid">
+
+  <div class="mat-card">
+    <div class="mat-card-hdr"><div class="kw">ТРЕНИРОВКА</div><div class="kw-desc">Бесплатная программа тренировок</div></div>
+    <div class="mat-card-body">
+      <div class="mat-desc">Скидываем сразу при слове «ТРЕНИРОВКА» + один вопрос про ситуацию.</div>
+      <a class="mat-link" href="https://drive.google.com/drive/folders/1udHjvkznY17SPH_9Yhxa8X76cX_IaFgg?usp=drive_link" target="_blank">
+        <span class="ml-icon">📁</span><span class="ml-label">Открыть папку</span>
+        <span class="ml-copy" onclick="copyLink(event,'https://drive.google.com/drive/folders/1udHjvkznY17SPH_9Yhxa8X76cX_IaFgg?usp=drive_link')">Копировать</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="mat-card">
+    <div class="mat-card-hdr"><div class="kw">ТЕСТОСТЕРОН</div><div class="kw-desc">Гайд по тестостерону</div></div>
+    <div class="mat-card-body">
+      <div class="mat-desc">Скидываем при слове «ТЕСТОСТЕРОН» + вопрос про энергию и состояние.</div>
+      <a class="mat-link" href="https://drive.google.com/file/d/1pYncvGiz34zHH-6gHZr7JHZ1ljaGBl7I/view?usp=sharing" target="_blank">
+        <span class="ml-icon">📄</span><span class="ml-label">Открыть гайд</span>
+        <span class="ml-copy" onclick="copyLink(event,'https://drive.google.com/file/d/1pYncvGiz34zHH-6gHZr7JHZ1ljaGBl7I/view?usp=sharing')">Копировать</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="mat-card">
+    <div class="mat-card-hdr"><div class="kw">АНАЛИЗЫ</div><div class="kw-desc">Список анализов</div></div>
+    <div class="mat-card-body">
+      <div class="mat-desc">Скидываем при слове «АНАЛИЗЫ» + вопрос про самочувствие.</div>
+      <a class="mat-link" href="https://drive.google.com/file/d/1c-y-4YLndd9f03SQD0lrc5TmZr0QbZuS/view?usp=sharing" target="_blank">
+        <span class="ml-icon">📄</span><span class="ml-label">Открыть список</span>
+        <span class="ml-copy" onclick="copyLink(event,'https://drive.google.com/file/d/1c-y-4YLndd9f03SQD0lrc5TmZr0QbZuS/view?usp=sharing')">Копировать</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="mat-card">
+    <div class="mat-card-hdr"><div class="kw">БАДЫ</div><div class="kw-desc">Подборка БАД</div></div>
+    <div class="mat-card-body">
+      <div class="mat-desc">Скидываем при слове «БАДЫ» + вопрос про ситуацию с добавками.</div>
+      <a class="mat-link" href="https://drive.google.com/file/d/1ARrBRFQBDGZwc1scq_C1u0uClJW3xydV/view?usp=sharing" target="_blank">
+        <span class="ml-icon">📄</span><span class="ml-label">Открыть подборку</span>
+        <span class="ml-copy" onclick="copyLink(event,'https://drive.google.com/file/d/1ARrBRFQBDGZwc1scq_C1u0uClJW3xydV/view?usp=sharing')">Копировать</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="mat-card">
+    <div class="mat-card-hdr"><div class="kw">ТЕХНИКА</div><div class="kw-desc">Разбор техники упражнений</div></div>
+    <div class="mat-card-body">
+      <div class="mat-desc">Скидываем при слове «ТЕХНИКА» + вопрос — начинающий или опытный.</div>
+      <a class="mat-link" href="https://drive.google.com/drive/folders/1pFOVjJrQXVgNt-jiPMp12kYUOEnry-xR?usp=sharing" target="_blank">
+        <span class="ml-icon">📁</span><span class="ml-label">Открыть папку</span>
+        <span class="ml-copy" onclick="copyLink(event,'https://drive.google.com/drive/folders/1pFOVjJrQXVgNt-jiPMp12kYUOEnry-xR?usp=sharing')">Копировать</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="mat-card">
+    <div class="mat-card-hdr"><div class="kw">СКИДКА 30%</div><div class="kw-desc">Промо hellodoc</div></div>
+    <div class="mat-card-body">
+      <div class="mat-desc">Скидываем по кодовому слову «СКИДКА 30%» или при соответствующем запросе.</div>
+      <a class="mat-link" href="https://hellodoc.app/s/26b35/" target="_blank">
+        <span class="ml-icon">🔗</span><span class="ml-label">Открыть ссылку</span>
+        <span class="ml-copy" onclick="copyLink(event,'https://hellodoc.app/s/26b35/')">Копировать</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="mat-card">
+    <div class="mat-card-hdr" style="background:#2d2523"><div class="kw">СТЕРОИДЫ</div><div class="kw-desc">Видео Дениса — честно про тему</div></div>
+    <div class="mat-card-body">
+      <div class="mat-desc">Скидываем при вопросах про стероиды — Денис объясняет позицию честно.</div>
+      <a class="mat-link" href="https://www.youtube.com/watch?v=lk1KsGh3FQ4&t=8s" target="_blank">
+        <span class="ml-icon">▶️</span><span class="ml-label">Открыть видео</span>
+        <span class="ml-copy" onclick="copyLink(event,'https://www.youtube.com/watch?v=lk1KsGh3FQ4&t=8s')">Копировать</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<div class="mat-group-title">Бонусные видео — скидываем только в лс, как бонус</div>
+<div class="g2">
+  <div class="bonus-card">
+    <div class="bonus-icon">🎥</div>
+    <div>
+      <div class="bonus-title">Большие открытые разборы мужчин за 30+</div>
+      <div class="bonus-desc">Скидываем как бонус в личку — после установления контакта, не сразу. Повышает доверие к методологии.</div>
+      <a class="mat-link" href="https://www.youtube.com/watch?v=ff0yTFquhpU" target="_blank">
+        <span class="ml-icon">▶️</span><span class="ml-label">Открыть</span>
+        <span class="ml-copy" onclick="copyLink(event,'https://www.youtube.com/watch?v=ff0yTFquhpU')">Копировать</span>
+      </a>
+    </div>
+  </div>
+  <div class="bonus-card">
+    <div class="bonus-icon">🔒</div>
+    <div>
+      <div class="bonus-title">Закрытые разборы без цензуры (20.02)</div>
+      <div class="bonus-desc">Только в лс, как эксклюзив. «Это обычно не показываем, но для Вас скину» — создаёт ощущение привилегии.</div>
+      <a class="mat-link" href="https://www.youtube.com/watch?v=WNjrs0o5n9g" target="_blank">
+        <span class="ml-icon">▶️</span><span class="ml-label">Открыть</span>
+        <span class="ml-copy" onclick="copyLink(event,'https://www.youtube.com/watch?v=WNjrs0o5n9g')">Копировать</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="mat-group-title">Индивидуальные разборы кейсов — по группам запроса</div>
+<p style="font-size:12px;color:var(--muted);margin-bottom:10px">Скидываем перед оффером — находим группу которая совпадает с запросом человека и отправляем ссылку.</p>
+<div class="cases-grid">
+  <div class="case-item">
+    <div class="ci-num">Группа 1</div>
+    <div class="ci-title">«Живот стоит, хотя стараюсь»</div>
+    <a class="mat-link" href="https://www.youtube.com/watch?v=WNjrs0o5n9g" target="_blank" style="margin-top:6px">
+      <span class="ml-icon">▶️</span><span class="ml-label">Открыть</span>
+      <span class="ml-copy" onclick="copyLink(event,'https://www.youtube.com/watch?v=WNjrs0o5n9g')">Копировать</span>
+    </a>
+  </div>
+  <div class="case-item">
+    <div class="ci-num">Группа 2</div>
+    <div class="ci-title">«Нет времени» / вахта</div>
+    <a class="mat-link" href="https://www.youtube.com/watch?v=WNjrs0o5n9g" target="_blank" style="margin-top:6px">
+      <span class="ml-icon">▶️</span><span class="ml-label">Открыть</span>
+      <span class="ml-copy" onclick="copyLink(event,'https://www.youtube.com/watch?v=WNjrs0o5n9g')">Копировать</span>
+    </a>
+  </div>
+  <div class="case-item">
+    <div class="ci-num">Группа 3</div>
+    <div class="ci-title">«Мне 40+, думаю уже не то что раньше»</div>
+    <a class="mat-link" href="https://www.youtube.com/watch?v=WNjrs0o5n9g" target="_blank" style="margin-top:6px">
+      <span class="ml-icon">▶️</span><span class="ml-label">Открыть</span>
+      <span class="ml-copy" onclick="copyLink(event,'https://www.youtube.com/watch?v=WNjrs0o5n9g')">Копировать</span>
+    </a>
+  </div>
+  <div class="case-item">
+    <div class="ci-num">Группа 4</div>
+    <div class="ci-title">«Есть конкретная дата — нужна форма»</div>
+    <a class="mat-link" href="https://www.youtube.com/watch?v=WNjrs0o5n9g" target="_blank" style="margin-top:6px">
+      <span class="ml-icon">▶️</span><span class="ml-label">Открыть</span>
+      <span class="ml-copy" onclick="copyLink(event,'https://www.youtube.com/watch?v=WNjrs0o5n9g')">Копировать</span>
+    </a>
+  </div>
+  <div class="case-item">
+    <div class="ci-num">Группа 5</div>
+    <div class="ci-title">«Хочу форму, а не просто похудеть»</div>
+    <a class="mat-link" href="https://www.youtube.com/watch?v=WNjrs0o5n9g" target="_blank" style="margin-top:6px">
+      <span class="ml-icon">▶️</span><span class="ml-label">Открыть</span>
+      <span class="ml-copy" onclick="copyLink(event,'https://www.youtube.com/watch?v=WNjrs0o5n9g')">Копировать</span>
+    </a>
+  </div>
+</div>
+
+<div class="mat-group-title" style="margin-top:28px">Быстрый доступ</div>
+<div class="g2">
+  <div class="bonus-card">
+    <div class="bonus-icon">🌐</div>
+    <div>
+      <div class="bonus-title">Сайт Экспресс-Ползунка</div>
+      <div class="bonus-desc">Отправляем только после явного «да» — Permission Close. Никогда раньше.</div>
+      <a class="mat-link" href="https://sorokin-fit.com/express" target="_blank">
+        <span class="ml-icon">🔗</span><span class="ml-label">sorokin-fit.com/express</span>
+        <span class="ml-copy" onclick="copyLink(event,'https://sorokin-fit.com/express')">Копировать</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-materials -->
+
+<!-- ══════════════════════════════════════════
+     TAB 4 — ПОИСК
+══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-search">
+<div style="max-width:700px;margin:0 auto;padding-top:8px">
+  <div class="hero-eyebrow">Поиск по плейбуку</div>
+  <h2 class="dial-title" style="margin-bottom:8px">Что написал человек?</h2>
+  <p class="dial-desc" style="margin-bottom:20px">Введите слово или фразу из сообщения клиента — получите готовый ответ и пояснение.</p>
+
+  <div style="position:relative;margin-bottom:24px">
+    <input id="search-input" type="text" placeholder="Например: дорого, нет времени, уже пробовал, сколько стоит..." style="width:100%;padding:14px 50px 14px 16px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s" oninput="doSearch(this.value)" onfocus="this.style.borderColor='var(--text)'" onblur="this.style.borderColor='var(--border)'">
+    <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:18px;pointer-events:none">🔍</span>
+  </div>
+
+  <div id="search-results"></div>
+</div>
+</div><!-- /tab-search -->
+
+</div><!-- /wrap -->
+
+<div class="toast" id="toast">Скопировано!</div>
+
+<script>
+// ── SEARCH DATA ──
+const SEARCH_DATA = [
+  { keys: ['дорого','цена высокая','это дорого','много стоит','дороговато'], label: '«Дорого»', response: 'Понимаю. Скажите — Вы сейчас вообще что-то тратите на здоровье, зал, питание? Хотя бы примерно в месяц?', why: 'Не защищаем цену — узнаём его текущие траты. Потом считаем ROI на его же цифрах. Человек сам приходит к выводу что уже тратит больше без результата.', extra: 'Если называет цифры: «То есть Вы уже тратите [X] в месяц — и при этом [его боль]. ЭП стоит один раз. Это меньше чем вкладываете за [N месяцев] — только с конкретным результатом.»' },
+  { keys: ['нет денег','не могу позволить','не по карману','нет средств','финансово сложно'], label: '«Нет денег»', response: 'Если бы вопрос цены решился — это то что Вам нужно? Или есть что-то ещё что останавливает?', why: 'Сначала проверяем — действительно ли только цена. Если «да» — предлагаем рассрочку. Есть беспроцентная на 6 мес — 2 283 ₽/мес.', extra: 'Минимальный вход: тариф СТАРТ за 6 700 ₽ — основная механика без питания. Можно начать с минимума и докупить потом.' },
+  { keys: ['не уверен','не знаю сработает','сомневаюсь','а вдруг не поможет','нет гарантий'], label: '«Не уверен в результате»', response: 'Скажите конкретно — что нужно увидеть, чтобы это имело смысл для Вас? Какой результат за какое время считали бы успехом?', why: 'Просим назвать конкретный критерий успеха — потом считаем на его цифрах. Плюс есть гарантия 200% если выполнил систему и нет результата.', extra: 'Хотите скину пару историй мужчин с похожим запросом — там конкретные цифры до и после?' },
+  { keys: ['нет времени','некогда','занят','работа','вахта','не успеваю','12 часов'], label: '«Нет времени»', response: 'Скажите честно — 20–30 минут три раза в неделю у Вас есть? Потому что система построена именно под тех у кого нет времени — там даже есть отдельная программа для вахты.', why: 'Сначала уточняем — про тренировки или про то чтобы разобраться с системой. Потом показываем что 20–30 мин это реально даже при плотном графике.', extra: 'Если вахта: «После смены думать о тренировках действительно тяжело. Именно поэтому система строится вокруг реального расписания, а не идеального.»' },
+  { keys: ['надо подумать','дайте подумать','подумаю','посмотрю','не сейчас'], label: '«Надо подумать»', response: 'Конечно. А что конкретно хотите обдумать — сама система, цена, или что-то не ясно? Помогу с ясностью прямо сейчас.', why: 'Не давим. Просим назвать конкретное сомнение — чаще всего человек называет цену или неуверенность в результате. Дальше работаем с конкретикой.', extra: '«[Его боль] — это сколько уже длится? Потому что лучший момент обычно так и не наступает, а тело за это время не стоит на месте.»' },
+  { keys: ['уже пробовал','не помогло','пробовал всё','ничего не работает','не раз пробовал'], label: '«Уже пробовал, не помогло»', response: 'Важно это знать. Скажите что конкретно пробовали и что именно не сработало?', why: 'Не защищаемся и не доказываем что мы лучше. Просим конкретику — потом объясняем почему именно то не сработало. Это разоружает скептицизм.', extra: '«[Что пробовал] — это стандартный подход который не учитывает Вашу конкретику. Именно поэтому и не сработало — не потому что Вы что-то делали не так.»' },
+  { keys: ['сколько стоит','какая цена','почём','прайс','стоимость'], label: 'Сразу спрашивает цену', response: 'Есть несколько вариантов под разные ситуации. Чтобы сориентировать точнее — скажите, какая у Вас сейчас главная задача по телу?', why: 'Никогда не называем цену первым сообщением. Сначала узнаём ситуацию — потом цена в контексте ценности воспринимается иначе.', extra: '' },
+  { keys: ['занимаюсь с тренером','есть тренер','работаю с тренером'], label: '«Уже занимаюсь с тренером»', response: 'Отлично — дисциплина есть, это уже половина. Результат который хотели — он идёт? Или что-то не хватает?', why: 'Не атакуем тренера. Если результат идёт — «пока не трогайте». Если чего-то не хватает — добавляем то что не хватает, не заменяем.', extra: '' },
+  { keys: ['не верю в онлайн','онлайн не работает','скептически к онлайн'], label: '«Не верю в онлайн»', response: 'Понимаю скепсис. Что конкретно останавливает — что онлайн, или что вообще сомневаетесь в результате?', why: 'Разделяем два возражения: «онлайн» и «результат» — это разные проблемы с разными ответами.', extra: 'Про онлайн: «Система работает в любом месте — зал, дом, командировка. Результат зависит от системы, не от формата.»' },
+  { keys: ['сам разберусь','разберусь сам','не нужна помощь'], label: '«Сам разберусь»', response: 'Вы явно не из тех кто сдаётся. Вопрос не в том разберётесь ли — вопрос сколько ещё времени уйдёт. У Вас сколько уже попыток было?', why: 'Уважаем самостоятельность. Переводим фокус с «смогу ли» на «сколько времени потеряю». Время — более острый аргумент чем деньги.', extra: '' },
+  { keys: ['что внутри','что в программе','расскажите подробнее','что там','что включает'], label: '«Что внутри?»', response: 'Внутри пять программ: тренировки под Ваш ритм, питание без отдельных кастрюль от семьи, план на 30 дней, техника и восстановление. Плюс 8 бонусов — программы для вахты, матрица замен, бот-помощник и сообщество. На сайте всё подробно — sorokin-fit.com/express', why: 'Это не возражение — это интерес. Отвечаем коротко и сразу предлагаем посмотреть сайт.', extra: '' },
+  { keys: ['живот','убрать живот','живот не уходит','жир на животе','бока'], label: 'Запрос: живот / похудеть', response: 'Живот — это почти всегда не про количество тренировок, а про то как выстроен обмен веществ и питание. Вы уже что-то пробовали или это первый серьёзный подход?', why: 'Самый частый запрос. Называем настоящую причину (обмен веществ, питание) — не говорим «надо больше тренироваться».', extra: 'Если пробовал: «Дело не в слабости воли — система не была выстроена под Ваш реальный ритм. Что конкретно не сработало?»' },
+  { keys: ['нет энергии','усталость','устал','нет сил','нет драйва','кофе не помогает','просыпаюсь уставшим'], label: 'Запрос: нет энергии / усталость', response: 'Хроническая усталость у мужчин после 35 — это почти всегда про гормональный фон и восстановление, а не про лень. Работа как устроена — офис, вахта, сменный?', why: 'Снимаем самообвинение («не про лень») и сразу квалифицируем по рабочему ритму — это даёт персонализацию.', extra: '' },
+  { keys: ['нет мышц','масса не идёт','хочу набрать','мышцы не растут','набрать массу'], label: 'Запрос: набрать мышцы / масса', response: 'Силовые растут, а масса нет — это почти всегда про питание, а не про тренировки. Сколько белка в день примерно едите?', why: 'Конкретный вопрос про белок — сразу выявляет главную дыру. Большинство не считают и не знают.', extra: 'Если не считает: «Вот именно — без понимания конкретных цифр масса не идёт. Это поправимо. Тренируетесь сейчас?»' },
+  { keys: ['болит спина','грыжа','болят суставы','колено','после операции','травма'], label: 'Запрос: боли / травмы', response: 'С этим как раз работаем — в системе есть адаптивный план под любые ограничения. При грыже наоборот нужно укреплять, просто делать это грамотно. Что конкретно у Вас?', why: 'Не отправляем к врачу. Говорим что система адаптируется — это правда, в ЭП есть программы под ограничения.', extra: '' },
+  { keys: ['хочу ведение','личная работа','индивидуальный план','хочу чтобы вели','личная программа'], label: 'Хочет личное ведение / КСФ', response: 'Да, есть формат личной работы с командой. Начинаем с разбора Вашей ситуации — питание, анализы, тренировки — и выстраиваем всё индивидуально. Расскажите подробнее — что сейчас происходит?', why: 'Не предлагаем ЭП — человек сам сказал что хочет личную работу. Отправляем голосовое про КСФ после уточнения ситуации.', extra: '🎤 Отправляем заранее записанное голосовое про ведение КСФ' },
+  { keys: ['стероиды','фарма','фармакология','курс стероидов'], label: 'Спрашивает про стероиды / фарму', response: 'В Экспресс-Ползунке честно — это не разбирается, там только натуральные методы: питание и тренировки. Если хотите работать с фармакологией индивидуально — это формат личного ведения. Вам интересно в эту сторону?', why: 'Честно говорим что ЭП это не про фарму. Предлагаем КСФ как альтернативу. Не осуждаем и не уходим от темы.', extra: '' },
+  { keys: ['рассрочка','частями','помесячно','платёж'], label: 'Спрашивает про рассрочку', response: 'Есть беспроцентная рассрочка на 6 месяцев на тариф «Всё и сразу» — получается 2 283 ₽ в месяц. Это меньше одного похода к диетологу. Плюс гарантия 200% — то есть риска нет никакого.', why: 'Называем конкретную цифру в месяц (2 283) — она звучит гораздо менее страшно чем 13 700 единовременно.', extra: '' },
+  { keys: ['гарантия','гарантии','вернут деньги','возврат'], label: 'Спрашивает про гарантию', response: 'Есть два уровня. 30 дней — возврат 100% по любой причине, без вопросов. И 60 дней — возврат 200% если выполнили все условия системы, а результата нет. Это только на тариф «Всё и сразу».', why: 'Гарантия 200% — мощный закрыватель сомнений. Человек понимает что рискует Денис, а не он.', extra: '' },
+];
+
+function doSearch(query) {
+  const res = document.getElementById('search-results');
+  const q = query.toLowerCase().trim();
+  if (!q) { res.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Начните вводить — появятся подсказки</p>'; return; }
+
+  const matches = SEARCH_DATA.filter(item =>
+    item.keys.some(k => k.includes(q) || q.includes(k) || item.label.toLowerCase().includes(q))
+  );
+
+  if (!matches.length) {
+    res.innerHTML = '<div style="text-align:center;padding:40px 0"><p style="color:var(--muted);font-size:13px">Ничего не нашлось. Попробуйте другое слово.</p><p style="color:var(--muted);font-size:12px;margin-top:6px">Подсказки: дорого, нет времени, уже пробовал, живот, масса, гарантия, рассрочка</p></div>';
+    return;
+  }
+
+  res.innerHTML = matches.map(m => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px">
+      <div style="background:var(--text);padding:10px 14px;display:flex;align-items:center;gap:8px">
+        <span style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:rgba(242,241,239,.5);text-transform:uppercase;letter-spacing:.1em">Ситуация</span>
+        <span style="font-size:13px;font-weight:600;color:#f2f1ef">${m.label}</span>
+      </div>
+      <div style="padding:14px">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:5px">Ответ</div>
+        <div style="background:#f0eeeb;border:1px solid #dbd8d2;border-left:3px solid var(--text);border-radius:5px;padding:9px 11px;font-style:italic;font-size:12.5px;color:var(--text);margin-bottom:10px;line-height:1.55;cursor:pointer;position:relative" onclick="copyText(event,'${m.response.replace(/'/g,"\\'")}')">
+          ${m.response}
+          <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;background:var(--text);color:#f2f1ef;padding:2px 6px;border-radius:3px;opacity:.7">Копировать</span>
+        </div>
+        <div style="font-size:11px;color:var(--sec);line-height:1.6;margin-bottom:${m.extra ? '8px' : '0'}">${m.why}</div>
+        ${m.extra ? `<div style="background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.15);border-radius:5px;padding:7px 10px;font-size:11.5px;color:#1a4899;line-height:1.5">${m.extra}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function copyText(e, text) {
+  e.stopPropagation();
+  navigator.clipboard.writeText(text).then(() => {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  });
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (id === 'search') {
+    setTimeout(() => document.getElementById('search-input').focus(), 100);
+    doSearch('');
+  }
+}
+
+function copyLink(e, url) {
+  e.preventDefault();
+  e.stopPropagation();
+  navigator.clipboard.writeText(url).then(() => {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  });
+}
+
+// Init search placeholder
+doSearch('');
+</script>
+</body>
+</html>
