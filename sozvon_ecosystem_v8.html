@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>SorokinFit, рабочее место созвона</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+html[data-theme="dark"]{
+  --bg:#070811;--bg2:#0b0d18;--surface:#0f1220;--surface2:#161a2b;--field:#11141f;
+  --line:#1c2133;--line2:#272d42;
+  --accent:#4d5dff;--accent2:#6e7bff;--accent-deep:#2c38c9;--glow:rgba(77,93,255,.32);--ice:#aab6ff;
+  --text:#f3f5fa;--text2:#9298ad;--text3:#5c6379;
+  --ok:#3ad999;--ok-bg:rgba(58,217,153,.13);--ok-bd:rgba(58,217,153,.34);
+  --gold:#f0c04c;--warn:#ff6b6b;--warn-bg:rgba(255,107,107,.1);--warn-bd:rgba(255,107,107,.3);
+  --say-bg:rgba(77,93,255,.1);--say-bd:rgba(77,93,255,.34);--say-tx:#eef0ff;
+}
+html[data-theme="light"]{
+  --bg:#f4f6fb;--bg2:#eef1f8;--surface:#ffffff;--surface2:#f7f9fd;--field:#f4f6fb;
+  --line:#e3e8f2;--line2:#d2dae8;
+  --accent:#3b4ae0;--accent2:#4d5dff;--accent-deep:#2c38c9;--glow:rgba(77,93,255,.18);--ice:#3b4ae0;
+  --text:#151a26;--text2:#5a6478;--text3:#8b95a8;
+  --ok:#1a9d6a;--ok-bg:rgba(26,157,106,.1);--ok-bd:rgba(26,157,106,.3);
+  --gold:#b8860b;--warn:#d64550;--warn-bg:rgba(214,69,80,.08);--warn-bd:rgba(214,69,80,.28);
+  --say-bg:rgba(77,93,255,.07);--say-bd:rgba(77,93,255,.3);--say-tx:#1a2140;
+}
+:root{--font-display:'Unbounded',system-ui,sans-serif;--font:'Manrope',system-ui,-apple-system,sans-serif;}
+*,*::before,*::after{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;padding:0 0 40px;line-height:1.55;font-weight:500;position:relative;overflow-x:hidden;transition:background .3s,color .3s;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(620px 420px at 78% -4%, var(--glow), transparent 70%);opacity:.6;}
+body>*{position:relative;z-index:1;}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;max-width:760px;margin:0 auto;padding:14px 16px 6px;}
+.brand{font-family:var(--font-display);font-weight:700;font-size:14px;letter-spacing:.3px;color:var(--text);}
+.brand .dot{color:var(--accent2);}
+.theme-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:11px;border:1px solid var(--line2);background:var(--surface);color:var(--text2);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.theme-btn:hover{border-color:var(--accent);color:var(--text);}
+.theme-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;}
+
+.tabsbar{position:sticky;top:0;z-index:95;background:var(--bg);border-bottom:1px solid var(--line);}
+.tabs-trigger{display:none;align-items:center;gap:9px;width:100%;max-width:760px;margin:0 auto;padding:12px 16px;background:none;border:none;cursor:pointer;font-family:inherit;color:var(--text);-webkit-tap-highlight-color:transparent;}
+.tabs-trigger .tt-ic{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.tabs-trigger .tt-ic svg{width:100%;height:100%;stroke:var(--accent2);fill:none;stroke-width:2;}
+.tabs-trigger .tt-label{font-family:var(--font-display);font-size:16px;font-weight:600;flex:1;text-align:left;letter-spacing:-.2px;}
+.tabs-trigger .tt-caret{width:18px;height:18px;flex-shrink:0;stroke:var(--text3);transition:transform .25s;}
+.tabs-trigger.open .tt-caret{transform:rotate(180deg);}
+.tabs{margin:0;padding:9px 16px;display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;justify-content:center;}
+.tabs::-webkit-scrollbar{display:none;}
+
+@media(max-width:600px){
+  .tabs-trigger{display:flex;}
+  .tabs{display:none;flex-direction:column;padding:6px 12px 12px;gap:6px;}
+  .tabsbar.open .tabs{display:flex;animation:fadeIn .2s ease;}
+  .tab{width:100%;justify-content:flex-start;font-size:15px;padding:13px 15px;}
+}
+.tab{flex-shrink:0;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--text2);font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;transition:all .16s;-webkit-tap-highlight-color:transparent;white-space:nowrap;}
+.tab:hover{border-color:var(--accent);color:var(--text);}
+.tab.active{background:linear-gradient(120deg,var(--accent-deep),var(--accent));border-color:transparent;color:#fff;box-shadow:0 5px 18px var(--glow);}
+.tab-ic{width:16px;height:16px;flex-shrink:0;}
+.tab-ic svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:2;}
+
+.panel{display:none;}
+.panel.active{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+.stepper{position:sticky;top:55px;z-index:88;background:var(--bg);padding:12px 0 10px;margin-bottom:4px;}
+.stepper::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--line);}
+.step-row{display:flex;align-items:center;gap:10px;max-width:760px;margin:0 auto;padding:0 16px;}
+.step-arrow{flex-shrink:0;width:44px;height:44px;border-radius:13px;border:1px solid var(--line2);background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.step-arrow:hover:not(:disabled){border-color:var(--accent);background:var(--surface2);}
+.step-arrow:active:not(:disabled){transform:scale(.94);}
+.step-arrow:disabled{opacity:.3;cursor:default;}
+.step-arrow svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.4;}
+.step-center{flex:1;min-width:0;text-align:center;cursor:pointer;padding:5px 8px;border-radius:12px;transition:background .15s;-webkit-tap-highlight-color:transparent;}
+.step-center:hover{background:var(--surface);}
+.step-label{font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--text3);text-transform:uppercase;}
+.step-name{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text);letter-spacing:-.2px;line-height:1.15;margin-top:2px;display:flex;align-items:center;justify-content:center;gap:7px;}
+.step-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,var(--accent2),var(--accent-deep));color:#fff;font-size:12px;font-weight:800;padding:0 4px;}
+.step-badge.prep{background:linear-gradient(135deg,#5a627c,#343a54);}
+.step-badge.price{background:linear-gradient(135deg,var(--gold),#c99420);color:#1a1205;}
+.step-caret{width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2.4;flex-shrink:0;}
+.step-dots{display:flex;justify-content:center;gap:5px;margin-top:9px;}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--line2);transition:all .2s;cursor:pointer;}
+.step-dot.active{background:var(--accent2);width:20px;border-radius:3px;}
+.step-dot.done{background:var(--accent-deep);}
+.mode-btn{display:flex;align-items:center;gap:7px;margin:10px auto 0;padding:7px 13px;border-radius:10px;border:1px solid var(--line2);background:var(--surface);color:var(--text2);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.mode-btn:hover{border-color:var(--accent);color:var(--text);}
+.mode-btn svg{width:14px;height:14px;}
+#panel-script.scrollmode .stepper .step-row,
+#panel-script.scrollmode .stepper .step-dots{display:none;}
+#panel-script.scrollmode .stage{display:block;scroll-margin-top:70px;}
+#panel-script.scrollmode .stage-title-inline{display:flex;}
+.stage-title-inline{display:none;align-items:center;gap:10px;margin:-2px 0 12px;padding-bottom:12px;border-bottom:1px solid var(--line);}
+.sti-badge{width:32px;height:32px;flex-shrink:0;border-radius:9px;background:linear-gradient(135deg,var(--accent2),var(--accent-deep));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;font-family:var(--font-display);}
+.sti-badge.prep{background:linear-gradient(135deg,#5a627c,#343a54);}
+.sti-badge.price{background:linear-gradient(135deg,var(--gold),#c99420);color:#1a1205;}
+.sti-txt{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--text);letter-spacing:-.2px;}
+.sti-time{font-size:11.5px;color:var(--text3);font-weight:600;}
+
+.sheet-back{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);display:none;opacity:0;transition:opacity .2s;}
+.sheet-back.open{display:block;opacity:1;}
+.sheet{position:fixed;left:50%;bottom:0;transform:translateX(-50%) translateY(100%);width:min(520px,100%);max-height:76vh;z-index:301;background:var(--surface);border:1px solid var(--line2);border-bottom:none;border-radius:20px 20px 0 0;padding:8px 8px 20px;overflow-y:auto;transition:transform .28s cubic-bezier(.3,.8,.3,1);box-shadow:0 -20px 60px rgba(0,0,0,.4);}
+.sheet.open{transform:translateX(-50%) translateY(0);}
+.sheet-handle{width:40px;height:4px;border-radius:2px;background:var(--line2);margin:8px auto 12px;}
+.sheet-title{font-family:var(--font-display);font-size:15px;font-weight:600;text-align:center;margin-bottom:12px;color:var(--text);}
+.sheet-item{display:flex;align-items:center;gap:12px;padding:12px 13px;border-radius:12px;cursor:pointer;transition:background .13s;-webkit-tap-highlight-color:transparent;}
+.sheet-item:hover{background:var(--surface2);}
+.sheet-item.active{background:var(--surface2);}
+.sheet-num{width:32px;height:32px;flex-shrink:0;border-radius:9px;background:linear-gradient(135deg,var(--accent2),var(--accent-deep));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;}
+.sheet-num.prep{background:linear-gradient(135deg,#5a627c,#343a54);}
+.sheet-num.price{background:linear-gradient(135deg,var(--gold),#c99420);color:#1a1205;}
+.sheet-nm{flex:1;min-width:0;}
+.sheet-nm-t{font-size:14.5px;font-weight:700;color:var(--text);letter-spacing:-.2px;}
+.sheet-nm-s{font-size:11.5px;color:var(--text3);font-weight:600;margin-top:1px;}
+.sheet-item.active .sheet-check{opacity:1;}
+.sheet-check{width:18px;height:18px;stroke:var(--accent2);fill:none;stroke-width:2.5;opacity:0;flex-shrink:0;}
+
+.stage{display:none;background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--line2);border-radius:16px;padding:18px 18px 20px;margin-bottom:16px;box-shadow:0 1px 0 rgba(255,255,255,.02) inset;animation:slideIn .3s ease;}
+.stage.show{display:block;}
+@keyframes slideIn{from{opacity:0;transform:translateX(8px);}to{opacity:1;transform:none;}}
+
+.say{background:var(--say-bg);border:1px solid var(--say-bd);border-left:4px solid var(--accent2);border-radius:12px;padding:15px 17px;margin:13px 0;font-size:18px;font-weight:600;line-height:1.5;color:var(--say-tx);letter-spacing:-.2px;}
+.say.big{font-size:20px;background:var(--say-bd);}
+.note{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;color:var(--text2);line-height:1.5;margin:9px 2px;font-weight:500;}
+.note::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--text3);flex-shrink:0;margin-top:8px;}
+.note.pause{color:var(--gold);font-weight:600;}
+.note.pause::before{background:var(--gold);}
+.blist{margin:11px 0;padding:0;list-style:none;counter-reset:bl;}
+.blist li{position:relative;font-size:14px;color:var(--text);line-height:1.5;font-weight:500;padding:9px 12px 9px 40px;margin-bottom:6px;background:var(--field);border:1px solid var(--line);border-radius:9px;}
+.blist li:last-child{margin-bottom:0;}
+.blist li b{color:var(--text);font-weight:700;}
+.blist.bnum li{counter-increment:bl;}
+.blist.bnum li::before{content:counter(bl);position:absolute;left:9px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--accent2),var(--accent-deep));color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.blist.bdot li{padding-left:30px;}
+.blist.bdot li::before{content:"";position:absolute;left:13px;top:16px;width:6px;height:6px;border-radius:50%;background:var(--accent2);}
+.branch{display:flex;gap:8px;align-items:flex-start;font-size:14px;line-height:1.5;margin:8px 2px;padding:10px 13px;background:var(--field);border:1px solid var(--line);border-radius:10px;font-weight:500;}
+.branch-arrow{color:var(--accent2);font-weight:800;flex-shrink:0;}
+.branch b{color:var(--text);font-weight:700;}
+.branch.yes{border-color:var(--ok-bd);background:var(--ok-bg);}
+.branch.yes .branch-arrow{color:var(--ok);}
+.substep{font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--ice);margin:18px 0 7px;padding-top:13px;border-top:1px solid var(--line);}
+.substep:first-child{border-top:none;padding-top:0;margin-top:2px;}
+.collapse-head{display:flex;align-items:center;gap:9px;width:100%;text-align:left;font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--ice);margin:16px 0 0;padding:11px 13px;border:1px dashed var(--line2);border-radius:10px;background:var(--field);cursor:pointer;font-family:inherit;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.collapse-head:hover{border-color:var(--accent2);}
+.collapse-head .cc-caret{width:14px;height:14px;stroke:var(--ice);fill:none;stroke-width:2.5;margin-left:auto;transition:transform .25s;flex-shrink:0;}
+.collapse-head.open .cc-caret{transform:rotate(180deg);}
+.collapse-body{display:none;padding:10px 12px 6px;margin:0 0 6px;border:1px solid var(--line2);border-top:none;border-radius:0 0 10px 10px;background:var(--field);}
+.collapse-body.open{display:block;animation:fadeIn .2s ease;}
+.collapse-head.open{border-radius:10px 10px 0 0;border-bottom-style:solid;margin-bottom:0;}
+.callout{display:flex;gap:9px;align-items:flex-start;border-radius:11px;padding:11px 14px;margin:12px 0;font-size:13px;line-height:1.5;font-weight:500;}
+.callout svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;}
+.callout.warn{background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn);}
+.callout.warn svg{stroke:var(--warn);}
+.callout.warn b{color:var(--text);}
+.callout.tip{background:var(--say-bg);border:1px solid var(--say-bd);color:var(--text2);}
+.callout.tip svg{stroke:var(--accent2);}
+.callout.tip b{color:var(--ice);}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:14px;font-size:12px;}
+.legend-item{display:flex;align-items:center;gap:7px;color:var(--text2);font-weight:600;}
+.legend-sw{width:22px;height:14px;border-radius:5px;flex-shrink:0;}
+.legend-sw.say{background:var(--say-bg);border:1px solid var(--say-bd);}
+.legend-sw.note{background:var(--field);border:1px solid var(--line2);}
+.legend-sw.do{background:var(--ok-bg);border:1px solid var(--ok-bd);}
+
+.pintro{font-size:13.5px;color:var(--text2);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:15px;line-height:1.6;display:flex;gap:10px;align-items:flex-start;}
+.pintro svg{width:17px;height:17px;stroke:var(--accent2);flex-shrink:0;margin-top:1px;fill:none;stroke-width:2;}
+.pintro b{color:var(--text);}
+
+.block-card{background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--line2);border-radius:15px;padding:15px 16px;margin-bottom:14px;}
+
+.chip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px;margin-bottom:16px;}
+.chip{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--text);font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;transition:all .15s;text-align:left;-webkit-tap-highlight-color:transparent;}
+.chip:hover{border-color:var(--warn);background:var(--surface2);transform:translateY(-1px);}
+.chip.active{border-color:var(--warn);background:var(--warn-bg);}
+.chip.acase:hover{border-color:var(--accent);}
+.chip.acase.active{border-color:var(--accent);background:var(--say-bg);}
+.chip-ic{width:28px;height:28px;flex-shrink:0;border-radius:8px;background:linear-gradient(135deg,var(--warn),#c0392b);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.chip.acase .chip-ic{background:linear-gradient(135deg,var(--accent2),var(--accent-deep));}
+.detail{display:none;background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--warn-bd);border-radius:16px;padding:18px;margin-bottom:16px;scroll-margin-top:16px;}
+.detail.acase{border-color:var(--say-bd);}
+.detail.active{display:block;animation:fadeIn .25s ease;}
+.detail-h{display:flex;align-items:center;gap:10px;margin-bottom:5px;}
+.detail-h .dh-ic{width:34px;height:34px;flex-shrink:0;border-radius:9px;background:linear-gradient(135deg,var(--warn),#c0392b);display:flex;align-items:center;justify-content:center;font-size:16px;}
+.detail.acase .dh-ic{background:linear-gradient(135deg,var(--accent2),var(--accent-deep));}
+.detail-h h3{font-family:var(--font-display);font-size:18px;font-weight:600;margin:0;letter-spacing:-.3px;}
+.detail-mean{font-size:12.5px;color:var(--text2);font-style:italic;margin:0 0 4px;line-height:1.5;}
+.case{background:var(--surface);border:1px solid var(--line2);border-radius:12px;padding:13px 15px;margin-bottom:9px;}
+.case-name{font-size:15px;font-weight:800;color:var(--text);margin-bottom:5px;}
+.case-text{font-size:13.5px;color:var(--text2);line-height:1.55;}
+.case-text b{color:var(--ok);font-weight:700;}
+
+.cheat-list{background:var(--surface);border:1px solid var(--line2);border-radius:15px;padding:7px;margin-bottom:20px;}
+.cheat-item{display:flex;gap:12px;align-items:flex-start;padding:12px 13px;border-radius:10px;}
+.cheat-item:hover{background:var(--surface2);}
+.cheat-item:not(:last-child){border-bottom:1px solid var(--line);}
+.cheat-n{width:26px;height:26px;flex-shrink:0;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent-deep));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;}
+.cheat-txt{font-size:14px;color:var(--text);line-height:1.5;font-weight:600;padding-top:2px;}
+.cheat-txt span{display:block;font-size:12.5px;color:var(--text3);font-weight:500;margin-top:2px;}
+
+.notepad{position:fixed;bottom:18px;right:18px;z-index:200;}
+.np-toggle{width:52px;height:52px;border-radius:15px;border:1px solid var(--line2);background:linear-gradient(135deg,var(--accent2),var(--accent-deep));color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 30px var(--glow);transition:transform .15s;-webkit-tap-highlight-color:transparent;position:relative;}
+.np-toggle:hover{transform:translateY(-2px);}
+.np-toggle svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2;}
+.np-toggle .badge{position:absolute;top:-3px;right:-3px;width:13px;height:13px;border-radius:50%;background:var(--ok);border:2px solid var(--bg);display:none;}
+.notepad.has .badge{display:block;}
+.np-panel{position:fixed;bottom:80px;right:18px;width:min(360px,calc(100vw - 36px));max-height:min(540px,72vh);background:var(--surface);border:1px solid var(--line2);border-radius:17px;box-shadow:0 20px 60px rgba(0,0,0,.5);display:none;flex-direction:column;overflow:hidden;z-index:201;}
+.np-panel.open{display:flex;animation:fadeIn .2s ease;}
+.np-head{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid var(--line);gap:10px;}
+.np-head-t{font-family:var(--font-display);font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;color:var(--text);}
+.np-head-t svg{width:15px;height:15px;stroke:var(--accent2);fill:none;stroke-width:2;}
+.np-acts{display:flex;gap:6px;flex-shrink:0;}
+.np-btn{font-size:11.5px;font-weight:700;font-family:inherit;padding:6px 10px;border-radius:8px;cursor:pointer;border:1px solid var(--line2);background:var(--field);color:var(--text2);transition:all .14s;display:inline-flex;align-items:center;gap:5px;}
+.np-btn:hover{border-color:var(--accent);color:var(--text);}
+.np-btn.copy{border-color:var(--accent);color:var(--ice);}
+.np-btn.copy.done{border-color:var(--ok);color:var(--ok);background:var(--ok-bg);}
+.np-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+.np-area{flex:1;background:transparent;border:none;color:var(--text);font-family:inherit;font-size:14px;line-height:1.6;padding:14px 15px;resize:none;outline:none;min-height:210px;font-weight:500;}
+.np-area::placeholder{color:var(--text3);}
+.np-foot{padding:9px 15px;border-top:1px solid var(--line);font-size:11px;color:var(--text3);}
+.np-foot .saved{color:var(--ok);}
+
+.foot{text-align:center;margin-top:30px;padding-top:20px;border-top:1px solid var(--line);font-size:11.5px;color:var(--text3);}
+@media(max-width:520px){
+  .chip-grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr));}
+  .say{font-size:16.5px;}.say.big{font-size:18px;}
+}
+.pay-fab{position:fixed;bottom:18px;left:18px;z-index:200;display:inline-flex;align-items:center;gap:9px;padding:0 16px;height:52px;border-radius:15px;border:1px solid var(--line2);background:linear-gradient(135deg,var(--accent2),var(--accent-deep));color:#fff;font-family:var(--font);font-size:13.5px;font-weight:700;text-decoration:none;box-shadow:0 10px 30px var(--glow);transition:transform .15s;-webkit-tap-highlight-color:transparent;}
+.pay-fab:hover{transform:translateY(-2px);}
+.pay-fab svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;}
+.pay-fab .ext{width:13px;height:13px;opacity:.85;}
+@media(max-width:520px){.pay-fab .lbl{display:none;}.pay-fab{padding:0;width:52px;justify-content:center;}}
+</style>
+</head>
+<body>
+
+<a class="pay-fab" href="https://sorokin-fit.com/links_to_tsf" target="_blank" rel="noopener noreferrer" title="Ссылки на оплату">
+  <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+  <span class="lbl">Оплата</span>
+  <svg class="ext" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+</a>
+
+<div class="topbar">
+  <div class="brand">SOROKINFIT<span class="dot">·</span> созвон</div>
+  <button class="theme-btn" id="themeBtn">
+    <svg id="themeIc" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <span id="themeLabel">Светлая</span>
+  </button>
+</div>
+
+<div class="tabsbar" id="tabsbar">
+<button class="tabs-trigger" id="tabsTrigger" aria-label="Разделы">
+  <span class="tt-ic" id="ttIc"></span>
+  <span class="tt-label" id="ttLabel">Скрипт</span>
+  <svg class="tt-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+</button>
+<div class="tabs" id="tabs">
+  <button class="tab active" data-tab="script"><span class="tab-ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Скрипт</button>
+  <button class="tab" data-tab="obj"><span class="tab-ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>Возражения</button>
+  <button class="tab" data-tab="cases"><span class="tab-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></span>Кейсы</button>
+  <button class="tab" data-tab="nosale"><span class="tab-ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></span>Если не купил</button>
+  <button class="tab" data-tab="cheat"><span class="tab-ic"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Шпаргалка</button>
+</div>
+</div>
+
+<div class="panel active" id="panel-script">
+  <div class="stepper" id="stepper">
+    <div class="step-row">
+      <button class="step-arrow" id="stepPrev" aria-label="Назад"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="step-center" id="stepCenter">
+        <div class="step-label" id="stepLabel">Этап 1</div>
+        <div class="step-name" id="stepName"></div>
+      </div>
+      <button class="step-arrow" id="stepNext" aria-label="Вперёд"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+    <div class="step-dots" id="stepDots"></div>
+    <button class="mode-btn" id="modeBtn">
+      <svg id="modeIc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span id="modeLabel">Листать всё подряд</span>
+    </button>
+  </div>
+  <div class="wrap">
+    <div class="legend">
+      <div class="legend-item"><span class="legend-sw say"></span>Говоришь вслух</div>
+      <div class="legend-item"><span class="legend-sw note"></span>Инструкция себе</div>
+      <div class="legend-item"><span class="legend-sw do"></span>Действие по ответу</div>
+    </div>
+    <div id="stages"></div>
+  </div>
+</div>
+
+<div class="panel" id="panel-obj"><div class="wrap">
+  <div class="pintro"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg><div>Клиент возразил, <b>тапни плитку</b>, откроется отработка. Философия и петли свёрнуты сверху.</div></div>
+  <div class="block-card" id="objLogic"></div>
+  <div class="block-card" id="objLoops"></div>
+  <div class="chip-grid" id="objGrid"></div>
+  <div id="objDetails"></div>
+</div></div>
+
+<div class="panel" id="panel-cases"><div class="wrap">
+  <div class="pintro"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg><div>Тапни категорию под ситуацию клиента, бери <b>ОДИН мужской кейс</b>, в котором он узнает себя.</div></div>
+  <div class="chip-grid" id="caseCats"></div>
+  <div id="caseDetails"></div>
+</div></div>
+
+<div class="panel" id="panel-nosale"><div class="wrap">
+  <div class="pintro"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg><div>Не закрыли на созвоне? <b>Вот что делаешь дальше</b>, по шагам.</div></div>
+  <div class="block-card" id="nosale"></div>
+</div></div>
+
+<div class="panel" id="panel-cheat"><div class="wrap">
+  <div class="pintro"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg><div>Перед созвоном пробеги глазами. Во время держи под рукой.</div></div>
+  <div class="cheat-list" id="cheat"></div>
+</div></div>
+
+<div class="sheet-back" id="sheetBack"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Все этапы, перейти к любому</div>
+  <div id="sheetItems"></div>
+</div>
+
+<div class="notepad" id="notepad">
+  <div class="np-panel" id="npPanel">
+    <div class="np-head">
+      <div class="np-head-t"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Заметки</div>
+      <div class="np-acts">
+        <button class="np-btn copy" id="npCopy"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Копировать</button>
+        <button class="np-btn" id="npClear">Очистить</button>
+      </div>
+    </div>
+    <textarea class="np-area" id="npArea" placeholder="Имя, возраст, боль, что пробовал, зачем ему это, дети и семья, какой формат назначил и почему, кому передаём, договорённость по оплате, дата следующего касания..."></textarea>
+    <div class="np-foot"><span class="saved" id="npSaved">Сохраняется автоматически</span></div>
+  </div>
+  <button class="np-toggle" id="npToggle" aria-label="Заметки">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+    <span class="badge"></span>
+  </button>
+</div>
+<script>
+/* ==== РАБОЧЕЕ МЕСТО СОЗВОНА v8, координатор направления ==== */
+/* Блоки: say(вслух) note(инструкция) branch(ветка) sub(подзаголовок) warn/tip(важно) */
+/* collapse:true у sub сворачивает всё до следующего sub */
+
+const STAGES = [
+{ id:'prep', badge:'0', type:'prep', short:'Подготовка', title:'Подготовка до звонка', time:'10-15 мин, до звонка',
+  blocks:[
+    {tip:'<b>Рамка всего звонка:</b> ты не продаёшь, ты разбираешь ситуацию и в конце говоришь, какой формат человеку нужен. Может оказаться, что нужен дорогой. Может оказаться, что дешёвый. Может оказаться, что мы не берёмся. Держи эту установку весь звонок, человек считывает её раньше слов.'},
+    {sub:'🗂 Кто есть кто, чтобы не путаться'},
+    {note:'В команде три роли, и их легко перепутать, особенно на созвоне. Держи в голове чётко.'},
+    {list:['<b>Ты</b> координатор направления, и так же представляешься клиенту. Ты разбираешь ситуацию человека и подбираешь ему направление: какой формат, какой путь, какой специалист. Клиентов ты не ведёшь.','<b>Специалист</b> это тот, кто ведёт клиента после оплаты: питание, тренировки, корректировки, обратная связь. Когда в скрипте написано «специалист», речь всегда о нём.','<b>Денис</b> автор методологии. Он в рабочем чате клиента и каждую неделю получает сводку по всем ученикам с именами и результатами. Но день за днём человека ведёт специалист, а не Денис, и это важно проговаривать честно.']},
+    {warn:'Никогда не называй себя специалистом. Это слово занято тем, кто ведёт клиента, и человек их перепутает. Ты координатор направления, и точка.'},
+    {tip:'Само слово «координатор» клиент может услышать как администратора, который согласует расписание. Поэтому сразу за названием говори, что ты делаешь: разбираю ситуацию и подбираю направление. Тогда роль читается верно с первой секунды.'},
+    {sub:'🔴 Включи запись'},
+    {warn:'Первое действие перед звонком. Без записи невозможен разбор, а разбор звонков это то, что поднимает твою конверсию, то есть твои деньги. Не записал, значит этот звонок ничему тебя не научит.'},
+    {sub:'⚙️ 9 принципов звонка',collapse:true},
+    {steps:['Ты в позиции эксперта, а не продавца.','Кто говорит больше, тот платит (задал вопрос, молчи 2-4 сек).','Ты ведёшь разговор.','Живой диалог, не читаешь.','Упреждай сомнения.','Один вопрос за раз.','Задавай вопросы, ответ на которые знаешь.','Сначала лёгкие вопросы, потом тяжёлые.','Не суди и не поучай.']},
+    {sub:'📋 Открой анкету и выпиши'},
+    {list:['Имя, возраст, откуда пришёл','Главную цель на 3 месяца, его словами','Что мешает и что пробовал (его боль)','Приоритет 1-10 и готовность','Ограничения по здоровью','Что указал по бюджету']},
+    {sub:'💰 Что делать с графой бюджета',collapse:true},
+    {note:'Сеттер уже спрашивал про бюджет, поэтому цифра в анкете это не приговор, а подсказка, как вести разговор.'},
+    {note:'<b>Бюджет в районе цены или выше.</b> Работаешь обычным ходом, про деньги не переживаешь.'},
+    {note:'<b>Бюджет заметно ниже.</b> Не отказывайся заранее и не меняй формат под цифру. Люди регулярно пишут меньше, чем реально готовы платить, потому что не понимают, за что. Копай глубже в ценность и в цену бездействия, и заранее держи в голове рассрочку.'},
+    {note:'<b>Бюджет символический или пусто.</b> Скорее всего человек пришёл посмотреть. Проведи разбор честно, но не растягивай, и сразу настраивайся, что итогом может быть перенос или отказ.'},
+    {sub:'🚫 Кого мы не берём'},
+    {note:'Если ты обещаешь честный вердикт, ты должен знать, при каких условиях говоришь нет. Вот они.'},
+    {list:['<b>Серьёзное заболевание или острое состояние</b>, сначала врач, мы не лечим','<b>Ждёт волшебную таблетку</b>, не готов менять ни питание, ни режим','<b>Нереалистичная цель и не слышит</b>, хочет минус 30 кг за месяц и не воспринимает объяснение','<b>Агрессивен или неадекватен в разговоре</b>, с таким не сработается ни у кого','<b>Платить будет в ущерб семье</b>, это не наш путь, лучше вернуться позже']},
+    {warn:'Сработал критерий, говоришь нет. Один честный отказ окупается рекомендациями и людьми, которые возвращаются через полгода уже готовыми.'},
+    {sub:'🧭 Держи в голове рамку разговора'},
+    {note:'В начале звонка ты пообещаешь человеку честный ответ в конце: можем помочь или нет и каким именно способом. Значит по ходу разбора ты должен реально определить формат, а не вести всех к одному и тому же.'},
+    {sub:'👤 Посмотри таблицу занятости специалистов'},
+    {note:'Знай ДО созвона, кому передашь: имя, сколько ведёт, сколько мест свободно, под какие ситуации силён. Без имени этап «Кто ведёт» не работает.'},
+    {sub:'🎯 Определи готовность',collapse:true},
+    {list:['<b>«Настроен серьёзно»</b>, горячий, решение может быть сегодня','<b>«Готов, есть вопросы»</b>, тёплый, закрой вопросы в этапе пути','<b>«Сомневаюсь»</b>, холодный, копай Сократа глубже, может не решиться сразу, это норма','<b>«Просто смотрю»</b>, 15 минут, выяснить что мешает, дать VSL, назначить контакт']},
+    {sub:'⚠️ Если созвон пошёл не по плану',collapse:true},
+    {note:'<b>Не вышел на связь.</b> Ждёшь 5 минут, звонишь сам. Не ответил, пишешь: «[Имя], не дозвонился, всё в порядке? Скажите, когда удобно, перенесём». Через 2 часа второе касание. Молчит сутки, уходит в общий список на прогрев.'},
+    {note:'<b>Опоздал на 10 минут и больше.</b> Спокойно, без упрёка, но честно: «У нас осталось [N] минут, а разговор нужен нормальный. Успеем, или лучше перенести, чтобы не комкать?». Часто человек сам предложит перенести, и это лучше, чем скомканный разбор.'},
+    {note:'<b>За рулём или на работе.</b> Переноси, не проводи. Разбор требует, чтобы человек говорил про здоровье, семью и деньги, а он не может ни сосредоточиться, ни говорить свободно. Скажи прямо: «Разговор личный, и вам будет неудобно. Давайте перенесём на время, когда сможете говорить спокойно, вам так же будет полезнее».'},
+    {note:'<b>Рядом кто-то есть.</b> Спроси: «Вы сейчас один? Просто разговор будет личный». Если не один, лучше перенести. При жене или коллегах человек не откроет настоящую боль, а без неё разбор пустой.'},
+    {note:'<b>Плохая связь.</b> Не терпи. Одна попытка переподключиться, потом перенос. Разбор через помехи не получится.'},
+    {sub:'✅ Настройся физически'},
+    {note:'Отключи ВСЕ уведомления, спам звуков убивает доверие.'},
+    {note:'Приготовь лист и ручку, записывай от руки. Человек слышит, что его фиксируют, это добавляет экспертности.'},
+    {note:'2 минуты, несколько вдохов. Установка не «я должен продать», а «я должен разобраться и честно сказать».'},
+    {tip:'Держи фразу-компас: <b>«[Имя], [возраст], [боль], пробовал [что], хочет [цель]».</b>'}
+  ]},
+
+{ id:'contact', badge:'1', short:'Контакт', title:'Контакт и рамка', time:'3-4 мин',
+  blocks:[
+    {sub:'👋 Представление'},
+    {note:'Тон спокойный, вниз, не заискивающий. На линии не продавец, а человек, который сейчас будет разбираться в его ситуации.'},
+    {say:'[Имя], добрый день! Меня зовут [имя], я координатор направления в команде Дениса Сорокина. Если по-простому, моя работа разобрать вашу ситуацию и подобрать направление: с чего начинать, что подходит именно вам, а что нет. Вы заполняли анкету на диагностику, вот, созвонились. Как вы?'},
+    {note:'Один-два живых вопроса, дай человеку выдохнуть. Потом сразу ставишь рамку, не жди, пока спросят сами.'},
+    {say:'И сразу скажу, чтобы не было недопонимания. Я не тренер и клиентов не веду, я разбираю ситуации. Через меня проходит [N] мужских разборов в месяц, только мужчины за 30, поэтому типовые причины вижу быстро.'},
+    {sub:'Если ты новый и своей цифры разборов ещё нет',collapse:true},
+    {say:'Я работаю по методологии Дениса, той самой, по которой он за 14 лет провёл через трансформацию больше 970 мужчин. Моя задача разобрать вашу ситуацию по этой системе и понять, что вам подходит.'},
+    {warn:'Никогда не выдумывай себе личный результат, которого не было. Считывается мгновенно, и дальше тебе не верят ни в чём.'},
+    {sub:'Регистр общения'},
+    {say:'Как вам удобнее общаться, на «ты» или на «вы»?'},
+    {note:'Держи ЕДИНЫЙ регистр весь звонок, не смешивай.'},
+    {sub:'Проверка VSL'},
+    {say:'Скажите, видео перед звонком успели посмотреть? Которое я скидывал про формат работы.'},
+    {branch:'<b>Смотрел</b> → «Что зацепило? Что откликнулось больше всего?» Слушай, это материал для разговора.',yes:true},
+    {branch:'<b>Смотрел частично</b> → «А до какого места дошли?» Работаешь как обычно, но в этапе пути раскрываешь подробнее то, что он пропустил.'},
+    {sub:'Если не смотрел совсем'},
+    {note:'Не бросай трубку и не читай нотацию. Человек уже выделил время, а второй раз может и не прийти. Задача понять, готов ли он вкладываться или пришёл послушать.'},
+    {say:'Понял. Скажу честно: там как раз вся суть, кейсы и как устроена работа, без этого разговор будет поверхностнее. Давайте так, у нас два варианта. Либо вы сейчас смотрите двадцать минут и мы созваниваемся сразу после, разбор выйдет намного точнее. Либо говорим сейчас, но тогда я коротко проговорю главное сам. Как вам удобнее?'},
+    {branch:'<b>Готов посмотреть и вернуться</b> → лучший вариант. Ставишь время сразу, не «когда посмотрите», а конкретный час.',yes:true},
+    {branch:'<b>Хочет говорить сейчас</b> → продолжаешь, но в этапе пути закладываешь 3-4 минуты на сжатый пересказ сути и обязательно отправляешь видео после звонка.'},
+    {branch:'<b>«Да зачем, вы же сами всё расскажете»</b> → сигнал, что человек не готов вкладываться. Не спорь, проводи разбор, но внимательнее к красным флагам.'},
+    {warn:'Не отпускай смотреть без назначенного времени. «Посмотрю и напишу» почти всегда значит, что не вернётся.'}
+  ]},
+
+{ id:'program', badge:'2', short:'Рамка', title:'Рамка разговора', time:'1-2 мин',
+  blocks:[
+    {tip:'Самый недооценённый этап. Здесь ты задаёшь регламент и получаешь на него согласие. После согласия ты имеешь право вести разговор и возвращать человека в структуру, если он уходит в сторону. Без этого шага ты весь звонок будешь догонять.'},
+    {sub:'1. Регламент, как пройдёт разговор'},
+    {say:'Давайте сразу договоримся, как пройдёт разговор, чтобы мы оба понимали. Займёт около часа, у вас столько есть? Сначала я задаю вопросы: тело, режим, что уже пробовали, что не сработало. Потом разбираю, почему конкретно у вас не получается.'},
+    {warn:'Не обещай сорок минут. Полный разбор с назначением формата занимает 45-55 минут, и если ты пообещал сорок, ты либо нарушишь слово, либо скомкаешь конец, где как раз и происходит решение.'},
+    {note:'Вопрос «у вас столько есть» задан не просто так. Если человек говорит, что у него полчаса, ты сразу знаешь, что придётся сжимать разбор и расширение картины. Лучше узнать это в начале, чем на сороковой минуте услышать «мне пора».'},
+    {sub:'2. Обещание честного ответа'},
+    {say:'А в конце я скажу прямо, можем мы вам помочь или нет. И если можем, то каким именно способом. Скажу как есть, а не то, что дороже.'},
+    {note:'Это обещание ты обязан выполнить. У нас есть и плотное ведение, и вариант, где человек идёт сам. Если по разбору увидишь, что второй ему подходит больше, ты называешь именно его, даже если он дешевле в разы. Иначе фраза выше становится приёмом, а приёмы считываются.'},
+    {warn:'Не называй здесь ни продукты, ни цены, ни форматы. Рано. Человек ещё ничего про себя не рассказал, а ты уже дашь ему якорь, и он будет ждать конкретную цифру вместо того, чтобы говорить о себе.'},
+    {tip:'Фраза «а не то, что дороже» работает сильнее любого обещания про отбор. Её человек может проверить прямо в этом разговоре, поэтому и верит. У нас прямой запрет продавать ведение тому, кому достаточно более простого формата, так что это правда, а не приём.'},
+    {sub:'3. Право на нет, снимаем «я подумаю» заранее'},
+    {say:'И у меня будет одна просьба. В конце скажите мне прямо, да или нет. Оба ответа нормальные, я не обижусь. Единственное, о чём попрошу, не говорите «я подумаю». Обычно это значит нет, просто вслух не сказали, а я останусь гадать. Лучше честно.'},
+    {say:'И если будет нет, я задам один вопрос, почему, чтобы понять, где я недоработал. И на этом всё, давить не буду.'},
+    {warn:'Говори именно «один вопрос», а не «пара вопросов». Дальше в этапе цены ты сошлёшься на эту договорённость дословно, и формулировка должна совпасть.'},
+    {tip:'Ты снимаешь главное возражение до того, как оно появилось, и показываешь, что не боишься отказа. Это позиция силы. Если человек всё же скажет «подумаю», ты имеешь право мягко сослаться на договорённость.'},
+    {sub:'4. Согласие, без него дальше не идёшь'},
+    {say:'Договорились?'},
+    {note:'Молчи и дождись ответа. Это микро-согласие даёт тебе право вести разговор дальше. Не проглатывай вопрос и не беги сразу к анкете.',pause:true},
+    {branch:'«Да», «договорились» → переходишь к анкете.',yes:true},
+    {branch:'Мнётся или уточняет → ответь коротко и повтори вопрос: «Договорились?» Рамка должна быть принята.'},
+    {sub:'Если сразу спрашивает про цену'},
+    {note:'Не отвечай цифрой, верни управление. Формулировка не «пока не пойму, что предложить», а «у нас разные форматы, и я не знаю, какой нужен вам».'},
+    {say:'Без проблем, всё расскажу. Если совсем коротко, мы помогаем мужчинам за 30 разобраться с формой и энергией системно, под их организм. Но у нас разные форматы, и я пока не знаю, какой нужен именно вам. Поэтому давайте я сначала пойму вашу ситуацию, а потом скажу конкретно: что вам подходит и что это будет стоить. Справедливо?'},
+    {note:'Если давит дальше, вторая, честная подача:'},
+    {say:'Понимаю, хочется сразу к делу, я сам такой. Но у нас всё строится под конкретного человека, это не курс, где всем одно и то же. Я физически не могу сказать, что и сколько будет именно у вас, пока мы честно не поговорим. Готовы к нормальному разговору? Как хотите поступить?'}
+  ]},
+
+{ id:'anketa', badge:'3', short:'Анкета', title:'Вход через анкету', time:'2-3 мин',
+  blocks:[
+    {note:'Человек почувствует, что его уже знают. Строит доверие.'},
+    {say:'Я внимательно изучил вашу анкету. Вы написали, что хотите [его цель его словами], и что мешает [его барьер]. Правильно понял?'},
+    {branch:'«Да» → «Расскажите подробнее, что именно имеете в виду?» Дай раскрыться.',yes:true}
+  ]},
+
+{ id:'diag', badge:'4', short:'Диагностика', title:'Диагностика, сердце разбора', time:'12-15 мин',
+  blocks:[
+    {warn:'Главная часть. Именно на её основе ты назначаешь формат. Чем глубже разбор, тем меньше возражений в конце. <b>Задал вопрос, молчи.</b>'},
+    {sub:'💡 Probing, главный навык',collapse:true},
+    {note:'Ответил коротко, не беги дальше, копни: «Расскажите подробнее» или «Когда вы говорите [его слово], что конкретно имеете в виду?». Без probing получишь «форма не очень». С probing вытащишь настоящую боль.'},
+    {sub:'4.1 Тело сейчас'},
+    {say:'Расскажите, как тело прямо сейчас? Что больше всего хочется изменить?'},
+    {note:'Дай выговориться полностью. Не перебивай.'},
+    {say:'А сколько это уже длится, вот это состояние?'},
+    {note:'Пауза 2-4 сек. Пусть сам услышит, сколько тянется. Эта цифра пригодится тебе при назначении формата.',pause:true},
+    {sub:'4.2 История попыток'},
+    {say:'Вы что-то пробовали раньше: зал, тренер, программы, диеты?'},
+    {branch:'Пробовал → «И что в итоге? Дошли до результата?» → «Почему бросили, что происходило?»'},
+    {note:'Молчи. Выходит страх «снова брошу». Запомни, закроешь позже.',pause:true},
+    {branch:'Не пробовал → «А что останавливало, почему не начинали?»'},
+    {note:'Здесь же слушай главное для назначения формата: он в принципе способен идти сам или ему нужен человек рядом. Кто-то бросал из-за отсутствия системы, а кто-то из-за отсутствия контроля, это разные форматы.'},
+    {sub:'4.3 Рабочий контекст'},
+    {say:'Расскажите про свой день. Обычная рабочая неделя: график, нагрузка, командировки?'},
+    {note:'Материал для этапа пути: «именно под такой график система и создана».'},
+    {sub:'4.4 Настоящая причина'},
+    {say:'А зачем вам это вообще, по-настоящему? Не для отчёта, реально зачем?'},
+    {note:'Ответы: здоровье, энергия, дети, жена. Повтори его слова (метод ЭХО):'},
+    {say:'То есть для вас это не просто про живот, это про [его слова]?'},
+    {sub:'4.5 Упомянул детей или семью, СТОП'},
+    {say:'Подождите. Вы сказали, [его фраза]. Расскажите про это подробнее.'},
+    {warn:'Самый сильный рычаг. Дай проговорить. НЕ смягчай боль, не утешай «да ладно, у всех так». Боль двигает к решению.'},
+    {sub:'🚩 Отмечай красные флаги'},
+    {note:'Параллельно держи в голове критерии отказа из этапа 0. Увидел красный флаг, не гони дальше по скрипту, готовь честный отказ. Это не провал звонка, это твоя работа.'},
+    {sub:'😐 Если закрытый, отвечает односложно',collapse:true},
+    {note:'Не дави. Заходи мягче, через простые вопросы. Поделись: «ко мне часто приходят мужчины с [ситуация], вам знакомо?». Снимает ощущение, что он один такой.'}
+  ]},
+
+{ id:'socrat', badge:'5', short:'Сократ', title:'Метод Сократа', time:'5-7 мин',
+  blocks:[
+    {tip:'Цель в том, чтобы человек САМ пришёл к выводу, что нужна система. То, что придумал сам, не оспорит. <b>Задал вопрос, молчи. Максимум 3 вопроса. Вывод произносит ОН.</b>'},
+    {sub:'Цепочка А, «Почему не работало»'},
+    {say:'Смотрите, вы пробовали [что-то]. Как думаете, почему это не сработало?'},
+    {note:'Молчи.',pause:true},
+    {branch:'«Не было времени» → «А если бы времени было чуть больше, результат был бы другим?»'},
+    {branch:'«Наверное нет» → «А почему нет?» Думает глубже.'},
+    {say:'То есть дело было не только во времени? А что нужно было, чтобы реально сработало?'},
+    {note:'Молчи. Сам формулирует, что нужна система.',pause:true},
+    {say:'То есть нужна система конкретно под вас, не общая программа?'},
+    {sub:'Цепочка Б, «Цена бездействия»',collapse:true},
+    {say:'Вы говорите, это уже [N лет]. Как думаете, само по себе изменится?'},
+    {note:'Молчи.',pause:true},
+    {branch:'«Вряд ли» → «А через год, если всё как сейчас, что изменится в вашей жизни?»'},
+    {branch:'«Хуже» → «А через три года?» Сильный момент, не торопись.'},
+    {say:'А что заставило вас записаться на разбор именно сейчас?'},
+    {note:'Молчи. Выходит настоящая причина.',pause:true},
+    {sub:'Цепочка В, «Что нужно, чтобы изменилось»',collapse:true},
+    {say:'Что должно быть по-другому, чтобы на этот раз получилось?'},
+    {note:'Молчи.',pause:true},
+    {say:'То есть нужен человек, который разберёт именно вашу ситуацию? И если такая система появится, вы готовы её пройти?'},
+    {note:'Пауза. Это предзакрытие его же словами.',pause:true},
+    {sub:'🔍 Уточняющие вопросы, работают в любой момент',collapse:true},
+    {note:'Эти вопросы не привязаны к цепочке. Вставляй их каждый раз, когда человек сказал что-то важное, но коротко. Они делают две вещи разом: углубляют разбор и заставляют его самого договорить мысль до конца. А то, что человек договорил сам, он потом не оспорит.'},
+    {say:'А почему это для вас важно?'},
+    {say:'Что вы имеете в виду, когда говорите [его слово]?'},
+    {say:'А как вы сами это объясняете?'},
+    {say:'И к чему это в итоге привело?'},
+    {say:'А что тогда, по-вашему, нужно, чтобы получилось?'},
+    {say:'Правильно я понимаю, что [его мысль твоими словами]?'},
+    {tip:'Последний вопрос самый сильный. Когда ты переформулируешь его мысль и он подтверждает, эта мысль становится общей. Дальше в разговоре ты можешь на неё опираться, и он от неё уже не откажется.'},
+    {warn:'Не превращай это в допрос. Один уточняющий вопрос на важный ответ, а не три подряд. После каждого молчи и слушай.'},
+    {sub:'🔧 Под конкретные ситуации',collapse:true},
+    {branch:'<b>«В возрасте поздно»</b> → «Почему некоторые в 50+ выглядят лучше, чем в 35?» → «Дело не в возрасте, а в том, как работать с организмом?» → «Вы разбирали свою биохимию: анализы, гормоны, ЖКТ?» → «Нет» → «Могло это быть причиной?»'},
+    {branch:'<b>«Пробовал всё»</b> → «Всё это что конкретно?» → «Кто-то разбирал вашу биохимию: ЖКТ, гормоны?» → «Нет» → «То есть пробовали многое, но без понимания, что блокирует?»'},
+    {branch:'<b>«Боюсь бросить»</b> → «Почему в прошлый раз бросили?» → «Дело не в том, что вы слабый, а в том, что не было кого-то рядом?» → «Если бы был, результат был бы другим?» Сказал «да», страх закрыт.'}
+  ]},
+
+{ id:'resume', badge:'6', short:'Разбор', title:'Разбор ситуации', time:'4-5 мин',
+  blocks:[
+    {note:'Если Сократ сработал, разбор короткий. Подтверждаешь, даёшь диагноз, расширяешь картину.'},
+    {sub:'Часть 1, подтверждение и диагноз'},
+    {say:'Смотрите. Я вас слышу и вижу картину чётко. [Его боль его словами] это не случайность и не ваша вина. У большинства мужчин за 30 с таким графиком заблокирован кортизол и нарушена работа ЖКТ. Пока это не разберём, любые тренировки работают вполсилы. Это физиология, а не сила воли. Обычный тренер этого не видит.'},
+    {warn:'Не называй процентов и статистики, которую не сможешь подтвердить. «Почти всегда», «у большинства», «очень часто» звучат так же сильно, но их нельзя поймать на вранье. Придуманная цифра, которую клиент решит проверить, обрушит доверие ко всему разбору.'},
+    {sub:'💬 Приём «одновременное объяснение»',collapse:true},
+    {note:'Разбор объясняет две вещи сразу: почему не выходило раньше и почему теперь может быть иначе. Раньше не работало, потому что никто не смотрел на причину. Может сработать, потому что начинаем именно с неё. Снимает страх «а вдруг опять не выйдет».'},
+    {sub:'Часть 2, расширь картину'},
+    {note:'Человек пришёл с узким «убрать живот». Покажи, что за этим система. Бери 2-3 связи под него, не вываливай всё.'},
+    {say:'И смотрите, что важно. Вы пришли с запросом [его цель], это понятно. Но хочу, чтобы вы увидели картину шире.'},
+    {sub:'🧬 Связи, взять 2-3 под него',collapse:true},
+    {say:'За формой стоит гормональный фон. Жиры в питании нужны для выработки тестостерона, а это ваша энергия, либидо, настроение. Когда вы урезали жиры на диете, вы просаживали гормоны, а не только сушились.'},
+    {note:'↑ Живот и тестостерон.'},
+    {say:'Ещё момент: витамин D это фактически гормон, и его дефицит встречается очень часто, особенно у тех, кто целыми днями в помещении. Он бьёт по иммунитету и гормональному фону, а человек годами живёт с этим и не связывает с тем, что нет энергии.'},
+    {note:'↑ Витамин D.'},
+    {say:'За тестостероном и скоростью обмена стоят конкретные микроэлементы: цинк, работа щитовидки. Когда прогресс встал, часто дело в этом, а не в лени.'},
+    {note:'↑ Цинк и щитовидка.'},
+    {say:'И ЖКТ это фабрика усвоения. Значительная часть лишнего веса у многих это отёк и воспаление. Если ЖКТ барахлит, можно идеально питаться, а нутриенты просто не усваиваются, вы бьётесь с симптомом, не зная причины.'},
+    {note:'↑ ЖКТ.'},
+    {say:'Плюс кортизол: при хроническом стрессе он держится высоким, а на высоком кортизоле тело физически удерживает жир, как бы вы ни тренировались. Это биохимия, а не сила воли.'},
+    {note:'↑ Кортизол.'},
+    {say:'И смотрите вперёд: через несколько лет при той же траектории это уже не про живот, а про здоровье: давление, суставы, сердце. А ещё дети прямо сейчас перенимают ваши привычки, смотрят, каким может быть мужчина.'},
+    {note:'↑ Будущее и дети.'},
+    {say:'Вы думали, что проблема в одном, а на деле это связанная система. Вот почему разовые попытки не работали, они били по одному месту, а надо по всей системе.'},
+    {warn:'Показываешь ЧТО связано, но НЕ даёшь КАК это чинить, это продукт. Не залечивай.'},
+    {sub:'🛟 Если не знаешь ответа',collapse:true},
+    {note:'Клиент задал вопрос по биохимии, на который ты не ответишь точно. Самое опасное начать выдумывать, тебя раскусят и разговор закончится. Заготовка:'},
+    {say:'Честно скажу, точно на это ответит не я. Я вижу закономерность: у мужчин с вашим графиком почти всегда [что видишь]. Но что конкретно у вас, покажут анализы, и разбирать их будет специалист. Гадать на глаз я не буду, в этом и смысл нашей работы: мы смотрим цифры, а не предполагаем.'},
+    {tip:'Это не слабость, а сила. Ты показал, что здесь не угадывают, а работают по данным. Человек до тебя ходил ровно к тем, кто угадывал.'},
+    {warn:'Ты никогда не даёшь рекомендаций по здоровью, питанию и добавкам. Ни одной. Даже если знаешь ответ. Это работа специалиста, у тебя нет права.'},
+    {sub:'🚫 Если случай НЕ наш'},
+    {note:'Сработал критерий из этапа 0. Это не провал звонка, а выполненное обещание. Говоришь прямо и без виноватого тона.'},
+    {say:'Скажу честно, как и обещал в начале. Я не возьму вас сейчас, и вот почему: [причина]. Вам сейчас нужно [что реально нужно, например сначала к врачу]. Когда [условие изменится], возвращайтесь, разберём заново, и я буду рад с вами поработать.'},
+    {warn:'Не смягчай отказ до неузнаваемости и не подсовывай «ну можно и попробовать». Сказал нет, значит нет. Иначе рамка честности рушится и не сработает уже ни на ком.'},
+    {tip:'После отказа дай что-то полезное бесплатно: совет, материал, направление. Такой звонок возвращается рекомендациями чаще, чем средняя продажа.'},
+    {sub:'Переход дальше'},
+    {say:'Могу показать, как это выглядит по шагам конкретно в вашей ситуации?'}
+  ]},
+
+{ id:'path', badge:'7', short:'Путь', title:'Путь к результату', time:'6-7 мин',
+  blocks:[
+    {note:'Не презентация продукта, а путь этого человека. Говори «у вас», «под вас».'},
+    {warn:'Главная ошибка на этом этапе: превратить его в монолог на семь минут. Помни принцип, кто говорит больше, тот платит. После каждого шага короткий вопрос, а не просто пауза. Вопрос возвращает человека в диалог и попутно собирает согласия, которые потом сложатся в решение.'},
+    {sub:'Шаг 1, найти узкое горлышко'},
+    {say:'Первые семь дней. Анализы крови: тестостерон, кортизол, витамин D, ЖКТ, маркеры воспаления. Замеры, фото, энергия. Находим причину, работаем не вслепую. Вы только сдаёте анализы и заполняете анкету. Всё остальное мы.'},
+    {say:'Скажите, вы вообще когда-нибудь сдавали такие анализы?'},
+    {note:'Ответ почти всегда «нет» или «давно». Это само по себе усиливает разбор, человек слышит, что упускал.',pause:true},
+    {sub:'Шаг 2, система под вашу жизнь'},
+    {say:'У вас [его график], именно под это и строим. Тренировки 2-3 раза в неделю: зал, дом или командировка. Питание под ваш ЖКТ: убираем отёк, добавляем ресурс и энергию через простые блюда, вначале с граммовкой, потом можно перейти на интуитивное. В семье изгоем не станете, это обещаю. И специалист проверяет ваш отчёт и корректирует.'},
+    {say:'Как думаете, две-три тренировки в вашем графике реально помещаются?'},
+    {note:'Он сам скажет «да» или назовёт ограничение. Оба варианта полезны: либо получил согласие, либо узнал, что учесть.',pause:true},
+    {sub:'📝 Что такое отчёт, раскрой обязательно'},
+    {say:'Отчёт это просто: вечером пишете, как прошёл день, что поели, как самочувствие, как тренировка. Это нужно, чтобы видеть, как организм отвечает, и вовремя корректировать. А раз в неделю общие замеры. Цель в том, чтобы результат был не случайным, а предсказуемым.'},
+    {say:'Как вам такой формат, пара минут вечером, это нормально?'},
+    {sub:'Шаг 3, не дать телу остановиться'},
+    {say:'Тело адаптируется к любой нагрузке, если не менять, прогресс встаёт. Каждые 2-3 недели меняем программу, переключаем питание по сигналу. Аврал, командировка, заболел ребёнок, система не ломается, а адаптируется. Именно этого раньше не было.'},
+    {say:'У вас же бывают такие недели, когда всё летит?'},
+    {note:'Он подтвердит и часто расскажет пример. Это момент, где человек понимает, что систему строят под его реальную жизнь.',pause:true},
+    {sub:'Шаг 4, результат в цифрах'},
+    {say:'По итогам трёх месяцев финальные замеры, фото, анализы. Как изменились тестостерон, кортизол, маркеры воспаления. Личный разбор, что сработало именно у вас.'},
+    {say:'Это не просто получили результат и отпустили. Самое ценное в том, что вы уходите с пониманием своего организма и знаете, как им управлять. Мы собираем систему конкретно под ваше тело, которую вы забираете на всю жизнь.'},
+    {sub:'Кейс, один, под ситуацию (вкладка «Кейсы»)'},
+    {note:'Один МУЖСКОЙ кейс, максимально похожий. НЕ женский. Говори живо, будто вспомнил сам.'},
+    {note:'<b>Как выбрать, если подходят несколько.</b> Бери тот, где совпадает главное препятствие человека, а не просто цифра результата. Мужчине с командировками нужен кейс про командировки, а не про самый большой минус в килограммах. Совпадение обстоятельств убеждает сильнее, чем масштаб цифры.'},
+    {warn:'Рассказывай только те кейсы, которые есть в наших материалах и которые человек сможет найти, если решит проверить. Придуманный или приукрашенный кейс это самый быстрый способ потерять доверие насовсем.'},
+    {say:'Кстати, помните, в том видео был мужчина, [его ситуация]? Мы с ним сделали [что], и у него получилось [результат].'},
+    {say:'Вот это и есть КСФ, личное ведение Команды Сорокина. Три месяца, где вас ведут от первого анализа до результата. Вы только выполняете и присылаете отчёт. Всё остальное на нас.'},
+    {sub:'❓ Проверка перед тем, как идти дальше'},
+    {say:'Вот так это выглядит от начала до конца. Скажите, что думаете?'},
+    {note:'Обязательный вопрос, не пропускай его. Ты только что говорил несколько минут подряд, и тебе нужно понять, что у человека в голове, ДО того как пойдёшь к специалисту и цене. Задал и молчи, сколько бы он ни думал.',pause:true},
+    {branch:'<b>Отвечает развёрнуто, задаёт вопросы</b> → отлично, он включён. Отвечаешь и идёшь дальше.',yes:true},
+    {branch:'<b>«Нормально», «понятно», сухо</b> → не беги дальше. «А что откликается больше всего?» или «Что вызывает вопросы?» Пустое согласие здесь потом превратится в «я подумаю» на цене.'},
+    {branch:'<b>Задал уточняющий вопрос по продукту</b> → отвечай коротко и по делу, не уходи в новую презентацию. Ответил, и сразу дальше.'},
+    {warn:'Если человек молчит или отвечает односложно, значит где-то по пути ты его потерял. Не двигайся к цене в этом состоянии, там он просто скажет «подумаю». Лучше вернись и спроси, что было непонятно.'}
+  ]},
+
+{ id:'expert', badge:'8', short:'Кто ведёт', title:'Представление специалиста', time:'3-4 мин',
+  blocks:[
+    {warn:'Строго ДО цены. После цены это читается как понижение: «плачу 60 тысяч, а вести будет не Денис». До цены это часть того, что человек получает.'},
+    {note:'Перед созвоном посмотри таблицу занятости и знай имя. «Наш специалист» вместо имени убивает весь эффект.'},
+    {sub:'Кто ведёт'},
+    {say:'Теперь про то, кто конкретно вас поведёт. Под вашу ситуацию, [его боль его словами], вести вас будет [Имя].'},
+    {say:'Работает так: обратная связь четыре раза в неделю, каждое воскресенье полный срез по замерам и корректировка плана. То есть вы не остаётесь один на один с программой, вас ведут и перестраивают под ваши цифры.'},
+    {say:'Плюс сам Денис будет в вашем рабочем чате. Методология его, специалиста он обучал лично, и каждую неделю ему уходит сводка по всем, кто в работе, с именами и результатами. То есть за вашим прогрессом он следит, но ежедневно с вами работает специалист.'},
+    {warn:'Не обещай, что Денис будет лично включаться в переписку и разбирать вопросы. Со всей работой команда справляется сама, и это нормально. Пообещаешь личное участие Дениса, клиент будет его ждать, не дождётся и почувствует себя обманутым.'},
+    {sub:'Его цифры и ограничение по местам'},
+    {say:'Сейчас у него [N] учеников, [M] довёл до результата за последние полгода. Больше [лимит] одновременно он не берёт принципиально, иначе не сможет погружаться в каждого. Свободно сейчас [K] мест.'},
+    {sub:'Если специалист новый и результатов пока нет',collapse:true},
+    {note:'Не выдумывай ему стаж и цифры. Опираешься на систему, это честно и работает почти так же. Заменяешь этим блок с цифрами выше, остальное говоришь как есть.'},
+    {say:'Вести вас будет специалист из команды Дениса. Он работает по методологии Дениса, Денис обучал его лично и контролирует работу команды. Формат тот же: обратная связь четыре раза в неделю, воскресный срез по замерам, корректировка плана под вашу динамику.'},
+    {say:'Каждый специалист берёт ограниченное число людей, чтобы хватало внимания на каждого. У вашего сейчас [K] свободных мест.'},
+    {sub:'🚫 Чего не говорить'},
+    {list:['<b>«Опытный специалист»</b>, вместо этого конкретная цифра','<b>«Индивидуальный подход»</b>, вместо этого «пересчитаем под ваш вес, возраст и график»','<b>«Профессиональная команда»</b>, вместо этого «берёт максимум [N] человек»','Правило простое: даёшь факт, вывод человек делает сам. Сформулировал вывод за него, он его не примет.']},
+    {warn:'Число свободных мест называй настоящее. Придуманный дефицит вскроется, и тогда посыплется доверие ко всему остальному.'},
+    {say:'Знакомство сделаем так: как только оформим, я добавляю вас в рабочий чат, и [Имя] выходит на связь сегодня же. Стартовые данные, анкета, замеры, дальше он ведёт.'}
+  ]},
+
+{ id:'preclose', badge:'9', short:'Предзакрытие', title:'Предзакрытие', time:'1 мин',
+  blocks:[
+    {note:'Формулировка важна. Спрашиваешь не «покупаете?» и не «нравится ли специалист?», а про саму работу. Человек отвечает про себя, а не про сделку, и защита не включается.'},
+    {say:'Вот такой путь я вижу для вас. Скажите честно, вот такая работа, в таком формате, это то, что вам сейчас нужно?'},
+    {branch:'«Да» или «звучит логично» → к назначению и цене.',yes:true},
+    {branch:'Сомневается → «Что вызывает вопросы?» → выслушай → ответь → вернись.'}
+  ]},
+
+{ id:'price', badge:'10', type:'price', short:'Назначение', title:'Назначение и цена', time:'4-5 мин',
+  blocks:[
+    {warn:'КРИТИЧНО: не называй цену без «разрешения на продажу». Сначала назначение, потом якорь, потом temperature check, и только на готовности цена.'},
+    {sub:'💊 Назначение, формат выбираешь ты'},
+    {note:'Ты не спрашиваешь «что вам больше подходит» и не показываешь список. Весь звонок ты разбирал ситуацию, теперь называешь ОДИН формат и объясняешь, почему именно он. Как врач: не «какое лечение хотите», а «вам нужно вот это, вот почему».'},
+    {warn:'Никогда не вываливай несколько тарифов на выбор. Выбор топит: человек перестаёт думать «надо или нет» и начинает думать «а вдруг возьму не тот». В итоге не берёт ничего.'},
+    {say:'[Имя], я разобрал вашу ситуацию и скажу прямо, что вам нужно. Вам нужно личное ведение, три месяца. Почему именно столько: [обоснование из его слов, например «у вас это тянется восемь лет», «вы пробовали короткие забеги, и они не держались», «по вашему графику первый месяц уйдёт только на то, чтобы система встала»]. Первые сдвиги вы увидите уже в первый месяц, но закрепится всё только к третьему.'},
+    {warn:'Мы не продаём ведение на месяц, минимальный срок три месяца. Никогда не предлагай «давайте попробуем месяц», такого формата нет, и обещать его нельзя.'},
+    {note:'Обоснование всегда из того, что он сам сказал в разборе. Не «у нас так принято», а «так надо вам». Это и есть разница между продавцом и экспертом.'},
+    {sub:'Если человек объективно не готов к ведению',collapse:true},
+    {note:'Важно понимать: у нас нет урезанного ведения. Более простой формат это Экспресс-Ползунок, программа, которую человек проходит сам. Это исключение для конкретных ситуаций, а не запасной вариант на каждое «дорого».'},
+    {note:'<b>Когда это уместно.</b> Человек дисциплинирован и уже понимает базу, ему не хватало системы, а не контроля. Либо объективно не тянет ведение по деньгам, но реально хочет начать и готов работать сам. Тогда честнее дать ему рабочий инструмент, чем не дать ничего.'},
+    {say:'Скажу честно, как и обещал. Плотное ведение даёт максимальный результат, но в вашей ситуации я вижу другое. Вам не хватало не контроля, а системы. У нас есть Экспресс-Ползунок, вы проходите его сами, он в разы дешевле. Для вашего старта этого достаточно. А если поймёте, что нужен человек рядом каждый день, вернётесь на ведение, и я буду рад.'},
+    {warn:'НЕ используй это как ответ на «дорого». Если человеку объективно нужно ведение, а он просто торгуется, ты не понижаешь формат, а работаешь с возражением. Понизил под давлением, и ты продал то, что в его ситуации не сработает. Потом он скажет, что метод не работает, и будет по-своему прав.'},
+    {sub:'⛔ Скажи, чего НЕ рекомендуешь',collapse:true},
+    {note:'Отказ продать более дорогое даёт больше доверия, чем любая аргументация. Плюс снимает тему Дениса заранее, до того как она всплывёт возражением. Используй, если человек прощупывает, что есть подороже, или если по разбору видно, что он пришёл на имя.'},
+    {say:'И сразу скажу, чего я вам не рекомендую. У нас есть формат, где ведёт лично Денис, это 124 900 и 224 900 за три месяца. В вашей ситуации я его не советую. Вам нужна не звезда рядом, а система и человек, который каждый день смотрит ваши отчёты и вовремя правит план. Это вы получаете в основном формате, а переплачивать вам незачем.'},
+    {tip:'Ты только что отказался от продажи втрое дороже. После этого твоей рекомендации верят совсем иначе.'},
+    {sub:'Якорь до цены'},
+    {say:'Скажите, вы уже думали, что нужно, чтобы реально изменить ситуацию? Что это потребует?'},
+    {note:'Молчи.',pause:true},
+    {say:'А если бы занялись с тренером в зале, представляете, во что это выходит? Грамотный тренер от 3 000 за тренировку. Даже две-три тренировки в неделю это 25-35 тысяч в месяц. И только за тренировки: без питания, анализов, работы с ЖКТ. Тренер работает с тем, что снаружи. То, что реально блокирует результат, он не видит. Как думаете, такой подход решил бы вашу ситуацию как мужчины, у которого [его боль]?'},
+    {note:'Молчи.',pause:true},
+    {branch:'«Наверное нет» → «У меня тоже такое мнение. Давайте сравним, что у нас».',yes:true},
+    {sub:'💬 Что сказать в сравнении',collapse:true},
+    {note:'4 шага под него, индивидуальность (нет двух одинаковых организмов, важно смотреть, что работает у него), минимум 3 месяца (за месяц результат есть, но насколько, зависит от исходных данных и анализов).'},
+    {sub:'Temperature check, «разрешение на продажу»'},
+    {say:'Скажите, от 1 до 10, насколько вам была бы интересна такая работа?'},
+    {note:'Молчи.',pause:true},
+    {branch:'<b>9-10, уверенно</b> → называешь цену.',yes:true},
+    {branch:'<b>7-8</b> → «А что не хватает до 10?» Называет возражение, закрываешь (вкладка «Возражения»), потом цена.'},
+    {branch:'<b>Ниже 7</b> → «Что останавливает?» Через возражения. Цену пока НЕ называешь.'},
+    {sub:'💰 Название цены'},
+    {say:'[Имя], смотрите. То, что мы разобрали, это по сути ваш путь к результату. Можете идти им сами, а можете вместе с нами. Уважаю любой выбор и искренне считаю, что вам лучше вместе с нами.'},
+    {say:'Инвестиция за три месяца плотной индивидуальной работы 59 900 рублей. На выходе система под ваш организм, результат в теле, в самочувствии, в зеркале.',big:true},
+    {warn:'МОЛЧИ. Жди. Не добавляй ничего. Кто первым заговорил после цены, тот в слабой позиции. Терпи 5-10 секунд.'},
+    {branch:'«Давайте» или «Как оплатить?» → переходишь к этапу «Оформление». НЕ перепродавай после «да».',yes:true},
+    {branch:'Мнётся, но не возражает → пробное закрытие: «Как ощущения? Откликается?.. Уверены?.. Тогда оформляем, пришлю ссылку?»'},
+    {sub:'Первый ход на частое возражение'},
+    {note:'▼ «Дорого», сначала изолируй, не бросайся в рассрочку:'},
+    {say:'Понимаю. Скажите честно, это для вас принципиально много, или просто сейчас неудобно вынуть всю сумму разом?'},
+    {branch:'Неудобно разом → этап «Рассрочка и бронь».',yes:true},
+    {branch:'Принципиально много → вкладка «Возражения», «Дорого», полная отработка и петли.'},
+    {note:'▼ «Надо подумать», вытащи, о чём именно:'},
+    {say:'Конечно. Один вопрос, прежде чем пойдёте думать: как вам кажется, это вообще может вам помочь?'},
+    {branch:'«Да» → «Тогда честно, что именно вызывает сомнение? Давайте разберём сейчас». Дальше вкладка «Возражения».',yes:true},
+    {note:'Любое другое возражение, вкладка «Возражения», там полная отработка каждого.'},
+    {warn:'Если человек не тянет назначенный формат, ты НЕ скатываешься на вариант подешевле в ответ на сопротивление. Формат ты назначил по его ситуации, он не меняется от того, что человек торгуется. Меняется только график платежей.'},
+    {sub:'🚪 Если сказал НЕТ'},
+    {note:'В рамке ты предупредил, что на «нет» задашь один вопрос. Значит это не давление, а то, о чём вы условились. Спрашивай спокойно, без напряжения в голосе, иначе человек услышит, что ты расстроен, и закроется.'},
+    {say:'Понял, принимаю. Мы с вами договаривались, что я задам один вопрос. Скажите честно, дело в том, что я где-то недоработал и чего-то не объяснил, или вам это по сути не нужно?'},
+    {tip:'Формулировка снимает с человека защиту. Он объясняет не своё решение, а твою работу, и в процессе часто сам называет настоящую причину.'},
+    {branch:'<b>Назвал сомнение</b> (дорого, не уверен, что сработает, боюсь бросить, надо с женой) → это не «нет», это возражение. Отработай ОДИН раз, вкладка «Возражения», и спокойно спроси ещё раз.',yes:true},
+    {branch:'<b>Сказал, что по сути не нужно</b> → это настоящее «нет». Принимаешь, не давишь, идёшь к красивому выходу ниже.'},
+    {sub:'Как отличить «нет» от возражения',collapse:true},
+    {note:'<b>Возражение</b> это невыясненное сомнение: дорого, надо подумать, а вдруг не сработает. Человек хочет, но чего-то опасается. С этим работаешь, это твоя работа.'},
+    {note:'<b>Настоящее нет</b> это решение по сути: мне это сейчас не нужно, я не готов ничего менять, я разберусь сам. Человек не хочет. Это уважаешь.'},
+    {warn:'После обещания «давить не буду» у тебя ОДИН заход на отработку, а не шесть петель подряд. Пойдёшь по кругу второй раз, и ты обычный продавец, который наврал в начале звонка. Петли из вкладки «Возражения» применяй ДО финального «нет», а не после.'},
+    {sub:'🤝 Красивый выход'},
+    {say:'Хорошо, понял вас, уважаю решение. Тогда давайте так. Вот что я бы посоветовал уже сейчас, независимо от нас: [простой совет из метода]. И если ситуация поменяется, напишите мне напрямую, разберём заново.'},
+    {tip:'Человек, которому не выкрутили руки, возвращается сам, часто через месяц или два. А тот, кого продавили, не возвращается никогда и рассказывает об этом знакомым. Дальше вкладка «Если не купил».'}
+  ]},
+
+{ id:'deal', badge:'11', type:'price', short:'Оформление', title:'Оформление после «да»', time:'3-5 мин',
+  blocks:[
+    {warn:'Самое дорогое место звонка. Человек сказал да, но денег ещё нет. Отпустишь его оплатить попозже, и часть таких оплат не дойдёт никогда: остынет, отвлечётся, передумает, жена спросит. Твоя работа довести до факта оплаты, не бросая трубку.'},
+    {sub:'1. Не перепродавай'},
+    {warn:'Сказал «да», ты замолкаешь про ценность. Никаких «и вот ещё что вы получите». Каждое лишнее слово после согласия даёт человеку новый повод задуматься. Дальше только техника.'},
+    {sub:'2. Способ оплаты'},
+    {say:'Отлично, тогда оформляем. Вам как удобнее, оплатить полностью или в рассрочку?'},
+    {branch:'Полностью → отправляешь ссылку.',yes:true},
+    {branch:'Рассрочка → этап «Рассрочка и бронь», там условия.'},
+    {sub:'3. Отправляешь ссылку и остаёшься на линии'},
+    {say:'Скидываю ссылку в [мессенджер]. Давайте я побуду на связи, пока проходит оплата, если что-то не пройдёт, сразу решим. Обычно это пара минут.'},
+    {warn:'Это главный приём этапа. Не «оплатите и напишите мне», а «я подожду». Человеку неловко бросить трубку, и он оплачивает сразу. Плюс ты решаешь технические сбои на месте, а они бывают чаще, чем кажется.'},
+    {note:'Пока он оплачивает, не молчи в тишину, но и не продавай. Спроси что-то бытовое и лёгкое: как обычно проходит его неделя, есть ли отпуск в планах. Это снимает неловкость момента.'},
+    {sub:'4. Если оплата не проходит'},
+    {note:'Частое: лимит по карте, банк блокирует платёж, не проходит перевод. Не паникуй и не отпускай.'},
+    {say:'Бывает, ничего страшного. Давайте попробуем другой способ, у нас есть [варианты]. Либо с другой карты, если есть под рукой.'},
+    {branch:'Не получилось ни одним способом → договариваешься на конкретное время сегодня же. Не «как сможете», а «во сколько вам будет удобно, я напишу».'},
+    {sub:'5. Подтверждение и следующий шаг'},
+    {note:'Оплата пришла. Дальше сразу, не откладывая.'},
+    {say:'Всё, оплата отобразилась, поздравляю, вы в программе. Сейчас я добавляю вас в рабочий чат, там будете вы, [Имя специалиста] и Денис. [Имя] напишет вам сегодня, скинет анкету и список анализов. Первое, что от вас нужно, это заполнить анкету и сдать анализы, дальше он всё расскажет.'},
+    {say:'И скажу главное: вы сейчас сделали то, что откладывали [срок из его слов]. Дальше моя работа заканчивается, начинается ваша со специалистом. Я буду рядом, если что-то пойдёт не так, пишите напрямую.'},
+    {sub:'6. Что сделать сразу после звонка',collapse:true},
+    {list:['Внести сделку в CRM с суммой и способом оплаты','Создать рабочий чат и добавить клиента и специалиста','Передать специалисту краткую сводку: боль, цель, ограничения, что обещано','Проверить в течение дня, что специалист вышел на связь','Поставить себе напоминание на 30-й день для касания']},
+    {warn:'Сводку специалисту передавай обязательно и в тот же день. Если специалист начнёт разговор с нуля и спросит то, что человек уже рассказывал тебе целый час, клиент почувствует, что его передали как папку, а не как человека.'}
+  ]},
+
+{ id:'money', badge:'12', type:'price', short:'Рассрочка/бронь', title:'Рассрочка и бронь', time:'если по деньгам',
+  blocks:[
+    {sub:'💳 Рассрочка'},
+    {note:'Не предлагай первой. Сначала полная цена, пауза, и только после «неудобно разом».'},
+    {say:'Есть два варианта рассрочки. Внутренняя, от нас: три платежа, первый сейчас, второй через месяц, третий через два. И банковская, помесячно на 3 или 6 месяцев, оформляется по ссылке за пару минут.'},
+    {say:'Единственное, в рассрочку сумма выходит на 8% больше в обоих случаях. По банковской это комиссия банка, по внутренней потому, что мы начинаем работать сразу, а деньги получаем в течение трёх месяцев. То есть оплата сразу самый выгодный вариант, экономите почти пять тысяч. Как вам удобнее?'},
+    {warn:'Не говори «банк берёт комиссию» про внутреннюю рассрочку. Никакого банка там нет, человек платит нам напрямую, и он это заметит. Разделяй причины: по банковской комиссия, по внутренней рассрочка от нас.'},
+    {tip:'Полная оплата это выгода. Человек не хочет терять 5 тысяч. Базу 59 900 НЕ меняй, она в VSL.'},
+    {sub:'Если полная по силам, но берёт рассрочку',collapse:true},
+    {say:'Можно скажу, что бы я сделал на вашем месте? Оплатил бы сразу. Во-первых, выгоднее, экономите почти пять тысяч. А во-вторых, по опыту: кто вкладывается полностью, тот и работает полностью, результат приходит быстрее.'},
+    {note:'Только если реально по силам. Впритык, рассрочка лучше, не дави.'},
+    {sub:'🔒 Бронь, если не решили сегодня'},
+    {note:'Не отпускай «подумать» с пустыми руками. Внёс даже 5 000, принял микро-решение, доходит до полной оплаты чаще. Возвратность снимает страх.'},
+    {say:'[Имя], смотрите, я вижу, что вам это откликается, и вы уже почти решились. Искренне не хочу, чтобы вы отказались от своей цели просто потому, что взяли паузу. Поэтому давайте поступим так, чтобы не потерять место.'},
+    {say:'Количество людей, которых мы можем качественно вести одновременно, ограничено. Поэтому можем прямо сейчас зафиксировать за вами место и цену. Вы вносите возвратную бронь, 5 000 рублей. Это фиксирует цену 59 900 и все бонусы. Если в течение 48 часов поймёте, что не готовы, вернём эти 5 000 в ту же минуту, без вопросов.'},
+    {warn:'Про ограниченность мест говори только тогда, когда мест действительно мало, и ты видишь это в таблице занятости. Наш дефицит настоящий, специалист физически ведёт ограниченное число людей. Но если сказать это при полностью свободных местах, ты превращаешь правду в приём, и однажды это вскроется.'},
+    {say:'Куда вам удобнее прислать ссылку?'},
+    {warn:'Молчи. Финал не «будете бронировать?», а «куда прислать?», вопрос про способ. После него пауза.'},
+    {note:'После брони: «Отлично, место за вами. Напишу завтра в [время], оформим полностью. Договорились?»'}
+  ]},
+
+{ id:'denis', badge:'★', short:'Форматы с Денисом', title:'Форматы личной работы с Денисом', time:'только если он сам спросил',
+  blocks:[
+    {note:'Открываешь ТОЛЬКО если человек сам поднял тему Дениса. Сам ты его не предлагаешь, ты уже назначил формат. Если настаивает после твоего «не рекомендую», значит для него это принципиально, и тогда продавай спокойно и без извинений.'},
+    {say:'Хорошо, расскажу про формат с Денисом лично. Денис абсолютный чемпион Arnold Classic, ПРО-атлет, за 14 лет помог трансформироваться больше 970 мужчинам. Это человек, который видел сотни разных организмов и выстроил систему из этого опыта.'},
+    {say:'В личной работе всё то же: четыре шага, система под вас, анализы, питание, тренировки. Разница в том, что разбирает ситуацию лично Денис. Есть два формата, еженедельная обратная связь или ежедневная. Вам какой ближе?'},
+    {branch:'Еженедельная → «Раз в неделю, три месяца. Инвестиция 124 900 рублей».'},
+    {branch:'Ежедневная → «Самый личный формат, ежедневная обратная связь от Дениса. Инвестиция 224 900 за три месяца».'},
+    {say:'Для вашей ситуации я бы рекомендовал начать с формата за 124 900, раз в неделю в большинстве случаев достаточно.'},
+    {note:'Пауза.',pause:true},
+    {say:'Как вам?'},
+    {tip:'Если сомнения, закрывай на бронь, этап «Рассрочка и бронь».'}
+  ]}
+];
+
+const OBJ_LOGIC = [
+  {sub:'🧠 Философия',collapse:true},
+  {tip:'<b>Возражение не отказ, а невыясненное сомнение.</b> «Подумаю» не значит «нет», есть невысказанный вопрос. Первое возражение часто дымовая завеса: за «дорого» прячется «не уверен, что сработает». Сначала докопайся до настоящего.'},
+  {warn:'НЕЛЬЗЯ: 1) пугаться и сдаваться, 2) спорить и давить, 3) игнорировать и таранить скрипт.'},
+  {sub:'📐 Логика работы, 6 шагов',collapse:true},
+  {steps:['Упреди сомнение сам, раньше человека.','Прими, не спорь.','Изолируй: «если отложить [деньги] в сторону, есть ещё что-то?».','Закрепи желание ДВАЖДЫ.','Закрой настоящее возражение.','Верни к решению.']},
+  {warn:'Тональность нейтральная и спокойная. Не заискивай (слабость) и не злись (конфликт).'},
+  {sub:'🔑 Двойное закрепление желания',collapse:true},
+  {say:'Давайте на секунду представим, что вопрос денег вообще не стоит. Как вам сам подход? Чувствуете, что это то, что вам нужно, чтобы [его цель]?'},
+  {say:'То есть вы не в позиции «а надо ли мне это», вы в позиции «как мне это сделать». Правильно?'}
+];
+
+const OBJ_LOOPS = [
+  {sub:'🔁 Петли Хормози',collapse:true},
+  {branch:'<b>Петля 1:</b> «Как думаете, это вообще может вам помочь?» → Да → «Тогда давайте.» → Сомневается → Петля 2'},
+  {branch:'<b>Петля 2:</b> «Что тогда останавливает?» → Называет → Петля 3'},
+  {branch:'<b>Петля 3:</b> «Именно это главная причина, почему вам это нужно сейчас.» → пробуешь закрыть → нет → Петля 4'},
+  {branch:'<b>Петля 4:</b> «Гипотетически, если бы всё было идеально, вы бы сделали?» → Да → «А что не так с тем, что есть?» → Нет → Петля 5'},
+  {branch:'<b>Петля 5:</b> «Вы хотите [его цель]. Мы именно это делаем. Что теряется-то?»'},
+  {branch:'<b>Петля 6:</b> «Лучший случай, жизнь меняется. Худший, разберёмся. Что теряете, попробовав?»'},
+  {warn:'Петли применяй ДО финального «нет». После того как человек сказал нет и ты задал свой один вопрос, у тебя остаётся один заход, а не шесть.'},
+  {sub:'⚡ Пробное закрытие',collapse:true},
+  {say:'Так, смотрите. Если мы заходим и я показываю вам ровно, как прийти к [его цель], вы стопроцентно включаетесь и делаете?.. Уверены?.. Отлично. Тогда оформляем, пришлю ссылку?'},
+  {sub:'📊 Шкала-реверс, если делал 1-10',collapse:true},
+  {say:'Можно честно? Вы пять минут назад сказали, что на девятке из десяти. А сейчас звучит, будто не уверены. Скажите прямо, что на самом деле происходит?'}
+];
+
+const OBJECTIONS = [
+{ id:'expensive', ico:'💰', chip:'Дорого', title:'«Дорого» или «Нет денег»',
+  meaning:'Почти никогда не значит «нет суммы». Чаще «не уверен, что стоит того». Не бросайся в рассрочку.',
+  blocks:[
+    {say:'Понимаю. Скажите, а вопрос именно в деньгах, или ещё есть сомнения? Если деньги отложить, всё остальное устраивает?'},
+    {say:'То есть если бы с деньгами вопрос решился, вы бы точно хотели? Вы не думаете «а надо ли», вы думаете «как»?'},
+    {say:'Скажите честно, это для вас принципиально много, или просто сейчас неудобно вынуть всю сумму разом?'},
+    {branch:'<b>Неудобно разом</b> → рассрочка, этап «Рассрочка и бронь».',yes:true},
+    {branch:'<b>Принципиально много</b> → через ценность ниже плюс петли.'},
+    {say:'Вы уже пробовали: зал, диеты, может тренер. Сколько ушло за пару лет? И какой результат? КСФ не очередная трата, это первый раз, когда рядом специалист. Вопрос не «дорого или дёшево», а хотите ли вы через 90 дней быть в другой точке, или ещё год там же.'},
+    {warn:'НЕ предлагай другой, более дешёвый формат в ответ на торг. Формат назначен по его ситуации. Меняется только график платежей.'},
+    {warn:'Если видишь, что человек реально не тянет и платить будет в ущерб семье, не дожимай. Это критерий отказа из этапа 0. Честно скажи, что сейчас не время, и предложи вернуться позже.'}
+  ]},
+{ id:'think', ico:'🤔', chip:'Подумаю', title:'«Мне надо подумать»',
+  meaning:'Значит «есть невысказанное сомнение» или «некомфортно сказать нет». Вытащи, о чём думать.',
+  blocks:[
+    {note:'Сначала мягко верни к договорённости из рамки, вы про это условились в начале звонка.'},
+    {say:'Мы с вами в начале договорились, что в конце будет прямой ответ, да или нет. Я не давлю, просто напомню. Скажите, как вам кажется, это вообще может вам помочь?'},
+    {branch:'«Да» → «Тогда честно, что именно вызывает сомнение? Давайте разберём сейчас, чтобы вы думали не в пустоте».',yes:true},
+    {sub:'Мягкое дожатие через опыт',collapse:true},
+    {say:'Скажите, а когда вы раньше говорили «подумаю» про что-то важное, чем обычно заканчивалось? Часто ведь руки не доходят. Вы пришли на разбор, значит, вам важно. Давайте разберём сейчас.'},
+    {warn:'Не отпускай без даты: «напишу вам завтра в 12, договорились?».'}
+  ]},
+{ id:'guarantee', ico:'🛡️', chip:'Гарантии и возврат', title:'«Какие гарантии?» или «Деньги вернёте?»',
+  meaning:'Спросят почти всегда, чек высокий. Главная опасность в том, что ты на автомате пообещаешь возврат, которого нет. Это возвращается скандалом через две недели.',
+  blocks:[
+    {warn:'У нас нет возврата денег и нет гарантии результата. Никогда не говори «если не пойдёт, вернём» и «гарантируем результат». Пообещал то, чего нет, и подставил и себя, и клиента, и компанию.'},
+    {note:'Отвечать спокойно и сразу, без заминки. Заминка читается как «что-то тут не так».'},
+    {say:'Скажу честно и прямо: возврата денег у нас нет. И вот почему. Мы начинаем вкладываться в вас с первого дня: разбираем анализы, собираем систему под ваш организм, специалист ведёт вас каждый день. Это работа, которую нельзя отменить задним числом.'},
+    {say:'Но именно поэтому весь процесс и выстроен так, чтобы вы дошли. Замеры каждую неделю, корректировки по вашей динамике, специалист видит, если что-то идёт не туда, и правит до того, как вы это заметите. Мы зарабатываем на том, что люди доходят до результата и остаются, а не на разовых оплатах.'},
+    {sub:'Если спрашивает «а если результата не будет»',collapse:true},
+    {say:'Результат зависит от двух сторон. Наша часть это точная система и контроль, ваша это выполнять. Если вы делаете, результат будет, за 14 лет через это прошли больше 970 мужчин. А если человек не делает, ему не поможет ни одна гарантия на свете, он просто вернёт деньги и останется в той же точке.'},
+    {tip:'Это сильный ответ, потому что он честный. Мужчина 35+ гораздо больше уважает прямое «возврата нет, и вот почему», чем размытое «ну мы что-нибудь придумаем».'},
+    {warn:'Если человек настаивает на гарантии возврата как условии покупки, это красный флаг. Он покупает страховку от собственного бездействия, а не работу. Такой чаще всего не доходит и потом требует деньги назад.'}
+  ]},
+{ id:'trainer', ico:'🏋️', chip:'Есть свой тренер', title:'«У меня уже есть тренер»',
+  meaning:'Не отказ. Человек не понимает разницы задач и думает, что вы конкуренты. Никогда не принижай его тренера, это личные отношения.',
+  blocks:[
+    {warn:'Ни слова плохого про его тренера. Скажешь «он вам не поможет», и человек защитит того, кого знает лично, а не тебя.'},
+    {say:'Хорошо, что есть. Скажите, а он разбирал вашу биохимию? Анализы, гормоны, ЖКТ?'},
+    {note:'Молчи. Ответ почти всегда «нет».',pause:true},
+    {say:'Это не в упрёк ему, это просто другая работа. Тренер отвечает за нагрузку: техника, программа, чтобы вы не травмировались. Это нужно и это он делает. Но то, что блокирует ваш результат, находится не в зале. Кортизол, щитовидка, усвоение, восстановление, это вне его зоны, и он к этому и не должен лезть.'},
+    {say:'Мы работаем на другом уровне: сначала находим, что мешает, потом строим систему под вашу биохимию, и уже под неё подстраиваются тренировки. Так что тут не «или он, или мы».'},
+    {branch:'<b>Тренировки в зале ему нравятся</b> → «Продолжайте с ним, если удобно. Мы дадим систему и корректировки, а нагрузку вы можете выполнять с ним, специалист согласует».'},
+    {branch:'<b>Результата нет и он это признаёт</b> → «Вы сколько с ним занимаетесь? И что за это время изменилось по цифрам?» Дальше через факты, а не через мнение.'}
+  ]},
+{ id:'notwork', ico:'🎲', chip:'Вдруг не сработает', title:'«А вдруг у меня не сработает»',
+  meaning:'Сомнение не в себе, а в продукте. Отличается от «боюсь бросить»: там человек не верит себе, здесь не верит методу.',
+  blocks:[
+    {say:'Нормальный вопрос, я бы тоже спросил. Скажите честно, вы сомневаетесь, что метод рабочий, или что он сработает конкретно у вас?'},
+    {note:'Молчи. Это два разных сомнения, и закрываются они по-разному.',pause:true},
+    {sub:'Если сомневается в методе'},
+    {say:'Понимаю. Смотрите, за 14 лет через систему прошли больше 970 мужчин, и это не абстрактная цифра: есть конкретные люди с именами, замерами и анализами до и после. Показать пару кейсов мужчин с ситуацией максимально похожей на вашу?'},
+    {sub:'Если сомневается в своей ситуации'},
+    {say:'Вот именно поэтому мы и начинаем с анализов, а не с программы. Мы не гадаем, сработает или нет, мы сначала смотрим ваши цифры и находим, что конкретно у вас блокирует результат. Это и есть ответ на ваш вопрос: мы не подставляем вас под общую программу и не надеемся, что повезёт.'},
+    {say:'И дальше каждую неделю смотрим замеры. Если что-то не двигается, мы это видим не через три месяца, а через семь дней, и меняем. Именно поэтому у нас нет истории «человек три месяца делал и ничего».'},
+    {tip:'Ключ в том, чтобы не спорить и не убеждать словами. Ты переводишь разговор на механику: у нас нет ставки на удачу, у нас есть измерение и корректировка.'}
+  ]},
+{ id:'doctor', ico:'🩺', chip:'Спрошу у врача', title:'«Надо посоветоваться с врачом»',
+  meaning:'Может быть настоящей осторожностью, а может мягким отказом. Разведи одно от другого, но никогда не отговаривай от врача.',
+  blocks:[
+    {warn:'Никогда не говори «да зачем вам врач» и не обесценивай это. Мы работаем со здоровьем, и осторожность человека это правильно. Плюс если у него реально есть заболевание, это наш критерий отказа.'},
+    {say:'Абсолютно правильно, я только за. Скажите, а есть что-то конкретное по здоровью, что вас беспокоит и о чём вы хотите с ним поговорить?'},
+    {note:'Молчи. Ответ покажет, что это на самом деле.',pause:true},
+    {branch:'<b>Назвал конкретный диагноз или состояние</b> → это настоящая осторожность, и она уместна. Идёшь по ветке ниже.',yes:true},
+    {branch:'<b>Мнётся, ничего конкретного</b> → это мягкое «подумаю». Возвращаешь к договорённости из рамки: «Мы договаривались про прямой ответ. Скажите честно, дело во враче или в чём-то другом?»'},
+    {sub:'Если есть реальный диагноз'},
+    {say:'Тогда сделаем правильно. Сначала вы говорите с врачом, это разумно. Что важно понимать: мы не лечим и не заменяем врача. Мы начинаем с анализов, работаем с питанием, нагрузкой и восстановлением, и как раз в вашей ситуации это делается аккуратно и с учётом того, что скажет врач.'},
+    {say:'Давайте так: вы сходите, и я напишу вам [конкретный день]. Если врач скажет, что противопоказаний нет, начнём. Если скажет, что сейчас нельзя, я первый скажу, что мы не берёмся, и это будет честно.'},
+    {warn:'Обязательно назначь конкретную дату следующего касания. Без даты «схожу к врачу» превращается в исчезновение.'}
+  ]},
+{ id:'youcoach', ico:'🧑‍⚕️', chip:'А вы сами тренер?', title:'«А вы сами тренер?»',
+  meaning:'Проверка твоей экспертности. Отвечать сразу, без паузы. Заминка читается как «поймали», и дальше ты теряешь рамку.',
+  blocks:[
+    {say:'Нет, я не веду клиентов. Я разбираю ситуации и подбираю программу и специалиста. Это как в клинике: диагност определяет, что с вами, а ведёт профильный врач. Никого это не смущает, потому что так и должно работать.'},
+    {say:'Мой профиль это насмотренность. Через меня проходит [N] мужских случаев в месяц, поэтому типовые причины я вижу быстро. А доводить вас до результата будет [Имя], это его работа и его специализация.'},
+    {sub:'Если давит: «а сами вы в форме?»',collapse:true},
+    {say:'Я не тренер и не спортсмен, я координатор направления. Моя форма к вашему результату отношения не имеет. Вести вас будет [Имя], вот на его учеников и стоит смотреть. Показать пару кейсов мужчин с ситуацией как у вас?'},
+    {tip:'Идеальный разворот: превращаешь проверку тебя в показ кейсов. Дальше сразу вкладка «Кейсы».'},
+    {warn:'Не оправдывайся и не приукрашивай. Говоришь спокойно, как о нормальном устройстве работы, потому что оно и есть нормальное.'}
+  ]},
+{ id:'wantdenis', ico:'👤', chip:'Хочу Дениса', title:'«Я думал, меня будет вести Денис»',
+  meaning:'Не отказ. Человек покупал под именем. Задача не понизить ценность, а показать, что система от имени не зависит.',
+  blocks:[
+    {say:'Понимаю. Денис действительно ведёт лично, такой формат есть, и я про него расскажу. Скажу сразу: мест там физически мало и стоит это в разы дороже.'},
+    {say:'Что важно понимать про основной формат. Методология одна и та же, это система Дениса. Специалистов он обучает лично и контролирует их работу, каждую неделю по каждому ученику к нему идёт сводка. И сам Денис будет в вашем рабочем чате.'},
+    {say:'Разница по сути одна: с кем вы общаетесь каждый день. Ежедневное ведение, разбор ваших отчётов, корректировки это специалист, у него на вас есть время. У Дениса такого времени нет ни на кого, и честнее сказать это прямо. В основном формате он не будет разбирать ваши сообщения лично, и я не буду делать вид, что будет.'},
+    {branch:'Согласился на основной формат → возвращаешься к цене.',yes:true},
+    {branch:'Всё равно хочет Дениса → этап «Форматы личной работы с Денисом», называешь цену без извинений.'}
+  ]},
+{ id:'wife', ico:'💍', chip:'С женой', title:'«Надо посоветоваться с женой»',
+  meaning:'Определи: это уважение (решит сам) или разрешение (без жены никак)?',
+  blocks:[
+    {say:'Уважаю. Скажите, кроме того, чтобы обсудить с женой, больше ничего не останавливает? Если бы жена сказала «делай, поддерживаю», вы бы точно вписались?'},
+    {say:'Это про то, что вы из уважения хотите сказать до, но решение ваше? Или нужно её разрешение?'},
+    {sub:'🎭 Приём контраста'},
+    {say:'Смотрите, к жене можно прийти двумя способами. Первый: «поговорил с каким-то тренером из интернета, стоит 60 тысяч, что думаешь?». Или второй: «я решил разобраться со своим здоровьем и формой, ради себя и ради вас с детьми. Нашёл, кто поможет системно. Мне важна твоя поддержка». Чувствуете разницу? Во втором вы приходите как мужчина, принявший решение, а не спрашиваете разрешения.'},
+    {note:'Напомни: он идёт в это ради семьи, это и её ценности.'},
+    {warn:'Не отпускай без даты. «Поговорю с женой» без назначенного времени следующего касания это то же самое, что «подумаю».'}
+  ]},
+{ id:'fear', ico:'😰', chip:'Боюсь бросить', title:'«Боюсь снова бросить»',
+  meaning:'Это страх, не логика. Через снятие вины и поддержку.',
+  blocks:[
+    {say:'Это самое честное, что можно сказать, и я вас уважаю за это. Но вы бросали не потому, что слабый. Вы бросали, потому что система ломалась, и вы были одни. Это не ваша вина, инструмент был не тот. Здесь специалист рядом каждый день, видит, что происходит, и корректирует до того, как что-то сломается. Вы не сами, вы в системе. Единственное, что может помешать, это вообще не начать.'}
+  ]},
+{ id:'time', ico:'⏰', chip:'Нет времени', title:'«Нет времени» или «График»',
+  meaning:'Часто отговорка. Переверни на «время на последствия».',
+  blocks:[
+    {say:'Слышу вас. Но вопрос не в том, есть ли время. Вы уже тратите время на последствия того, что тело не в форме: усталость к вечеру, нет энергии на работу и семью. Это тоже время, только впустую. Метод создан для занятых: тренировки 2-3 раза в неделю под ваш график, питание без готовки отдельных блюд. Николай работал из командировок, минус 24 см в талии. Чем меньше времени, тем нужнее система.'}
+  ]},
+{ id:'price-now', ico:'❓', chip:'Скажите цену', title:'«Просто скажите цену» в начале',
+  meaning:'Цену сразу нельзя, он не увидел ценность. Но и в оборону нельзя.',
+  blocks:[
+    {say:'Без проблем, всё расскажу. Если коротко, мы помогаем мужчинам за 30 разобраться с формой системно, под их организм. Но у нас разные форматы, и я пока не знаю, какой нужен именно вам. Поэтому давайте я сначала пойму вашу ситуацию, а потом скажу конкретно: что вам подходит и что это будет стоить. Справедливо?'},
+    {sub:'Если давит дальше',collapse:true},
+    {say:'Понимаю, хочется сразу к делу, я сам такой. Но у нас всё строится под конкретного человека, это не курс. Я физически не могу сказать, что и сколько будет у вас, пока не поговорим. Готовы к нормальному разговору? Как хотите поступить?'}
+  ]},
+{ id:'later', ico:'📅', chip:'Начнём позже', title:'«Хочу, но позже»',
+  meaning:'Хочет, но упирается в тайминг. Не отпускай в «позже само рассосётся».',
+  blocks:[
+    {say:'Понял. То есть кроме того, что сейчас [его событие], больше ничего не останавливает? Если бы говорили на следующий день после [события], вы бы стопроцентно вписались?'},
+    {sub:'🎁 Приём «подарю время»'},
+    {say:'Смотрите, что я могу. Заходить вполсилы не стоит, согласен. Но и ничего не делать, время уходит. Поэтому, раз вы точно в деле, готов добавить вам неделю к программе. Месяц будет полноценный с момента, когда реально включитесь. А до этого уже начнём: анализы, анкета, и когда освободитесь, стартуем с разгона. Справедливо?'}
+  ]},
+{ id:'silent', ico:'😐', chip:'Отключился', title:'Односложно, чувствуешь разрыв',
+  meaning:'Возражение поведением. Не игнорируй, назови честно.',
+  blocks:[
+    {say:'Можно честно? У меня ощущение, что мы уже не так на одной волне, как в начале. Что у вас сейчас на уме?'},
+    {sub:'Если не помогло, уровень 2 и 3',collapse:true},
+    {say:'Скажу, что чувствую. Может, ошибаюсь, но когда вы заходили, казалось, что вам важно разобраться. А сейчас отклика мало. Что-то случилось?'},
+    {say:'Буду честен. Чтобы понять, можем ли мы помочь, мне нужно нормально понять вашу ситуацию. С ответами в одно слово не получится. Может, сейчас не время? Скажите, как хотите поступить.'}
+  ]}
+];
+
+const CASE_CATS = [
+{ id:'belly', ico:'🎯', chip:'Живот стоит', cases:[
+  {name:'Владимир, 44', text:'Руки и плечи росли, живот стоял. Начали с ЖКТ и биохимии, живот сдулся на 5 см ещё до тяжёлых тренировок. <b>Минус 16 кг, минус 15 см в животе за 3 месяца.</b>'},
+  {name:'Кирилл', text:'Год в зале, вес стоит, тренировки как день сурка. Внедрили периодизацию. <b>Минус 15 см в животе, минус 8,5 кг жира за 6 месяцев.</b>'}
+]},
+{ id:'yoyo', ico:'🔄', chip:'Худел и набирал', cases:[
+  {name:'Павел', text:'Худел и набирал обратно. Искал систему без надрыва. Бережно с ЖКТ, читмилы в плане. <b>Минус 33 см в животе, минус 24 кг за год и 5 месяцев.</b>'},
+  {name:'Алексей', text:'Со 104 до 91 кг. Первое, ревизия ЖКТ, половина веса оказалась отёком. <b>«Будто скинул десять лет».</b>'},
+  {name:'Сергей', text:'Пришёл со скепсисом после марафонов. Углеводное чередование, БАДы для щитовидной. <b>Минус 40 кг, минус 29 см в животе за 7 месяцев</b>, даже с паузой из-за перелома.'}
+]},
+{ id:'travel', ico:'✈️', chip:'Командировки', cases:[
+  {name:'Николай', text:'Командировки по странам, режима нет. Адаптивная нагрузка под ритм. <b>Минус 24 см в талии, минус 17 кг чистого жира.</b>'},
+  {name:'Виталий', text:'Госслужба, командировки. Хотел рекомпозицию. Специализация на верх, умные загрузки. <b>Минус 15 см в животе, плюс 3 см в плечах за 21 неделю.</b>'},
+  {name:'Сергей, 48', text:'Дальнобойщик, живёт в кабине фуры. Тренировки в реальные окна. <b>Форма, которой завидуют вдвое моложе.</b>'}
+]},
+{ id:'father', ico:'👨‍👦', chip:'Отец и семья', cases:[
+  {name:'Максим', text:'Отец четырёх детей, тренер-преподаватель. Думал, не выйдет. Всё под его график. <b>Минус 12 см в животе, минус 10 кг за 15 недель.</b>'},
+  {name:'Вячеслав, 42', text:'Стал отцом в процессе. Большинство сливаются, он не слился. Нагрузка под режим молодого отца. <b>Минус 23 см в животе, натурально.</b>'},
+  {name:'Иван, 30', text:'Гастрит, семья, «быстро без надрыва». Питание под ЖКТ без агрессии. <b>Победитель конкурса трансформаций 2025. 7 недель.</b>'}
+]},
+{ id:'age', ico:'🎂', chip:'«В возрасте поздно»', cases:[
+  {name:'Илья, 50', text:'Думал, поздно. Периодизация под возрастное восстановление. <b>Минус 13 см в животе, минус 9 кг за 14 недель.</b>'},
+  {name:'Андрей, 57', text:'Аргумент, возраст. Бережный подход, восстановление суставов и ЦНС. <b>Минус 10 кг, минус 12 см с талии за 12 недель, без препаратов.</b>'},
+  {name:'Константин, 45', text:'Читал, что без ГЗТ форму не построить. Работали натурально. <b>Минус 21 см в животе, минус 16 кг за 7 месяцев, анализы в норме.</b>'}
+]},
+{ id:'work', ico:'🔨', chip:'Физический труд', cases:[
+  {name:'Евгений', text:'Строитель, 8 часов физического труда, ходил в зал сам и толстел. Работа по анализам, восстановление ЖКТ, 3 тренировки. <b>Минус 20 кг, минус 16 см в животе.</b>'}
+]}
+];
+
+const NOSALE = [
+  {tip:'<b>До половины продаж приходит из follow-up.</b> Не решился сейчас не равно не решится. Кто остался в поле, тому он и напишет. Кто исчез, того забыл.'},
+  {warn:'Follow-up НЕ оправдание слить закрытие. Сначала выложись на разборе, потом follow-up.'},
+  {note:'Если ты честно отказал и человека не взял, follow-up с продажей не делаешь. Можешь один раз написать с полезным материалом и предложить вернуться, когда ситуация изменится.'},
+  {sub:'1. Не сжигай мост, в конце звонка'},
+  {note:'Не бросай трубку разочарованным. Останься на 2-3 минуты по-человечески.'},
+  {say:'Вот что я бы посоветовал уже сейчас, независимо от нас: [простой совет из метода]. И вот что: скину вам пару кейсов ребят с похожей ситуацией. И напишу вам [день], узнаю, как вы. Хорошо?'},
+  {warn:'Всегда назначай конкретную дату следующего касания. Никогда без даты.'},
+  {sub:'2. Два списка',collapse:true},
+  {list:['<b>ГОРЯЧИЙ</b> (конкретная дата: «оплачу в пятницу», бронь), проверяешь КАЖДЫЙ ДЕНЬ','<b>ОБЩИЙ</b> (думает без конкретики), раз в неделю','Оба в CRM: дата касания, что отправил, реакция, следующая дата']},
+  {sub:'3. Касание через 2 часа'},
+  {say:'[Имя], как вам наш разговор? Какие ощущения?'},
+  {branch:'<b>Позитив</b> → не трогай до дня созвона, в день: «Всё в силе?»'},
+  {branch:'<b>«Сумма большая, надо подумать»</b> → «Понимаю. Волнение перед серьёзным шагом это нормально. Не принимайте пока решений, обсудим завтра. В любом случае всё нормально 🤝»'},
+  {branch:'<b>Молчание</b> → утром «Всё в силе?»'},
+  {sub:'📞 Второй созвон, если человек взял паузу'},
+  {note:'Частая ошибка: начинать всё заново, будто первого разговора не было. Человек уже всё слышал, повтор его раздражает. Второй созвон короткий, 10-15 минут, и он не про продукт, а про то, что изменилось в его голове.'},
+  {say:'[Имя], привет! Не буду заново всё пересказывать, вы и так всё знаете. Скажите просто, к чему пришли за эти дни?'},
+  {note:'Молчи и слушай. Первая фраза покажет всё.',pause:true},
+  {branch:'<b>«Решил, давайте»</b> → сразу к оформлению, не перепродавай.',yes:true},
+  {branch:'<b>Назвал конкретное сомнение</b> → отрабатываешь его, вкладка «Возражения», и закрываешь. Это то, ради чего пауза и была.'},
+  {branch:'<b>«Пока не решил», размыто</b> → «Я вас понял. Скажите честно, это скорее нет? Я нормально приму, просто хочу понимать, ждать вас или нет». Обычно после этого человек говорит правду.'},
+  {branch:'<b>Появилось новое обстоятельство</b> (отпуск, аврал, деньги ушли) → возражение «Начнём позже», приём «подарю время».'},
+  {warn:'На втором созвоне не пересказывай путь и не повторяй кейсы. Если ты снова начинаешь продавать, человек понимает, что первый разговор был спектаклем, и закрывается. Он взял паузу, чтобы решить, а не чтобы послушать ещё раз.'},
+  {sub:'4. Цепочка касаний',collapse:true},
+  {list:['<b>День 3-5:</b> кейс под ситуацию, «вспомнил о тебе, был похожий случай: [ссылка]». Кейс греет, «что решил» остужает','<b>День 10-12:</b> полезное видео Дениса','<b>День 20-21:</b> приглашение на закрытый эфир','<b>День 45:</b> новый кейс','<b>День 60/90+:</b> эфиры раз в месяц']},
+  {sub:'5. Re-offer',collapse:true},
+  {note:'Через 2-4 недели новый повод вернуть на разбор: свежий кейс, эфир. Цель вернуть на разговор, не продать в переписке. Можно 2-3 раза.'},
+  {warn:'НЕ делай: «ну что, надумал?», чаще раза в 5-7 дней, несколько материалов подряд, исчезать навсегда, держать в голове без таблицы.'}
+];
+
+const CHEAT = [
+{t:'Включи запись перед звонком', s:'Без записи нет разбора, а разбор это твоя конверсия и твои деньги'},
+{t:'Ты разбираешь, а не продаёшь', s:'В конце называешь формат, который человеку нужен. Может оказаться дешёвый, может оказаться отказ'},
+{t:'Обещай около часа, не сорок минут', s:'Полный разбор занимает 45-55. Пообещал меньше, скомкаешь финал'},
+{t:'Рамка и согласие в начале', s:'Регламент, обещание честного ответа, право на нет, и обязательно «Договорились?»'},
+{t:'В рамке проси право на ОДИН вопрос', s:'Именно один. Дальше сошлёшься на эту договорённость дословно'},
+{t:'Отличай «нет» от возражения', s:'Возражение это сомнение, с ним работаешь. Нет по сути уважаешь и отпускаешь'},
+{t:'После «нет» один заход, не шесть', s:'Пошёл по кругу дважды, значит наврал в начале звонка'},
+{t:'В рамке не называй продукты и цены', s:'Рано. Дашь якорь, и человек перестанет говорить о себе'},
+{t:'Обещал честность, будь готов её выполнить', s:'Знай критерии отказа. Соврал раз, рамка не работает больше никогда'},
+{t:'Ты координатор направления, не тренер', s:'Авторитет из объёма ситуаций, не из личного результата'},
+{t:'Не называй себя специалистом', s:'Это слово занято тем, кто ведёт клиента. Ты координатор направления'},
+{t:'Анкета это база', s:'Используй в разговоре, человек почувствует, что его знают'},
+{t:'Половину звонка говорит он', s:'Задал вопрос, молчи 2-4 секунды'},
+{t:'В «Пути» задавай вопросы, а не читай', s:'После каждого шага короткий вопрос, иначе это семь минут монолога'},
+{t:'После «Пути» обязательно «Что думаете?»', s:'Сухое «понятно» это не согласие. Не идёшь к цене, пока не понял, что у него в голове'},
+{t:'Уточняй, когда ответил коротко', s:'«Что вы имеете в виду?», «Правильно понимаю, что...». Договорил сам, значит не оспорит'},
+{t:'Ведение только от трёх месяцев', s:'Месячного формата нет. Проще только Экспресс-Ползунок, и это исключение, а не ответ на «дорого»'},
+{t:'Никаких выдуманных процентов', s:'«Почти всегда» вместо «в 8 из 10». Цифру, которую не подтвердишь, не называй'},
+{t:'Сократ не допрос', s:'Максимум 3 вопроса. Вывод произносит ОН'},
+{t:'Не смягчай боль', s:'Она двигает к решению'},
+{t:'Дети и семья, главный рычаг', s:'Упомянул, стоп, копай туда'},
+{t:'Один кейс, мужской, под него', s:'Совпадение обстоятельств важнее размера цифры. Только реальные кейсы'},
+{t:'Расширь картину, но не залечи', s:'ЧТО (диагноз) да, КАК (решение) нет'},
+{t:'Не знаешь ответа, не выдумывай', s:'«Покажут анализы, разберёт специалист». Это сила, а не слабость'},
+{t:'Никаких советов по здоровью', s:'Ни питание, ни добавки, ни анализы. Вообще'},
+{t:'Возврата нет, и это говоришь прямо', s:'Никогда не обещай «вернём деньги». Честный ответ уважают больше'},
+{t:'Представь специалиста ДО цены', s:'После цены звучит как понижение'},
+{t:'Имя специалиста, не «наш специалист»', s:'Посмотри таблицу занятости перед созвоном'},
+{t:'Не обещай личное участие Дениса', s:'Он в чате и видит сводку по всем, но работает с клиентом специалист. Обещал большее, и клиент будет ждать'},
+{t:'Назначай формат, не предлагай выбор', s:'Один вариант с обоснованием из его же слов. Список топит человека'},
+{t:'Скажи, чего НЕ рекомендуешь', s:'Отказ от дорогого формата даёт доверия больше, чем аргументы'},
+{t:'Не скатывайся на дешёвое под давлением', s:'Не тянет: рассрочка или позже, но не другой тариф'},
+{t:'Много возражений в конце, слабый разбор', s:'Закрывай сомнения до цены'},
+{t:'Не называй цену без разрешения', s:'Сначала temperature check 1-10'},
+{t:'Пауза после цены', s:'Назвал, жди 5-10 сек, не суетись'},
+{t:'После «да» останься на линии', s:'Не «оплатите потом», а «подожду, пока пройдёт». Так доходит гораздо больше'},
+{t:'Сводку специалисту в тот же день', s:'Иначе клиент почувствует, что его передали как папку'},
+{t:'Дефицит называй, только когда он есть', s:'Наш дефицит настоящий, но соврал раз, и он перестал работать'},
+{t:'Не решился, бронь. Не забронировал, след. шаг', s:'Всегда конкретная дата'}
+];
+</script>
+<script>
+'use strict';
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function renderBlocks(blocks){
+  let html='', i=0;
+  while(i<blocks.length){
+    const b=blocks[i];
+    if(b.sub!==undefined && b.collapse){
+      let inner='', j=i+1;
+      while(j<blocks.length && blocks[j].sub===undefined){ inner+=renderOne(blocks[j]); j++; }
+      html+='<button class="collapse-head" data-collapse><span>'+b.sub+'</span><svg class="cc-caret" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="collapse-body">'+inner+'</div>';
+      i=j;
+    } else {
+      html+=renderOne(b); i++;
+    }
+  }
+  return html;
+}
+function renderOne(b){
+  if(b.say!==undefined) return '<div class="say'+(b.big?' big':'')+'">'+b.say+'</div>';
+  if(b.note!==undefined) return '<div class="note'+(b.pause?' pause':'')+'">'+b.note+'</div>';
+  if(b.branch!==undefined) return '<div class="branch'+(b.yes?' yes':'')+'"><span class="branch-arrow">&#8594;</span><div>'+b.branch+'</div></div>';
+  if(b.sub!==undefined) return '<div class="substep">'+b.sub+'</div>';
+  if(b.steps!==undefined) return '<ol class="blist bnum">'+b.steps.map(x=>'<li>'+x+'</li>').join('')+'</ol>';
+  if(b.list!==undefined) return '<ul class="blist bdot">'+b.list.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+  if(b.warn!==undefined) return '<div class="callout warn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div>'+b.warn+'</div></div>';
+  if(b.tip!==undefined) return '<div class="callout tip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg><div>'+b.tip+'</div></div>';
+  return '';
+}
+function badgeCls(s){ if(s.type==='prep')return' prep'; if(s.type==='price')return' price'; return ''; }
+
+let cur=0;
+const stagesEl=document.getElementById('stages');
+stagesEl.innerHTML=STAGES.map((s,i)=>'<div class="stage'+(i===0?' show':'')+'" data-stage="'+i+'"><div class="stage-title-inline"><div class="sti-badge'+badgeCls(s)+'">'+s.badge+'</div><div><div class="sti-txt">'+esc(s.title)+'</div><div class="sti-time">'+esc(s.time||'')+'</div></div></div>'+renderBlocks(s.blocks)+'</div>').join('');
+document.getElementById('stepDots').innerHTML=STAGES.map((s,i)=>'<div class="step-dot'+(i===0?' active':'')+'" data-dot="'+i+'"></div>').join('');
+document.getElementById('sheetItems').innerHTML=STAGES.map((s,i)=>
+  '<div class="sheet-item" data-goto="'+i+'"><div class="sheet-num'+badgeCls(s)+'">'+s.badge+'</div><div class="sheet-nm"><div class="sheet-nm-t">'+esc(s.title)+'</div><div class="sheet-nm-s">'+esc(s.time||'')+'</div></div><svg class="sheet-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>').join('');
+
+function showStage(idx){
+  cur=Math.max(0,Math.min(STAGES.length-1,idx));
+  document.querySelectorAll('.stage').forEach((el,i)=>el.classList.toggle('show',i===cur));
+  const s=STAGES[cur];
+  document.getElementById('stepLabel').textContent='Этап '+(cur+1)+' из '+STAGES.length;
+  document.getElementById('stepName').innerHTML='<span class="step-badge'+badgeCls(s)+'">'+s.badge+'</span>'+esc(s.short)+' <svg class="step-caret" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
+  document.getElementById('stepPrev').disabled=(cur===0);
+  document.getElementById('stepNext').disabled=(cur===STAGES.length-1);
+  document.querySelectorAll('.step-dot').forEach((d,i)=>{ d.classList.toggle('active',i===cur); d.classList.toggle('done',i<cur); });
+  document.querySelectorAll('.sheet-item').forEach((it,i)=>it.classList.toggle('active',i===cur));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.getElementById('stepPrev').addEventListener('click',()=>showStage(cur-1));
+document.getElementById('stepNext').addEventListener('click',()=>showStage(cur+1));
+document.getElementById('stepDots').addEventListener('click',e=>{ const d=e.target.closest('[data-dot]'); if(d) showStage(+d.dataset.dot); });
+
+const sheet=document.getElementById('sheet'), sheetBack=document.getElementById('sheetBack');
+function openSheet(){ sheetBack.classList.add('open'); sheet.classList.add('open'); }
+function closeSheet(){ sheetBack.classList.remove('open'); sheet.classList.remove('open'); }
+document.getElementById('stepCenter').addEventListener('click',openSheet);
+sheetBack.addEventListener('click',closeSheet);
+document.getElementById('sheetItems').addEventListener('click',e=>{ const it=e.target.closest('[data-goto]'); if(it){ showStage(+it.dataset.goto); closeSheet(); } });
+
+document.addEventListener('click',e=>{
+  const h=e.target.closest('[data-collapse]'); if(!h)return;
+  h.classList.toggle('open');
+  const body=h.nextElementSibling;
+  if(body&&body.classList.contains('collapse-body')) body.classList.toggle('open');
+});
+
+document.getElementById('objLogic').innerHTML=renderBlocks(OBJ_LOGIC);
+document.getElementById('objLoops').innerHTML=renderBlocks(OBJ_LOOPS);
+document.getElementById('objGrid').innerHTML=OBJECTIONS.map(o=>'<button class="chip" data-obj="'+o.id+'"><span class="chip-ic">'+o.ico+'</span>'+esc(o.chip)+'</button>').join('');
+document.getElementById('objDetails').innerHTML=OBJECTIONS.map(o=>'<div class="detail" id="obj-'+o.id+'"><div class="detail-h"><span class="dh-ic">'+o.ico+'</span><h3>'+esc(o.title)+'</h3></div>'+(o.meaning?'<p class="detail-mean">'+esc(o.meaning)+'</p>':'')+renderBlocks(o.blocks)+'</div>').join('');
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-obj]'); if(!c)return;
+  const id=c.dataset.obj, was=c.classList.contains('active');
+  document.querySelectorAll('[data-obj]').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('#objDetails .detail').forEach(x=>x.classList.remove('active'));
+  if(!was){ c.classList.add('active'); const d=document.getElementById('obj-'+id); d.classList.add('active'); setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'center'}),60); }
+});
+
+document.getElementById('caseCats').innerHTML=CASE_CATS.map(c=>'<button class="chip acase" data-case="'+c.id+'"><span class="chip-ic">'+c.ico+'</span>'+esc(c.chip)+'</button>').join('');
+document.getElementById('caseDetails').innerHTML=CASE_CATS.map(c=>'<div class="detail acase" id="case-'+c.id+'">'+c.cases.map(k=>'<div class="case"><div class="case-name">'+esc(k.name)+'</div><div class="case-text">'+k.text+'</div></div>').join('')+'</div>').join('');
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-case]'); if(!c)return;
+  const id=c.dataset.case, was=c.classList.contains('active');
+  document.querySelectorAll('[data-case]').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('#caseDetails .detail').forEach(x=>x.classList.remove('active'));
+  if(!was){ c.classList.add('active'); const d=document.getElementById('case-'+id); d.classList.add('active'); setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'center'}),60); }
+});
+
+document.getElementById('nosale').innerHTML=renderBlocks(NOSALE);
+document.getElementById('cheat').innerHTML=CHEAT.map((c,i)=>'<div class="cheat-item"><div class="cheat-n">'+(i+1)+'</div><div class="cheat-txt">'+c.t+'<span>'+c.s+'</span></div></div>').join('');
+
+const tabsbar=document.getElementById('tabsbar');
+const tabsTrigger=document.getElementById('tabsTrigger');
+const ttLabel=document.getElementById('ttLabel');
+const ttIc=document.getElementById('ttIc');
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  const id=t.dataset.tab;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+  ttLabel.textContent=t.textContent.trim();
+  const ic=t.querySelector('.tab-ic svg');
+  if(ic) ttIc.innerHTML=ic.outerHTML;
+  tabsbar.classList.remove('open'); tabsTrigger.classList.remove('open');
+  window.scrollTo({top:0,behavior:'smooth'});
+}));
+(function(){ const a=document.querySelector('.tab.active'); if(a){ const ic=a.querySelector('.tab-ic svg'); if(ic) ttIc.innerHTML=ic.outerHTML; ttLabel.textContent=a.textContent.trim(); } })();
+tabsTrigger.addEventListener('click',()=>{ const o=tabsbar.classList.toggle('open'); tabsTrigger.classList.toggle('open',o); });
+document.addEventListener('click',e=>{ if(tabsbar.classList.contains('open')&&!e.target.closest('#tabsbar')) { tabsbar.classList.remove('open'); tabsTrigger.classList.remove('open'); } });
+
+(function(){
+  const KEY='sf_theme', root=document.documentElement, btn=document.getElementById('themeBtn'), lbl=document.getElementById('themeLabel'), ic=document.getElementById('themeIc');
+  const sun='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>';
+  const moon='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  function apply(t){ root.setAttribute('data-theme',t); if(t==='light'){ ic.innerHTML=sun; lbl.textContent='Тёмная'; } else { ic.innerHTML=moon; lbl.textContent='Светлая'; } try{localStorage.setItem(KEY,t);}catch(e){} }
+  let saved='dark'; try{ saved=localStorage.getItem(KEY)||'dark'; }catch(e){}
+  apply(saved);
+  btn.addEventListener('click',()=>apply(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+})();
+
+(function(){
+  const KEY='sf_call_notes';
+  const pad=document.getElementById('notepad'), panel=document.getElementById('npPanel'), toggle=document.getElementById('npToggle');
+  const area=document.getElementById('npArea'), clear=document.getElementById('npClear'), copy=document.getElementById('npCopy'), saved=document.getElementById('npSaved');
+  try{ area.value=localStorage.getItem(KEY)||''; }catch(e){}
+  if(area.value.trim()) pad.classList.add('has');
+  toggle.addEventListener('click',()=>panel.classList.toggle('open'));
+  let tmr;
+  area.addEventListener('input',()=>{
+    pad.classList.toggle('has',!!area.value.trim());
+    saved.textContent='Сохраняю...'; clearTimeout(tmr);
+    tmr=setTimeout(()=>{ try{localStorage.setItem(KEY,area.value);}catch(e){} saved.textContent='Сохранено'; setTimeout(()=>saved.textContent='Сохраняется автоматически',1500); },400);
+  });
+  copy.addEventListener('click',()=>{
+    const done=()=>{ copy.classList.add('done'); copy.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Готово'; setTimeout(()=>{copy.classList.remove('done'); copy.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Копировать';},1600); };
+    const txt=area.value;
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done).catch(()=>{area.select();document.execCommand('copy');done();}); }
+    else { area.select(); document.execCommand('copy'); done(); }
+  });
+  clear.addEventListener('click',()=>{ if(!area.value.trim()||confirm('Очистить заметки этого созвона?')){ area.value=''; try{localStorage.removeItem(KEY);}catch(e){} pad.classList.remove('has'); area.focus(); } });
+  document.addEventListener('click',e=>{ if(panel.classList.contains('open')&&!e.target.closest('#npPanel')&&!e.target.closest('#npToggle')) panel.classList.remove('open'); });
+})();
+
+showStage(0);
+
+(function(){
+  const KEY='sf_script_mode', panel=document.getElementById('panel-script');
+  const btn=document.getElementById('modeBtn'), lbl=document.getElementById('modeLabel'), ic=document.getElementById('modeIc');
+  const listIc='<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>';
+  const focusIc='<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>';
+  function apply(mode){
+    if(mode==='scroll'){ panel.classList.add('scrollmode'); lbl.textContent='Режим фокуса'; ic.innerHTML=focusIc; }
+    else { panel.classList.remove('scrollmode'); lbl.textContent='Листать всё подряд'; ic.innerHTML=listIc; showStage(cur); }
+    try{localStorage.setItem(KEY,mode);}catch(e){}
+  }
+  let saved='focus'; try{ saved=localStorage.getItem(KEY)||'focus'; }catch(e){}
+  apply(saved);
+  btn.addEventListener('click',()=>apply(panel.classList.contains('scrollmode')?'focus':'scroll'));
+})();
+</script>
+</body>
+</html>
