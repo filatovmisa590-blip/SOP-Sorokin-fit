@@ -2,6 +2,7 @@
 <html lang="ru" data-theme="dark">
 <head>
 <meta charset="utf-8"/>
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>SorokinFit, рабочее место созвона</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -234,9 +235,42 @@ body>*{position:relative;z-index:1;}
 .pay-fab svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;}
 .pay-fab .ext{width:13px;height:13px;opacity:.85;}
 @media(max-width:520px){.pay-fab .lbl{display:none;}.pay-fab{padding:0;width:52px;justify-content:center;}}
+
+html.sflocked,html.sflocked body{overflow:hidden;height:100%;}
+.sfgate{position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(900px 600px at 50% -10%, rgba(77,93,255,.20), transparent 70%),var(--bg);transition:opacity .4s,visibility .4s;}
+.sfgate.hide{opacity:0;visibility:hidden;}
+.sfgate-card{width:100%;max-width:410px;background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--line2);border-radius:22px;padding:36px 28px 30px;text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.55);}
+.sfgate-lock{width:60px;height:60px;margin:0 auto 18px;border-radius:17px;background:linear-gradient(135deg,var(--accent2),var(--accent-deep));display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px var(--glow);}
+.sfgate-lock svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:2;}
+.sfgate-eyebrow{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ice);margin-bottom:9px;}
+.sfgate-title{font-family:var(--font-display);font-size:23px;font-weight:700;margin:0 0 9px;color:var(--text);}
+.sfgate-desc{font-size:14px;color:var(--text2);margin:0 0 22px;line-height:1.55;}
+.sfgate-input{width:100%;background:var(--field);border:1.5px solid var(--line2);border-radius:13px;color:var(--text);font-family:inherit;font-size:16px;font-weight:600;padding:14px 16px;outline:none;text-align:center;transition:border-color .18s,box-shadow .18s;}
+.sfgate-input::placeholder{color:var(--text3);font-weight:500;}
+.sfgate-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(77,93,255,.13);}
+.sfgate-input.err{border-color:#ff5b6e;animation:sfshake .4s;}
+@keyframes sfshake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(8px);}60%{transform:translateX(-5px);}80%{transform:translateX(5px);}}
+.sfgate-btn{margin-top:12px;width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 24px;border-radius:13px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;border:none;color:#fff;background:linear-gradient(120deg,var(--accent-deep),var(--accent));box-shadow:0 6px 22px var(--glow);transition:transform .14s,filter .16s;}
+.sfgate-btn:hover{transform:translateY(-2px);filter:brightness(1.08);}
+.sfgate-msg{min-height:18px;font-size:13px;font-weight:700;color:#ff7684;margin-top:12px;opacity:0;transition:opacity .2s;}
+.sfgate-msg.show{opacity:1;}
+.sfgate-foot{margin-top:20px;font-size:11.5px;color:var(--text3);}
 </style>
 </head>
 <body>
+<div class="sfgate" id="sfGate">
+  <div class="sfgate-card">
+    <div class="sfgate-lock"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="11" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><circle cx="12" cy="16" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+    <div class="sfgate-eyebrow">Внутренний доступ</div>
+    <h2 class="sfgate-title">Рабочее место созвона</h2>
+    <p class="sfgate-desc">Введи пароль команды. На этом устройстве спросим один раз.</p>
+    <input type="password" class="sfgate-input" id="sfGateInput" placeholder="Пароль" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button class="sfgate-btn" id="sfGateBtn">Войти</button>
+    <div class="sfgate-msg" id="sfGateMsg">Неверный пароль. Попробуй ещё раз.</div>
+    <div class="sfgate-foot">SorokinFit · Не для распространения</div>
+  </div>
+</div>
+
 
 <a class="pay-fab" href="https://sorokin-fit.com/links_to_tsf" target="_blank" rel="noopener noreferrer" title="Ссылки на оплату">
   <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
@@ -1178,6 +1212,58 @@ showStage(0);
   let saved='focus'; try{ saved=localStorage.getItem(KEY)||'focus'; }catch(e){}
   apply(saved);
   btn.addEventListener('click',()=>apply(panel.classList.contains('scrollmode')?'focus':'scroll'));
+})();
+</script>
+<script>
+(function(){
+  var PASS='2026';           /* МЕНЯЙ ПАРОЛЬ ЗДЕСЬ */
+  var KEY='sf_call_gate';
+
+  /* Подпись пароля. Пока пароль не меняли, вход помнится навсегда.
+     Поменял PASS выше, подпись меняется, и у всех запросит заново. */
+  function sign(s){var x=0;for(var i=0;i<s.length;i++){x=((x<<5)-x)+s.charCodeAt(i);x|=0;}return 'v'+x;}
+  var SIG = sign(PASS);
+
+  document.documentElement.classList.add('sflocked');
+
+  function init(){
+    var gate=document.getElementById('sfGate');
+    var input=document.getElementById('sfGateInput');
+    var btn=document.getElementById('sfGateBtn');
+    var msg=document.getElementById('sfGateMsg');
+    if(!gate) return;
+
+    var saved=null;
+    try{ saved=localStorage.getItem(KEY); }catch(e){}
+
+    function unlock(instant){
+      gate.classList.add('hide');
+      document.documentElement.classList.remove('sflocked');
+      if(!instant){ try{ localStorage.setItem(KEY,SIG); }catch(e){} }
+      setTimeout(function(){ gate.style.display='none'; }, instant?0:450);
+    }
+
+    /* уже входил на этом устройстве и пароль с тех пор не меняли */
+    if(saved===SIG){ unlock(true); return; }
+
+    /* пароль сменили, чистим старую отметку */
+    if(saved){ try{ localStorage.removeItem(KEY); }catch(e){} }
+
+    setTimeout(function(){ try{input.focus();}catch(e){} },300);
+
+    function tryPass(){
+      var v=(input.value||'').trim().toLowerCase();
+      if(v===PASS){ msg.classList.remove('show'); unlock(false); }
+      else { input.classList.add('err'); msg.classList.add('show'); input.value='';
+             setTimeout(function(){ input.classList.remove('err'); },450);
+             try{input.focus();}catch(e){} }
+    }
+    btn.addEventListener('click', tryPass);
+    input.addEventListener('keydown', function(e){ if(e.key==='Enter') tryPass(); });
+    input.addEventListener('input', function(){ msg.classList.remove('show'); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
 </body>
