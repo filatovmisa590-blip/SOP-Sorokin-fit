@@ -91,6 +91,15 @@ body>*{position:relative;z-index:1;}
 .mode-btn{display:flex;align-items:center;gap:7px;margin:10px auto 0;padding:7px 13px;border-radius:10px;border:1px solid var(--line2);background:var(--surface);color:var(--text2);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
 .mode-btn:hover{border-color:var(--accent);color:var(--text);}
 .mode-btn svg{width:14px;height:14px;}
+.ctl-row{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:10px;flex-wrap:wrap;padding:0 16px;}
+.ctl-row .mode-btn{margin:0;}
+.mode-btn.on{border-color:var(--accent);color:var(--ice);background:var(--say-bg);}
+#panel-script.saymode .callout.tip{display:none;}
+#panel-script.saymode .note:not(.pause){display:none;}
+#panel-script.saymode .legend{display:none;}
+.keyhint{text-align:center;font-size:11px;color:var(--text3);margin-top:7px;font-weight:600;}
+#panel-script.scrollmode .keyhint{display:none;}
+@media(max-width:600px){.keyhint{font-size:10.5px;}}
 #panel-script.scrollmode .stepper .step-row,
 #panel-script.scrollmode .stepper .step-dots{display:none;}
 #panel-script.scrollmode .stage{display:block;scroll-margin-top:70px;}
@@ -261,6 +270,9 @@ html.sflocked,html.sflocked body{overflow:hidden;height:100%;}
 
 
 
+
+
+
 </style>
 </head>
 <body>
@@ -319,10 +331,17 @@ html.sflocked,html.sflocked body{overflow:hidden;height:100%;}
       <button class="step-arrow" id="stepNext" aria-label="Вперёд"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
     </div>
     <div class="step-dots" id="stepDots"></div>
-    <button class="mode-btn" id="modeBtn">
-      <svg id="modeIc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      <span id="modeLabel">Листать всё подряд</span>
-    </button>
+    <div class="ctl-row">
+      <button class="mode-btn" id="modeBtn">
+        <svg id="modeIc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <span id="modeLabel">Листать всё подряд</span>
+      </button>
+      <button class="mode-btn" id="focusBtn">
+        <svg id="focusIc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span id="focusLabel">Только реплики</span>
+      </button>
+    </div>
+    <div class="keyhint">Стрелки на клавиатуре или свайп листают этапы</div>
   </div>
   <div class="wrap">
     <div class="legend">
@@ -470,13 +489,14 @@ const STAGES = [
     {warn:'Не обещай сорок минут. Полный разбор с назначением формата занимает 45-55 минут, и если ты пообещал сорок, ты либо нарушишь слово, либо скомкаешь конец, где как раз и происходит решение.'},
     {note:'Вопрос «у вас столько есть» задан не просто так. Если человек говорит, что у него полчаса, ты сразу знаешь, что придётся сжимать разбор и расширение картины. Лучше узнать это в начале, чем на сороковой минуте услышать «мне пора».'},
     {sub:'2. Обещание честного ответа'},
-    {say:'А в конце я скажу прямо, можем мы вам помочь или нет. И если можем, то каким именно способом. Скажу как есть, с искренним намерением помочь'},
+    {say:'А в конце я скажу прямо, можем мы вам помочь или нет. И если можем, то каким именно способом. Скажу как есть, с искренним намерением помочь.'},
     {note:'Это обещание ты обязан выполнить. У нас есть и плотное ведение, и вариант, где человек идёт сам. Если по разбору увидишь, что второй ему подходит больше, ты называешь именно его, даже если он дешевле в разы. Иначе фраза выше становится приёмом, а приёмы считываются.'},
     {warn:'Не называй здесь ни продукты, ни цены, ни форматы. Рано. Человек ещё ничего про себя не рассказал, а ты уже дашь ему якорь, и он будет ждать конкретную цифру вместо того, чтобы говорить о себе.'},
-    {tip:'Фраза «а не то, что дороже» работает сильнее любого обещания про отбор. Её человек может проверить прямо в этом разговоре, поэтому и верит. У нас прямой запрет продавать ведение тому, кому достаточно более простого формата, так что это правда, а не приём.'},
+    {tip:'Обещание работает, только если ты правда готов его выполнить. У нас прямой запрет продавать ведение тому, кому достаточно более простого формата. Человек может проверить это прямо в разговоре, поэтому и верит.'},
     {sub:'3. Право на нет, снимаем «я подумаю» заранее'},
     {say:'И у меня будет встречная просьба. Если по итогу я скажу, что можем помочь, и предложу вариант работы, ответьте мне так же прямо, да или нет. Оба ответа нормальные, я не обижусь. Единственное, о чём попрошу, не говорите «я подумаю». Обычно это значит нет, просто вслух не сказали, а я останусь гадать. Лучше честно.'},
     {say:'По ходу разговора, если что-то будет смущать, говорите сразу, разберём на месте. Это нормально, для этого мы и созвонились. А вот если решение будет нет, я задам один вопрос, почему, и на этом остановлюсь. Уговаривать не буду.'},
+    {tip:'Обрати внимание на слово «встречная» и на условие «если предложу». Просьба звучит как обмен: ты обещал честный ответ, и просишь того же в ответ. А условие снимает ощущение, что продажа уже решена и разбор это формальность. Если сказать просто «в конце ответьте да или нет», человек услышит, что оффер будет в любом случае, и вся рамка честного вердикта развалится.'},
     {warn:'Говори именно «один вопрос», а не «пара вопросов». Дальше в этапе цены ты сошлёшься на эту договорённость дословно, и формулировка должна совпасть.'},
     {tip:'<b>Где проходит граница, это надо понимать самому.</b> Сомнение по ходу разговора («дорого», «а вдруг не сработает», «надо с женой») это не отказ, а невыясненный вопрос, и разбирать его нормально. Обещание касается финального ответа: человек сказал нет, ты задал один вопрос и остановился. Именно поэтому в рамке ты отдельно проговариваешь, что по ходу разбирать вопросы это нормально. Тогда ты потом ничего не нарушаешь.'},
     {tip:'Ты снимаешь главное возражение до того, как оно появилось, и показываешь, что не боишься отказа. Это позиция силы. Если человек всё же скажет «подумаю», ты имеешь право мягко сослаться на договорённость.'},
@@ -1259,6 +1279,64 @@ document.getElementById('stepPrev').addEventListener('click',()=>showStage(cur-1
 document.getElementById('stepNext').addEventListener('click',()=>showStage(cur+1));
 document.getElementById('stepDots').addEventListener('click',e=>{ const d=e.target.closest('[data-dot]'); if(d) showStage(+d.dataset.dot); });
 
+/* режим «только реплики»: прячет объяснения, оставляет то, что нужно в моменте */
+(function(){
+  var KEY='sf_say_mode', panel=document.getElementById('panel-script');
+  var btn=document.getElementById('focusBtn'), lbl=document.getElementById('focusLabel'), ic=document.getElementById('focusIc');
+  var eyeOn='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  var eyeOff='<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  function apply(on){
+    panel.classList.toggle('saymode', on);
+    btn.classList.toggle('on', on);
+    lbl.textContent = on ? 'Показать всё' : 'Только реплики';
+    ic.innerHTML = on ? eyeOff : eyeOn;
+    try{ localStorage.setItem(KEY, on ? '1' : '0'); }catch(e){}
+  }
+  var saved='0'; try{ saved=localStorage.getItem(KEY)||'0'; }catch(e){}
+  apply(saved==='1');
+  btn.addEventListener('click', function(){ apply(!panel.classList.contains('saymode')); });
+})();
+
+/* листание клавишами: стрелки, пробел, PageUp/PageDown */
+document.addEventListener('keydown', function(e){
+  var scriptOpen = document.getElementById('panel-script').classList.contains('active');
+  if(!scriptOpen) return;
+  var gate = document.getElementById('sfGate');
+  if(gate && gate.style.display !== 'none' && !gate.classList.contains('hide')) return;
+  var tag = (e.target.tagName || '').toLowerCase();
+  if(tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  var sheetOpen = document.getElementById('sheet').classList.contains('open');
+  if(sheetOpen && e.key === 'Escape'){ closeSheet(); e.preventDefault(); return; }
+  if(sheetOpen) return;
+  if(document.getElementById('panel-script').classList.contains('scrollmode')) return;
+  if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){ showStage(cur+1); e.preventDefault(); }
+  else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ showStage(cur-1); e.preventDefault(); }
+  else if(e.key === 'Home'){ showStage(0); e.preventDefault(); }
+  else if(e.key === 'End'){ showStage(STAGES.length-1); e.preventDefault(); }
+});
+
+/* свайп пальцем на телефоне */
+(function(){
+  var x0=null, y0=null, t0=0;
+  var panel=document.getElementById('panel-script');
+  panel.addEventListener('touchstart', function(e){
+    if(e.touches.length!==1) return;
+    x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now();
+  }, {passive:true});
+  panel.addEventListener('touchend', function(e){
+    if(x0===null) return;
+    if(panel.classList.contains('scrollmode')){ x0=null; return; }
+    var dx=e.changedTouches[0].clientX-x0;
+    var dy=e.changedTouches[0].clientY-y0;
+    var dt=Date.now()-t0;
+    x0=null; y0=null;
+    if(dt>600) return;
+    if(Math.abs(dx)<60 || Math.abs(dx)<Math.abs(dy)*1.6) return;
+    if(dx<0) showStage(cur+1); else showStage(cur-1);
+  }, {passive:true});
+})();
+
 const sheet=document.getElementById('sheet'), sheetBack=document.getElementById('sheetBack');
 function openSheet(){ sheetBack.classList.add('open'); sheet.classList.add('open'); }
 function closeSheet(){ sheetBack.classList.remove('open'); sheet.classList.remove('open'); }
@@ -1381,7 +1459,7 @@ showStage(0);
 </script>
 <script>
 (function(){
-  var PASS='2026';           /* МЕНЯЙ MISHA ЗДЕСЬ */
+  var PASS='2026';           /* МЕНЯЙ ПАРОЛЬ ЗДЕСЬ */
   var KEY='sf_call_gate';
 
   /* Подпись пароля. Пока пароль не меняли, вход помнится навсегда.
