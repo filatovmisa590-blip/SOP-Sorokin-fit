@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SorokinFit · Методология в сжатом виде · специалист по ведению</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0C11;
+  --bg-1:#10131B;
+  --bg-2:#161A24;
+  --bg-3:#1D222E;
+  --line:#252B39;
+  --line-soft:#1C2130;
+  --tx:#E9EBF2;
+  --tx-2:#A2AABD;
+  --tx-3:#6E778C;
+  --indigo:#6E7CFF;
+  --indigo-dim:#3B4382;
+  --indigo-glow:rgba(110,124,255,.13);
+  --green:#34D399;
+  --green-dim:#1C6B50;
+  --green-glow:rgba(52,211,153,.12);
+  --red:#FF6B6B;
+  --red-glow:rgba(255,107,107,.10);
+  --amber:#F5B841;
+  --amber-glow:rgba(245,184,65,.10);
+  --r:14px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:86px}
+body{
+  margin:0;background:var(--bg);color:var(--tx);
+  font-family:'Manrope',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:16.5px;line-height:1.65;-webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(900px 500px at 12% -8%, rgba(110,124,255,.10), transparent 60%),
+    radial-gradient(700px 420px at 92% 4%, rgba(52,211,153,.06), transparent 60%);
+}
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+
+/* ---------- typography ---------- */
+h1,h2,h3,h4,.eyebrow,.num,.slider-val,.stat-v{font-family:'Unbounded',sans-serif}
+h1{font-size:clamp(30px,5.2vw,52px);line-height:1.08;font-weight:600;letter-spacing:-.02em;margin:0 0 18px}
+h2{font-size:clamp(23px,3.4vw,33px);line-height:1.15;font-weight:600;letter-spacing:-.015em;margin:0 0 14px}
+h3{font-size:19px;line-height:1.3;font-weight:600;letter-spacing:-.01em;margin:38px 0 14px;color:var(--tx)}
+h4{font-size:15px;line-height:1.35;font-weight:600;margin:26px 0 10px;color:var(--tx)}
+p{margin:0 0 14px}
+strong{font-weight:700;color:#fff}
+em{font-style:normal;color:var(--indigo);font-weight:600}
+a{color:var(--indigo);text-decoration:none;border-bottom:1px solid var(--indigo-dim)}
+
+.eyebrow{
+  font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--tx-3);display:flex;align-items:center;gap:10px;margin-bottom:16px
+}
+.eyebrow::after{content:'';flex:1;height:1px;background:var(--line-soft)}
+.lede{font-size:18px;line-height:1.6;color:var(--tx-2);max-width:74ch}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.88em}
+
+/* ---------- hero ---------- */
+.hero{padding:74px 0 46px;border-bottom:1px solid var(--line-soft)}
+.brandline{
+  display:flex;align-items:center;gap:12px;margin-bottom:28px;
+  font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx-3);font-weight:600
+}
+.brandline b{color:var(--tx);font-weight:700}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+.hero h1 span{color:var(--indigo)}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.tag{
+  font-size:12px;padding:6px 13px;border-radius:100px;border:1px solid var(--line);
+  background:var(--bg-1);color:var(--tx-2);font-weight:600
+}
+.tag.g{border-color:var(--green-dim);color:var(--green);background:var(--green-glow)}
+
+/* ---------- nav ---------- */
+nav{
+  position:sticky;top:0;z-index:50;background:rgba(10,12,17,.86);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)
+}
+.nav-in{max-width:1000px;margin:0 auto;padding:0 24px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.nav-in::-webkit-scrollbar{display:none}
+nav a{
+  padding:15px 13px;font-size:13px;font-weight:600;color:var(--tx-3);white-space:nowrap;
+  border-bottom:2px solid transparent;border-radius:0;transition:color .18s,border-color .18s
+}
+nav a:hover{color:var(--tx-2)}
+nav a.on{color:var(--indigo);border-bottom-color:var(--indigo)}
+nav a b{font-family:'JetBrains Mono',monospace;color:var(--tx-3);margin-right:7px;font-weight:600}
+nav a.on b{color:var(--indigo)}
+
+/* ---------- sections ---------- */
+section{padding:64px 0;border-bottom:1px solid var(--line-soft)}
+.sec-head{margin-bottom:34px}
+.sec-head .crit{
+  display:inline-block;margin-left:10px;font-family:'Manrope';font-size:11px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--red);background:var(--red-glow);
+  border:1px solid rgba(255,107,107,.28);padding:4px 10px;border-radius:100px;vertical-align:middle
+}
+
+/* ---------- cards ---------- */
+.card{background:var(--bg-1);border:1px solid var(--line-soft);border-radius:var(--r);padding:22px 24px;margin:18px 0}
+.card h4{margin-top:0}
+.card>*:last-child{margin-bottom:0}
+
+.rule,.flag,.note,.say{border-radius:var(--r);padding:18px 20px 18px 22px;margin:20px 0;position:relative;border:1px solid}
+.rule{background:var(--indigo-glow);border-color:rgba(110,124,255,.25)}
+.flag{background:var(--red-glow);border-color:rgba(255,107,107,.24)}
+.note{background:var(--amber-glow);border-color:rgba(245,184,65,.22)}
+.say{background:var(--green-glow);border-color:rgba(52,211,153,.22)}
+.rule>*:last-child,.flag>*:last-child,.note>*:last-child,.say>*:last-child{margin-bottom:0}
+.lbl{
+  font-family:'Unbounded',sans-serif;font-size:10.5px;font-weight:500;letter-spacing:.16em;
+  text-transform:uppercase;display:block;margin-bottom:9px
+}
+.rule .lbl{color:var(--indigo)}
+.flag .lbl{color:var(--red)}
+.note .lbl{color:var(--amber)}
+.say .lbl{color:var(--green)}
+.say p{font-size:15.5px;color:var(--tx);font-style:italic}
+.say p::before{content:'«'}
+.say p::after{content:'»'}
+
+/* ---------- lists ---------- */
+ul,ol{margin:0 0 16px;padding-left:0;list-style:none}
+ul li{position:relative;padding-left:20px;margin-bottom:9px}
+ul li::before{content:'';position:absolute;left:2px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--indigo-dim)}
+.flag ul li::before{background:var(--red);opacity:.6}
+.say ul li::before{background:var(--green);opacity:.6}
+ol{counter-reset:o}
+ol li{position:relative;padding-left:30px;margin-bottom:10px;counter-increment:o}
+ol li::before{
+  content:counter(o);position:absolute;left:0;top:1px;font-family:'JetBrains Mono',monospace;
+  font-size:12px;font-weight:600;color:var(--indigo);background:var(--indigo-glow);
+  width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center
+}
+
+/* ---------- table ---------- */
+.tw{overflow-x:auto;margin:20px 0;border:1px solid var(--line-soft);border-radius:var(--r);background:var(--bg-1)}
+table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:520px}
+th{
+  text-align:left;padding:13px 16px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--tx-3);font-weight:700;border-bottom:1px solid var(--line);background:var(--bg-2)
+}
+td{padding:13px 16px;border-bottom:1px solid var(--line-soft);color:var(--tx-2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td strong{color:var(--tx)}
+td.k{color:var(--tx);font-weight:600}
+
+/* ---------- slider (signature) ---------- */
+.slider{margin:22px 0;padding:20px 22px;background:var(--bg-1);border:1px solid var(--line-soft);border-radius:var(--r)}
+.slider-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:16px}
+.slider-name{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:500;letter-spacing:-.01em}
+.slider-val{font-size:13px;color:var(--green);font-weight:500}
+.track{position:relative;height:8px;background:var(--bg-3);border-radius:100px;margin:0 0 8px}
+.range{position:absolute;top:0;height:8px;border-radius:100px;background:linear-gradient(90deg,var(--indigo-dim),var(--indigo))}
+.range.g{background:linear-gradient(90deg,var(--green-dim),var(--green))}
+.range.r{background:linear-gradient(90deg,rgba(255,107,107,.4),var(--red))}
+.range.a{background:linear-gradient(90deg,rgba(245,184,65,.35),var(--amber))}
+.pin{position:absolute;top:-5px;width:2px;height:18px;background:#fff;border-radius:2px;transform:translateX(-1px)}
+.pin span{
+  position:absolute;top:22px;left:50%;transform:translateX(-50%);white-space:nowrap;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--tx-2);font-weight:600
+}
+.scale{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--tx-3);margin-top:24px}
+.slider-note{font-size:14px;color:var(--tx-2);margin:14px 0 0}
+.slider.stack{padding-bottom:22px}
+.seg{display:flex;gap:3px;height:8px;margin-bottom:8px}
+.seg div{border-radius:100px;display:flex;align-items:center;justify-content:center;position:relative}
+.seg div span{
+  position:absolute;top:16px;font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  color:var(--tx-3);white-space:nowrap
+}
+
+/* ---------- stats ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin:22px 0}
+.stat{background:var(--bg-1);border:1px solid var(--line-soft);border-radius:var(--r);padding:18px}
+.stat-v{font-size:24px;font-weight:600;letter-spacing:-.02em;color:var(--indigo);line-height:1.1;margin-bottom:7px}
+.stat.g .stat-v{color:var(--green)}
+.stat.r .stat-v{color:var(--red)}
+.stat.a .stat-v{color:var(--amber)}
+.stat-l{font-size:13px;color:var(--tx-2);line-height:1.45}
+
+/* ---------- two-col ---------- */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+@media(max-width:720px){.two{grid-template-columns:1fr}}
+
+/* ---------- принципы ---------- */
+.pr{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:30px}
+.pr-i{background:var(--bg-1);border:1px solid var(--line-soft);border-radius:var(--r);padding:20px 22px;position:relative;overflow:hidden}
+.pr-i::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--indigo)}
+.pr-n{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--indigo);font-weight:600;margin-bottom:9px;display:block}
+.pr-t{font-family:'Unbounded',sans-serif;font-size:14.5px;font-weight:500;margin-bottom:8px;letter-spacing:-.01em}
+.pr-d{font-size:14px;color:var(--tx-2);line-height:1.55}
+
+/* ---------- footer ---------- */
+footer{padding:52px 0 70px;color:var(--tx-3);font-size:13.5px;line-height:1.6}
+footer strong{color:var(--tx-2)}
+
+
+/* ---------- gate ---------- */
+body.locked{overflow:hidden}
+body.locked>header,body.locked>nav,body.locked>.wrap{display:none}
+#gate{
+  position:fixed;inset:0;z-index:999;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;padding:24px
+}
+#gate::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(700px 420px at 50% 0%, rgba(110,124,255,.14), transparent 65%)
+}
+.gate-card{
+  position:relative;width:100%;max-width:420px;background:var(--bg-1);
+  border:1px solid var(--line);border-radius:18px;padding:34px 30px 30px
+}
+.gate-card h2{font-size:24px;margin:0 0 10px}
+.gate-card p{font-size:14.5px;color:var(--tx-2);margin:0 0 22px}
+.gate-row{display:flex;gap:8px}
+#gate-in{
+  flex:1;background:var(--bg-3);border:1px solid var(--line);border-radius:10px;
+  padding:13px 15px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:16px;
+  letter-spacing:.16em;outline:none;transition:border-color .15s
+}
+#gate-in:focus{border-color:var(--indigo)}
+#gate-in::placeholder{color:var(--tx-3);letter-spacing:.06em;font-family:'Manrope'}
+#gate-btn{
+  background:var(--indigo);border:none;border-radius:10px;padding:13px 20px;
+  color:#0A0C11;font-family:'Manrope';font-weight:800;font-size:14.5px;cursor:pointer;
+  transition:opacity .15s
+}
+#gate-btn:hover{opacity:.88}
+#gate-btn:focus-visible,#gate-in:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+#gate-err{
+  font-size:13.5px;color:var(--red);margin-top:14px;min-height:19px;opacity:0;transition:opacity .15s
+}
+#gate-err.on{opacity:1}
+.shake{animation:sh .32s}
+@keyframes sh{
+  0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}
+  40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}
+}
+@media(prefers-reduced-motion:reduce){.shake{animation:none}}
+
+@media(max-width:640px){
+  body{font-size:16px}
+  .wrap{padding:0 18px}
+  .nav-in{padding:0 18px}
+  section{padding:48px 0}
+  .hero{padding:52px 0 38px}
+  .card,.rule,.flag,.note,.say,.slider{padding-left:16px;padding-right:16px}
+}
+@media print{
+  body{background:#fff;color:#000}
+  nav,body::before{display:none}
+  section{page-break-inside:avoid}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+</head>
+<body class="locked">
+
+<div id="gate">
+  <div class="gate-card">
+    <div class="brandline"><span class="dot"></span><b>SorokinFit</b> · внутренний документ</div>
+    <h2>Доступ по коду</h2>
+    <p>Методология для специалиста по ведению. Код выдаёт куратор.</p>
+    <div class="gate-row">
+      <input id="gate-in" type="password" inputmode="numeric" autocomplete="off" placeholder="Введи код" aria-label="Код доступа">
+      <button id="gate-btn" type="button">Открыть</button>
+    </div>
+    <div id="gate-err" role="alert">Неверный код. Попробуй ещё раз.</div>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brandline"><span class="dot"></span><b>SorokinFit</b> · специалист по ведению</div>
+    <h1>Методология <span>в сжатом виде</span></h1>
+    <p class="lede">Всё, что нужно держать в голове с первого дня работы с клиентом: анализы крови, сон, метод «Ползунка», питание и добавки. Это не замена конспектам — это то, что должно быть в голове ещё до того, как ты их прочитаешь целиком.</p>
+    <div class="hero-meta">
+      <span class="tag">5 блоков</span>
+      <span class="tag">5 конспектов в основе</span>
+      <span class="tag g">закрывает мини-чек и тест</span>
+      <span class="tag">читать ~1 час</span>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-in">
+    <a href="#start"><b>00</b>Как читать</a>
+    <a href="#blood"><b>01</b>Анализы крови</a>
+    <a href="#sleep"><b>02</b>Сон</a>
+    <a href="#training"><b>03</b>Метод «Ползунка»</a>
+    <a href="#food"><b>04</b>Питание</a>
+    <a href="#supp"><b>05</b>БАДы</a>
+    <a href="#cheat"><b>06</b>Шпаргалка</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<section id="start">
+  <div class="sec-head">
+    <div class="eyebrow">Блок 00</div>
+    <h2>Как читать этот документ</h2>
+    <p class="lede">Ты принимаешь решения, которые влияют на здоровье живого человека. Поэтому сначала логика метода, потом цифры — а не наоборот. Заученная цифра без понимания причины на клиенте не работает.</p>
+  </div>
+
+  <div class="card">
+    <h4>Три вещи, которые нужно сделать в таком порядке</h4>
+    <ol>
+      <li><strong>Прочитать эту выжимку целиком.</strong> Она даёт каркас: как метод устроен и почему именно так. Без каркаса большие конспекты рассыпаются на факты.</li>
+      <li><strong>Пройти мини-чек и тест.</strong> Всё, что там спрашивают, есть здесь. Блок «Анализы крови» — критический, по нему нужен ноль ошибок.</li>
+      <li><strong>Прочитать полные конспекты.</strong> Там нюансы, примеры из практики и разборы, которые в выжимку не влезли.</li>
+    </ol>
+  </div>
+
+  <h3>Шесть сквозных принципов</h3>
+  <p>Они повторяются во всех модулях. Если забудешь конкретную цифру — эти пять принципов всё равно приведут тебя к правильному решению.</p>
+
+  <div class="pr">
+    <div class="pr-i">
+      <span class="pr-n">01</span>
+      <div class="pr-t">Динамика, а не точка</div>
+      <div class="pr-d">Одна сдача анализов, один замер, одна неделя без прогресса — это не факт, а шум. Решения принимаются по нескольким точкам во времени. Стандартный горизонт по крови — 6 недель.</div>
+    </div>
+    <div class="pr-i">
+      <span class="pr-n">02</span>
+      <div class="pr-t">Сначала база</div>
+      <div class="pr-d">Питание, сон, вода, объём тренировок, безопасные добавки. Только если база отработала и не помогла — идём дальше, и то через врача. Не «увидел плохой анализ → назначил препарат».</div>
+    </div>
+    <div class="pr-i">
+      <span class="pr-n">03</span>
+      <div class="pr-t">Самочувствие важнее цифры</div>
+      <div class="pr-d">Низкий тестостерон без жалоб — не проблема. «Мало глубокого сна» на браслете при бодром дне — не проблема. Форма и состояние человека оцениваются вместе с цифрой, а не вместо неё.</div>
+    </div>
+    <div class="pr-i">
+      <span class="pr-n">04</span>
+      <div class="pr-t">Один рычаг за раз</div>
+      <div class="pr-d">Меняем один параметр и смотрим результат. Дёрнешь всё сразу — не поймёшь, что сработало, и будешь годами промахиваться мимо цели.</div>
+    </div>
+    <div class="pr-i">
+      <span class="pr-n">05</span>
+      <div class="pr-t">Перегруз хуже недогруза</div>
+      <div class="pr-d">И в зале, и в еде, и в добавках. Недогруз стоит пары недель прогресса, перегруз — месяцев отката, травм и слитого клиента. Поэтому всегда начинаем с меньшего и добавляем плавно.</div>
+    </div>
+    <div class="pr-i">
+      <span class="pr-n">06</span>
+      <div class="pr-t">Ты не врач</div>
+      <div class="pr-d">Методология — твоя зона. Рецептурные препараты, гормоны, статины, вмешательство в женский цикл — не твоя, никогда. При серьёзных отклонениях направляешь к профильному врачу и фиксируешь это.</div>
+    </div>
+  </div>
+</section>
+
+<section id="blood">
+  <div class="sec-head">
+    <div class="eyebrow">Блок 01 · конспект «Работа с анализами крови»</div>
+    <h2>Анализы крови<span class="crit">критический блок</span></h2>
+    <p class="lede">Здесь ты работаешь не с формой, а со здоровьем. Поэтому в тесте по этому блоку нужен ноль ошибок, а в работе — жёсткая рамка: ты читаешь бланк и правишь базу, но не назначаешь рецептурное. Всё, что серьёзнее базы, идёт через врача.</p>
+  </div>
+
+  <div class="rule">
+    <span class="lbl">Главный принцип модуля</span>
+    <p>Любой анализ оценивается <strong>только в динамике</strong>. Стартуем всегда с базы — питание, отдых, вода, безопасные БАДы — и идём <strong>поэтапно, от меньшего к большему</strong>. Показатели, которые в норме и не вызывают жалоб, просто отметаются: повторно их не гоняем.</p>
+  </div>
+
+  <h3>Как работает цикл «отклонение → база → пересдача»</h3>
+  <ol>
+    <li><strong>Увидел отклонение</strong> (например, повышен эстрадиол, низковат тестостерон), но по форме, прогрессу и самочувствию всё нормально → ставишь пометку. Не действуешь.</li>
+    <li><strong>~6 недель работаешь базой:</strong> чистишь рацион, добавляешь нужные БАДы, корректируешь объём тренировок (при низком тестостероне — меньше грузить, больше отдыхать).</li>
+    <li><strong>Пересдача.</strong> Ухудшилось → думаем о более серьёзных корректировках, подключаем врача. Стабилизировалось → ещё одна контрольная через 6 недель и забываем о проблеме.</li>
+  </ol>
+
+  <div class="slider">
+    <div class="slider-head"><span class="slider-name">Период до пересдачи</span><span class="slider-val">~6 недель</span></div>
+    <div class="track">
+      <div class="range g" style="left:56%;width:16%"></div>
+      <div class="pin" style="left:64%"><span>6 нед.</span></div>
+    </div>
+    <div class="scale"><span>0</span><span>2 нед.</span><span>5 нед.</span><span>8 нед.</span><span>12 нед.</span></div>
+    <p class="slider-note">Почему именно столько: показатели меняются с разной скоростью. Креатинин после тренировки приходит в норму уже за неделю отдыха, а <strong>липидный профиль за неделю почти не сдвинется</strong> — ему нужно время, чтобы дать полную картину. Обещать клиенту результат по крови через неделю нельзя.</p>
+  </div>
+
+  <h3>Как правильно сдавать</h3>
+  <p>На результат влияют три вещи: тренировки, половая жизнь и питание накануне. Плюс базовое — <strong>сдавать натощак</strong>: проснулся, не ел, можно воды, дошёл до клиники, сдал, потом завтрак.</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Фактор</th><th>Как правильно</th><th>Если не получилось</th></tr>
+    <tr><td class="k">Тренировки</td><td>Идеально — неделя отдыха. Реально — хотя бы пара дней</td><td>Сдал на следующий день после тренировки → закономерно <strong>повышены креатинин и АЛТ</strong> (продукты распада мышечной клетки). Не критично, просто учитываем при чтении</td></tr>
+    <tr><td class="k">Секс</td><td>Избегать за день до сдачи</td><td>Условность: серьёзные проблемы всё равно будут видны</td></tr>
+    <tr><td class="k">Питание</td><td>Вечером лёгкое белковое + овощи (рыба или курица с салатом)</td><td>Жирное на ночь → искажает желчный и билирубин</td></tr>
+    <tr><td class="k">Клиника</td><td>Всегда одна и та же — личный кабинет, удобно смотреть динамику</td><td>—</td></tr>
+  </table>
+  </div>
+
+  <h3>Базовый список и что показывает каждый анализ</h3>
+  <p>Список подобран так, чтобы за адекватные деньги посмотреть все основные системы. Расширять его до бесконечности смысла нет.</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Анализ</th><th>Что показывает</th></tr>
+    <tr><td class="k">Липидный профиль</td><td>Состояние сосудов. Ключевое в нём — <strong>индекс атерогенности</strong> (баланс хорошего и плохого холестерина)</td></tr>
+    <tr><td class="k">С-реактивный белок</td><td>Воспаление. Плохой липидный профиль + повышенный СРБ = с холестерином совсем плохо, копать глубже</td></tr>
+    <tr><td class="k">АЛТ / АСТ</td><td>Печень и сердце. Если АСТ сильно выше АЛТ — перестраховаться и сделать ЭКГ</td></tr>
+    <tr><td class="k">Свободные Т3, Т4, ТТГ</td><td>Щитовидка и общий уровень метаболизма. Важно именно «свободные»</td></tr>
+    <tr><td class="k">Билирубин</td><td>Состояние желчного пузыря (прямой, непрямой)</td></tr>
+    <tr><td class="k">Креатинин</td><td>Почки. Закономерно завышается на фоне тренировок</td></tr>
+    <tr><td class="k">Общий анализ крови</td><td>Прежде всего <strong>гематокрит</strong> (густота крови), плюс признаки воспаления. Недорогой и важный</td></tr>
+    <tr><td class="k">Эстрадиол, пролактин</td><td>Контроль ароматизации у мужчин: отёк, либидо, самочувствие</td></tr>
+    <tr><td class="k">С-пептид (+ инсулин, глюкоза)</td><td>Поджелудочная. С-пептид — на длинную дистанцию, инсулин и глюкоза — «здесь и сейчас»</td></tr>
+    <tr><td class="k">Общий тестостерон</td><td>Мышечная масса, самочувствие, либидо</td></tr>
+    <tr><td class="k">Дополнительно</td><td>Общий белок (хватает ли белка в рационе), железо (часто занижено из-за ЖКТ), ЛГ/ФСГ (цепочка выработки тестостерона)</td></tr>
+  </table>
+  </div>
+
+  <h3>Липидный профиль — самая частая проблема</h3>
+  <p>Из 100 сдающих примерно у <strong>40</strong> есть нюансы с липидами. Смотришь в первую очередь на индекс атерогенности.</p>
+
+  <div class="card">
+    <h4>Что делаешь по базе</h4>
+    <ul>
+      <li><strong>Полезных жиров минимум 1 г/кг</strong>, можно поднять до 1,5 — пожертвовав углеводами. Жиров должно быть достаточно.</li>
+      <li><strong>Убрать животные жиры</strong> (свинина, сметана, майонез) и фастфуд — временно, пока липидограмма не стабилизируется. Потом отдельные загрузки уже не навредят.</li>
+      <li>Полезные жиры: авокадо, орехи, масла (оливковое, льняное). <strong>Омега-3 стабильно, 1–2 г кислот EPA+DHA</strong> — это тот же коридор, что и профилактические 10–15 мг на кг веса из модуля по добавкам, просто выраженный в граммах.</li>
+      <li>Из добавок по опыту лучше всего работают безопасные комплексные (армолипид или липид биом) — 1–2 капсулы утром после еды. Омегу и полезные жиры при этом не убираем.</li>
+      <li>Оцениваешь на дистанции <strong>6 недель</strong>. Индекс атерогенности пополз вниз — делаете всё правильно.</li>
+    </ul>
+  </div>
+
+  <div class="flag">
+    <span class="lbl">Флаг опасности</span>
+    <p><strong>Плохой липидный профиль + повышенный С-реактивный белок</strong> — пора бить тревогу. Если применяются препараты, убирается всё, кроме фоновой инъекционной формы тестостерона, и дальше разбираемся с врачом.</p>
+    <p style="margin-top:10px"><strong>Статины — крайняя мера и только через врача.</strong> Это серьёзный препарат: влияет на энергию, с него бывает сложно слезть. Сам ты к нему не тянешься никогда.</p>
+  </div>
+
+  <div class="note">
+    <span class="lbl">Частое заблуждение клиента</span>
+    <p>«Холестерин подскочил, потому что я ем много масла и орехов». Нет: <strong>полезные жиры даже в большом количестве липидный профиль не портят, а улучшают его.</strong> Повышение идёт от хаоса в диете — бургеры, пицца, жарка — а не от чистых жиров.</p>
+  </div>
+
+  <h3>Печень и желчный</h3>
+  <p>Сильно взаимосвязаны, часто проблема «печени» на деле в желчном. Смотришь верх бланка: билирубин, АЛТ/АСТ, ГГТ, щелочная фосфатаза.</p>
+  <ul>
+    <li>Перекос в сторону АЛТ → думаем о печени. Перед пересдачей дать <strong>~4 дня отдыха</strong> от тренировок, иначе АЛТ ложно завышен.</li>
+    <li>База та же: <strong>чистый рацион + снижение процента подкожного жира</strong>. У большинства всё стабилизируется просто за счёт этого.</li>
+    <li>Рабочий гепатопротектор — на основе <strong>урсодезоксихолевой кислоты</strong> (Урсосан, Урсофальк), ~500 мг после последнего приёма пищи. Гептрал при нарушенной печени может даже поднимать АЛТ/АСТ по обратной связи.</li>
+  </ul>
+
+  <h3>Общий анализ крови и гематокрит</h3>
+
+  <div class="slider">
+    <div class="slider-head"><span class="slider-name">Гематокрит — густота крови</span><span class="slider-val">зона внимания от 51%</span></div>
+    <div class="track">
+      <div class="range g" style="left:0%;width:64%"></div>
+      <div class="range a" style="left:64%;width:12%"></div>
+      <div class="range r" style="left:76%;width:24%"></div>
+      <div class="pin" style="left:64%"><span>51%</span></div>
+    </div>
+    <div class="scale"><span>35%</span><span>45%</span><span>51%</span><span>54%</span><span>60%</span></div>
+    <p class="slider-note"><strong>Выше 51%</strong> — присмотреться внимательно. <strong>~54% на фоне применения препаратов</strong> — бить тревогу: в связке с плохим липидным профилем это риск тромба, убирается всё, кроме фоновой инъекционной формы тестостерона.</p>
+  </div>
+
+  <div class="flag">
+    <span class="lbl">Два опасных мифа, которые принесёт клиент</span>
+    <ul>
+      <li><strong>«Слить кровь, чтобы разжижить».</strong> Даёт обратный эффект: организм активнее восстанавливает эритроциты, и гематокрит поднимается ещё выше — уже до смертельно опасного уровня.</li>
+      <li><strong>«Попить аспирин, чтобы кровь стала жиже».</strong> Аспирин, пентоксифиллин и подобное борются со <em>слипанием тромбоцитов</em> — то есть с последствием. Саму кровь жиже они не делают.</li>
+    </ul>
+    <p style="margin-top:10px">Любые капельницы — только под наблюдением специалиста.</p>
+  </div>
+
+  <div class="say">
+    <span class="lbl">Что отвечаешь по густоте крови</span>
+    <p>Базово здесь работает питьевой баланс: воду не минимизируем, из 3–4 литров в сутки примерно 0,5 л делаем минеральной — ежедневно или раз в два дня. Заодно закрываем возросшую потребность в минералах от тренировок. Метод простой, но рабочий: профессионалы за водой следят особенно тщательно.</p>
+  </div>
+
+  <h3>Половые гормоны</h3>
+  <p>При натуральном тренинге важна цепочка <strong>ЛГ → ФСГ → тестостерон</strong>: лютеинизирующий гормон стимулирует выработку тестостерона. Есть жалобы на либидо и самочувствие — сначала смотришь эту цепочку.</p>
+
+  <div class="two">
+    <div class="card">
+      <h4>Тестостерон</h4>
+      <p><strong>Низкий тестостерон — не всегда проблема.</strong> Если он в референсах и жалоб нет (либидо, энергия, прогресс, волосы, кожа в порядке) — лишние манипуляции не нужны. Поправить низкий тестостерон медицина умеет, но и здесь поэтапно, без форса: многие ученики за 40 отлично прогрессируют на режиме и тренировках.</p>
+    </div>
+    <div class="card">
+      <h4>Эстрадиол</h4>
+      <p>Держим в <strong>средних референсных значениях</strong> — и на наборе, и на сушке, ради самочувствия и энергии. Растёт при интенсивной ароматизации или больших дозах тестостерона. Нюанс из практики: кому-то высокий эстрадиол визуально даёт более наполненную форму, кому-то его надо поддушить — оценивается индивидуально по форме.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4>Пролактин</h4>
+    <p>Часто растёт просто <strong>от общей утомлённости</strong>. Корректировка соответствующая: снизить объём нагрузки и добавить отдыха — то есть устранить первопричину, а не гасить показатель. Особенно при натуральном тренинге.</p>
+  </div>
+
+  <h3>Щитовидная железа</h3>
+
+  <div class="slider">
+    <div class="slider-head"><span class="slider-name">ТТГ</span><span class="slider-val">рабочий ориентир — около 2</span></div>
+    <div class="track">
+      <div class="range" style="left:8%;width:72%"></div>
+      <div class="pin" style="left:40%"><span>2</span></div>
+    </div>
+    <div class="scale"><span>0</span><span>0,4</span><span>2</span><span>4</span><span>5</span></div>
+    <p class="slider-note">Референс примерно 0,4–4, автор держит район <strong>2</strong>. Т3 и Т4 свободные смотрим в динамике — по влиянию на прогресс и форму.</p>
+  </div>
+
+  <div class="card">
+    <h4>Что делаешь, если ТТГ пополз вверх на сушке</h4>
+    <p>Рабочая связка при нюансах — <strong>йодомарин + L-тирозин</strong>, минимальными дозами, курсом ~6 недель, как профилактика. Ориентир автора: 100 мкг йодомарина + 500 мг тирозина. <strong>С йодом не перебарщивать</strong> — есть обратный эффект. В модуле по добавкам та же связка идёт как «троица для щитовидки» с добавлением селена — см. блок 05.</p>
+    <p>L-тирозин — это аминокислота для нормальной работы щитовидки, <strong>а не гормон</strong>. Путать его с эльтироксином нельзя.</p>
+  </div>
+
+  <div class="flag">
+    <span class="lbl">Красная линия</span>
+    <p>Аптечные гормоны щитовидки (Т3/Т4) ты не назначаешь никогда. <strong>Любой гормон извне подавляет выработку собственного</strong> — организм перестаёт производить то, что уже поступает. Серьёзные проблемы со щитовидкой — сразу к эндокринологу, тем более у обычных людей: с ней шутки плохи.</p>
+  </div>
+
+  <h3>Поджелудочная и прочие показатели</h3>
+  <ul>
+    <li><strong>Поджелудочная:</strong> С-пептид — долгосрочная картина и точка отсчёта; инсулин и глюкоза — состояние здесь и сейчас. Информативна не сама глюкоза, а то, как организм реагирует на продукты и сладкое: для этого глюкометр или носимый монитор. Жалоб нет и жир нормально уходит — достаточно С-пептида.</li>
+    <li><strong>Креатинин:</strong> сильно завышается после тренировок, особенно после двух отказных дней подряд. Улетел — не паникуем, перед пересдачей 4–5 дней отдыха.</li>
+    <li><strong>Общий белок:</strong> подсказывает, хватает белка или есть перебор. Повод скорректировать рацион.</li>
+    <li><strong>Железо:</strong> часто занижено из-за проблем с ЖКТ. Пока пищеварение нарушено, добавки не помогут — сначала чистые продукты и здоровый ЖКТ.</li>
+  </ul>
+
+  <h3>Отдельно про девушек</h3>
+  <ul>
+    <li>Всё, что не касается половых гормонов — липиды, печень и желчный, поджелудочная — стратегия та же.</li>
+    <li><strong>Половые гормоны интерпретируются с учётом фазы цикла</strong> (в бланке это отражено).</li>
+    <li>Самостоятельно вмешиваться в женские половые гормоны <strong>строго нельзя</strong>: собьёшь цикл, будет серьёзная беда. Стероиды — не используем, качественно прогрессировать реально натурально.</li>
+  </ul>
+
+  <div class="rule">
+    <span class="lbl">Что запомнить из блока</span>
+    <ul>
+      <li>На прогресс реально влияют в основном <strong>тестостерон и щитовидка</strong>. Липиды — косвенно (могут испортить аппетит на массонаборе), поджелудочная — это больше про здоровье.</li>
+      <li>Анализы мотивируют: наглядная плохая картина заставляет навести порядок в питании и режиме. Пользуйся этим в разговоре.</li>
+      <li>В большинстве случаев <strong>база решает</strong>: чистое питание, отдых, вода, базовые добавки восстанавливают организм очень хорошо.</li>
+      <li>Никакие препараты не заменят тяжёлую работу в зале.</li>
+    </ul>
+  </div>
+</section>
+
+
+<section id="sleep">
+  <div class="sec-head">
+    <div class="eyebrow">Блок 02 · конспект «Сон и восстановление для мужчин»</div>
+    <h2>Сон и восстановление</h2>
+    <p class="lede">Гостевая лекция врача-невролога и сомнолога, всё с опорой на исследования. Это третий кит рядом с тренировками и питанием — и единственный блок, где твоя главная работа чаще всего <strong>успокоить, а не починить</strong>.</p>
+  </div>
+
+  <div class="rule">
+    <span class="lbl">Главный принцип модуля</span>
+    <p>Ориентир — <strong>самочувствие, а не цифры гаджетов</strong> и не чужие «идеальные нормы». Сон не нужно контролировать и вокруг него не нужно тревожиться: чрезмерная тревога о сне сама по себе портит сон. Главный маркер, что человек высыпается: <strong>быстро засыпает, просыпается бодрым, нормально чувствует себя днём</strong>.</p>
+  </div>
+
+  <h3>Сколько нужно спать</h3>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-v">~5 ч</div><div class="stat-l">Физиологический минимум взрослого («ядерный сон»). Ниже опускаться не стоит ни при каких экспериментах</div></div>
+    <div class="stat"><div class="stat-v">6–7 ч</div><div class="stat-l">Столько люди спят в среднем по объективным замерам — анализ 58 тысяч полисомнографий</div></div>
+    <div class="stat g"><div class="stat-v">7–9 ч</div><div class="stat-l">Ориентир Sleep Foundation для взрослых 18–64. Именно ориентир, а не норматив</div></div>
+    <div class="stat a"><div class="stat-v">~1%</div><div class="stat-l">Доля «малоспящих» — генетика, им хватает 5 часов и меньше. Лотерея генов, а не навык</div></div>
+  </div>
+
+  <p>Индивидуальный разброс большой: кому-то нужно 6 часов, кому-то 10. С возрастом потребность снижается — детям сон нужен для роста и закрепления знаний, у пожилых меньше вырабатывается мелатонина.</p>
+
+  <div class="note">
+    <span class="lbl">Миф «спи 7+ часов или умрёшь»</span>
+    <p>И короткий сон (менее 7 ч), и длинный (10 ч) статистически связаны с повышенной смертностью — но это <strong>обратная причинность</strong>. Не сон убивает, а болезни меняют сон: боль или нарушение дыхания сокращают сон, упадок сил при болезнях его удлиняет. Популярные книги на эту тему подают обрезанный график и невротизируют людей. <strong>Высыпается за 5–6 часов и чувствует себя хорошо — значит, ему этого достаточно.</strong></p>
+  </div>
+
+  <h3>Как выглядит нормальный сон</h3>
+
+  <div class="slider">
+    <div class="slider-head"><span class="slider-name">Время засыпания</span><span class="slider-val">норма 5–30 минут</span></div>
+    <div class="track">
+      <div class="range a" style="left:0%;width:8%"></div>
+      <div class="range g" style="left:8%;width:42%"></div>
+      <div class="range r" style="left:50%;width:50%"></div>
+      <div class="pin" style="left:8%"><span>5 мин</span></div>
+      <div class="pin" style="left:50%"><span>30 мин</span></div>
+    </div>
+    <div class="scale"><span>0</span><span>15 мин</span><span>30 мин</span><span>45 мин</span><span>60 мин</span></div>
+    <p class="slider-note"><strong>Быстрее 5 минут — тоже плохо:</strong> «отрубается, едва коснувшись подушки» это обычно признак дефицита сна, надо увеличить продолжительность. <strong>Дольше 30 минут регулярно</strong> — повод заподозрить бессонницу.</p>
+  </div>
+
+  <div class="card">
+    <h4>Ночные пробуждения — это норма</h4>
+    <p>Сон идёт волнами: то глубже, то поверхностнее. В поверхностные фазы легко проснуться от малейшего шума. Можно просыпаться хоть 10 раз за ночь — если это не мешает днём и <strong>обратно засыпаешь быстрее чем за 30 минут</strong>. Пугать этим клиента не нужно.</p>
+  </div>
+
+  <div class="card">
+    <h4>Во сколько ложиться</h4>
+    <p>Есть биологический якорь — <strong>кортизол повышается под утро независимо от режима</strong>. Это сохраняется даже у людей в пещерных экспериментах без света и часов. Отсюда два следствия:</p>
+    <ul>
+      <li><strong>Не ложиться спать после ночной смены</strong> — утром высокий кортизол, дневной сон будет некачественным. Лучше дотерпеть до ночи и получить глубокий восстанавливающий сон.</li>
+      <li><strong>Ложиться при сильной сонливости</strong>, а не по расписанию: засыпанием управлять нельзя, чем сильнее стараешься — тем хуже выходит.</li>
+    </ul>
+    <p>Хронотипы: «совам» проще ложиться и вставать позже, «жаворонкам» раньше, но большинство людей — <strong>промежуточный тип</strong>, и это выгодно: он подстраивается под любой режим.</p>
+  </div>
+
+  <h3>Когда заподозрить проблему и куда направлять</h3>
+
+  <div class="tw">
+  <table>
+    <tr><th>Состояние</th><th>Критерии</th><th>Куда</th></tr>
+    <tr><td class="k">Бессонница</td><td>Засыпание от 30 минут (или трудно заснуть после ночного пробуждения) + 3 ночи в неделю и чаще + на протяжении 3 месяцев + дневные симптомы (сонливость, разбитость). <strong>Нет части критериев — бессонница маловероятна</strong></td><td>Сомнолог, КПТ бессонницы</td></tr>
+    <tr><td class="k">Апноэ сна</td><td>Остановки дыхания во сне: сон поверхностный и невосстанавливающий, человек засыпает где угодно — у телевизора, за столом после ужина, пассажиром или за рулём</td><td>Сомнолог. Для самопроверки — Эпвортская шкала сонливости</td></tr>
+    <tr><td class="k">Гиперсомния</td><td>Патологически повышенная сонливость</td><td>Врач</td></tr>
+    <tr><td class="k">Тревога и депрессия</td><td>Часто лежат в основе стойких проблем со сном</td><td>Шкала Бека (депрессия), шкала Бека или Шихана (тревога)</td></tr>
+  </table>
+  </div>
+
+  <h3>Правило 15 минут — главное практическое правило</h3>
+
+  <div class="rule">
+    <span class="lbl">Формулировка сомнологов</span>
+    <p>Не удаётся заснуть 15 минут — <strong>встать с кровати и заняться спокойным делом вне неё</strong>, вернуться только когда почувствуешь сонливость.</p>
+    <ul>
+      <li>Не формируется связь «кровать = место мучений».</li>
+      <li>Вне постели быстрее накопится усталость.</li>
+      <li>Лёжа и глядя в потолок, человек разгоняет тревожные мысли и отгоняет сон.</li>
+    </ul>
+    <p style="margin-top:10px">Психологически помогает заранее запланировать приятное занятие «на случай, если не засну» — тогда бессонная ночь не пугает. Подходит: выписать планы на завтра, выписать тревожные мысли с ответами, спокойная сортировка вещей, тихое хобби, растяжка, чтение, уход за собой.</p>
+  </div>
+
+  <h3>Техники, если засыпание тяжёлое</h3>
+  <p>Трудности обычно связаны либо с <strong>руминацией</strong> — навязчивыми тревожными мыслями по кругу, либо с <strong>повышенной чувствительностью</strong>.</p>
+
+  <div class="two">
+    <div class="card">
+      <h4>Психологические</h4>
+      <ul>
+        <li><strong>Mindfulness:</strong> медитация дыхания (наблюдать, не управляя), бодискан, визуализация безопасного места, управляемые аудио-медитации.</li>
+        <li><strong>Релаксация по Якобсону:</strong> напрягать мышцу ~70 секунд, затем медленно расслаблять, идти по телу сверху вниз или снизу вверх.</li>
+        <li><strong>Парадоксальная интенция:</strong> при страхе «не засну» изо всех сил стараться НЕ заснуть — сопротивление парадоксально нагоняет сонливость.</li>
+        <li><strong>Опровержение тревожных мыслей:</strong> выписать мысль и рядом рациональный ответ. На бумаге нелогичность видна лучше, чем в голове.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Физиологические лайфхаки</h4>
+      <ul>
+        <li>Закатить глаза высоко вверх — это положение глаз во сне, мозг получает сигнал «пора отдыхать».</li>
+        <li>Ненадолго выйти на холод — постель после этого кажется теплее и уютнее.</li>
+        <li>Звук дождя или белый шум — маскирует резкие звуки и работает как условный рефлекс на сон.</li>
+      </ul>
+      <h4>Сенситивная бессонница</h4>
+      <p>Раздражает каждый светодиод, капающий кран, складка на простыне. Убрать раздражители полезно, но <strong>важнее техники расслабления</strong>: идеально изолироваться невозможно, а спокойный мозг перестаёт цепляться. Рабочий приём — не бороться со звуком, а наблюдать за ним с любопытством.</p>
+    </div>
+  </div>
+
+  <h3>Как легче просыпаться</h3>
+  <ul>
+    <li><strong>Первый шаг — проверить, достаточно ли человек спит.</strong> Если в постели всего 5–6 часов, это может быть ниже его нормы: увеличили время сна — трудности с подъёмом часто уходят сами.</li>
+    <li><strong>Мотивация встать:</strong> запланировать на утро приятное или важное дело — вкусный завтрак, тренировка, созвон, за который стыдно проспать.</li>
+    <li><strong>Не слышит будильник:</strong> телефон подальше от кровати, «убегающие» будильники, будильник с заданием для отключения. Немного утреннего стресса для пробуждения полезно.</li>
+    <li><strong>Световой будильник</strong> (имитация рассвета) — мягче будит и налаживает циркадные ритмы.</li>
+    <li><strong>SAD-лампа 10 000 люкс:</strong> «сове» светить в первые 30 минут после пробуждения, «жаворонку» — вечером. Брать медицинские бренды.</li>
+    <li><strong>Центр бодрствования</strong> активируется множеством стимулов: громкая музыка, энергичная зарядка, контрастный душ, горячий завтрак со специями, ароматный кофе.</li>
+  </ul>
+
+  <h3>Гигиена сна — и главная оговорка к ней</h3>
+
+  <div class="flag">
+    <span class="lbl">Оговорка важнее самих правил</span>
+    <p><strong>Если проблем со сном нет — не заморачиваться гигиеной сна вообще.</strong> Частая ловушка: человек с нормальным сном начинает строго соблюдать правила, отказывается от вечерних тренировок и встреч с друзьями, недостаточно устаёт, теряет позитив, тревожится «всё ли сделал правильно» — и зарабатывает бессонницу.</p>
+    <p style="margin-top:10px"><strong>Человек с хорошим сном никогда не думает о сне; человек с бессонницей думает о нём постоянно.</strong> Правила ниже нужны только тем, у кого есть проблема.</p>
+  </div>
+
+  <div class="tw">
+  <table>
+    <tr><th>Фактор</th><th>Что делать</th></tr>
+    <tr><td class="k">Время подъёма</td><td>Единое. Ложиться «по часам» невозможно, а вставать в одно и то же время — реально. Чтобы вечером накопить сонливость, надо рано встать накануне. Отсюда «бессонница выходного дня»</td></tr>
+    <tr><td class="k">Еда перед сном</td><td>Не переедать, не ложиться 0,5–1 ч после еды (риск рефлюкса). Но если очень голодно — лучше лёгкий перекус, чем лежать и думать о еде</td></tr>
+    <tr><td class="k">Кофеин</td><td>Не позже чем за <strong>6 часов</strong> до сна. Есть не только в кофе: чай (даже зелёный), кола, энергетики, тирамису, ряд лекарств</td></tr>
+    <tr><td class="k">Травы</td><td>Валериана, ромашка, мелисса по исследованиям значимо на сон не влияют. Как ритуал можно, для лечения — нет. <strong>Осторожно со зверобоем</strong>: влияет на серотонин</td></tr>
+    <tr><td class="k">Алкоголь и никотин</td><td>Нарушают структуру сна. Миф «алкоголь помогает заснуть»: заснёшь быстрее, но наутро разбитость, плюс порочный круг вплоть до зависимости</td></tr>
+    <tr><td class="k">Тренировки</td><td>Очень полезны: при лёгкой тревоге и депрессии работают не хуже антидепрессантов. Но если после вечерней трудно засыпать — сдвинуть на первую половину дня</td></tr>
+    <tr><td class="k">Дневной сон</td><td>Избегать, если трудно засыпать вечером: сонливость — накапливаемый ресурс, дневной сон её обнуляет. Если ночной сон в порядке — <strong>не дольше 20–30 минут</strong>, с будильником</td></tr>
+    <tr><td class="k">Телефон перед сном</td><td>Дело не в синем свете — это миф. Любой свет влияет на мелатонин, просто приглушите весь. Дело в <strong>контенте</strong>: возбуждающий (игры, ленты) мешает, подкаст с таймером или общение с друзьями — наоборот помогают</td></tr>
+    <tr><td class="k">Кровать</td><td><strong>Только для сна и секса.</strong> Не работать в кровати. Если комната одна — визуально разделять зоны</td></tr>
+  </table>
+  </div>
+
+  <h3>Спальня и гаджеты</h3>
+
+  <div class="two">
+    <div class="card">
+      <h4>Что реально работает</h4>
+      <ul>
+        <li><strong>Темнота:</strong> шторы-блэкаут или маска для сна.</li>
+        <li><strong>Тишина:</strong> беруши — полиуретановые или индивидуальные анатомические. <strong>Силиконовые и восковые избегать</strong>: могут расплавиться от тепла тела и затечь в ухо.</li>
+        <li><strong>Подушка — по позе сна:</strong> на боку высокая плотная, на спине плоская, на животе тонкая или без. Волшебных подушек «от храпа» не существует.</li>
+        <li><strong>Утяжелённое одеяло</strong> весом ~10% от веса человека — эффект «объятия», помогает при тревоге. Осторожно при проблемах с дыханием и болях в суставах.</li>
+        <li>Световой будильник, SAD-лампа, генератор белого шума.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Чему не доверять</h4>
+      <ul>
+        <li><strong>Фитнес-браслеты, кольца, Whoop:</strong> плохо определяют фазы сна, расхождение с полисомнографией колоссальное вплоть до «перевёрнутых» фаз. Как <strong>актиграф</strong> — когда лёг и встал — годятся. «Умный будильник по фазе» ненадёжен.</li>
+        <li><strong>«Кубики для сна»</strong> и подобные устройства — псевдонаучные обещания.</li>
+        <li><strong>Часы со светящимся циферблатом в спальне</strong> — убрать, усиливают тревогу.</li>
+      </ul>
+      <p><strong>Если прибор показывает «плохой сон», а человек чувствует себя хорошо — это нормально, переживать не о чем.</strong></p>
+    </div>
+  </div>
+
+  <div class="say">
+    <span class="lbl">Как отвечаешь на «браслет пишет, что мало глубокого сна»</span>
+    <p>Смотрим не на браслет, а на тебя: быстро засыпаешь, просыпаешься бодрым, днём нормально — значит, сна достаточно. Браслеты фазы сна определяют плохо, это делает только полисомнография в лаборатории. Как трекер «во сколько лёг и во сколько встал» он полезен, а фазам верить не стоит. Чинить нормальный сон не будем — от тревоги о сне он только портится.</p>
+  </div>
+
+  <div class="card">
+    <h4>Дневник сна</h4>
+    <p>Таблица по часам, где отмечаешь кофеин, алкоголь, лекарства, спорт и штрихуешь время сна. Позволяет увидеть, что реально влияет на сон конкретного человека — например, поздний кофе или вечерняя тренировка — и сдвинуть эти факторы. Полезный инструмент, когда клиент жалуется, но причина неочевидна.</p>
+  </div>
+</section>
+
+
+<section id="training">
+  <div class="sec-head">
+    <div class="eyebrow">Блок 03 · конспект «Метод Ползунка», модуль 1</div>
+    <h2>Метод «Ползунка»: тренировки</h2>
+    <p class="lede">Каркас, из которого собирается любая программа: шесть целей, три режима повторений, три типа движений. Рычагов намеренно мало — чтобы менять один параметр и понимать, что именно сработало.</p>
+  </div>
+
+  <h3>Словарь, без которого дальше будет тяжело</h3>
+  <div class="tw">
+  <table>
+    <tr><th>Термин</th><th>Что это</th></tr>
+    <tr><td class="k">Тоннаж</td><td>Суммарный вес, который мышца подняла за тренировку: вес × повторения × подходы. Главный показатель работы</td></tr>
+    <tr><td class="k">Памп</td><td>Накачка мышцы кровью до распирания. Создаёт давление, растягивает фасцию, даёт потенциал для роста</td></tr>
+    <tr><td class="k">Нейромышечная связь</td><td>Насколько хорошо мозг чувствует и включает нужную мышцу. Чем лучше — тем выше отдача от каждого повторения</td></tr>
+    <tr><td class="k">Кор</td><td>Мышцы-стабилизаторы центра тела: пресс и поясница</td></tr>
+    <tr><td class="k">Повтор запаса до отказа</td><td>Останавливаешь подход, когда мог бы сделать ещё <strong>одно</strong> повторение, но не делаешь. <strong>Базовый режим всей системы</strong></td></tr>
+    <tr><td class="k">Отказ</td><td>Делаешь столько повторений, сколько физически можешь в правильной технике, и ни одного больше. Используется дозированно</td></tr>
+    <tr><td class="k">V-образность</td><td>Силуэт «широкий верх — узкая талия». Формируется в первую очередь спиной</td></tr>
+  </table>
+  </div>
+
+  <h3>Шесть целей тренировки</h3>
+  <p>В бодибилдинге нет секундомера, форму оценивают на глаз. Поэтому тренировка не сводится к чему-то одному — она закрывает шесть задач сразу. Упускаешь хотя бы одну регулярно — прогресс тормозит. Любую программу проверяй вопросом: «эти цели удовлетворены или нет?»</p>
+
+  <ol>
+    <li><strong>Увеличение тоннажа за тренировку</strong> — главная цель, всё остальное работает на неё.</li>
+    <li><strong>Рост силовых в отдельных движениях</strong> — чтобы расти в весах и за счёт этого двигать тоннаж вверх.</li>
+    <li><strong>Улучшение нейромышечной связи</strong> — чтобы нагрузка попадала точно в целевую мышцу, а не в помощников.</li>
+    <li><strong>Укрепление кора</strong> — импульс в любом базовом упражнении идёт снизу вверх, слабый центр обрубает силу.</li>
+    <li><strong>Памп</strong> — создаёт потенциал для роста, растягивая фасции. Именно памп отличает бодибилдинг от пауэрлифтинга.</li>
+    <li><strong>Укрепление связок и сухожилий</strong> — позволяет в дальнейшем брать большие веса.</li>
+  </ol>
+
+  <div class="rule">
+    <span class="lbl">Как это упрощается</span>
+    <p>Шесть целей сводятся к двум задачам, итог которых — рост тоннажа: <strong>поднимать больший вес</strong> (за счёт крепкого кора, связок, сухожилий) и <strong>точно прокачивать целевую мышцу</strong> (за счёт нейромышечной связи и пампа).</p>
+    <p style="margin-top:10px">Всё, что не работает на эти шесть целей — кроссфит, «функциональные» и групповые тренировки — это разнообразие и трата калорий, но не инструмент роста мышц. Не «вредно», а «не про рост».</p>
+  </div>
+
+  <h3>Три режима работы</h3>
+  <p>Количество повторений — это по сути то, как долго мышца под нагрузкой и какие ресурсы включаются. Режимов всего три, больше вариаций не бывает — остальное это приёмы поверх них. Темп ровный средний, без рывков и нарочитого замедления.</p>
+
+  <div class="slider stack">
+    <div class="slider-head"><span class="slider-name">Диапазоны повторений</span><span class="slider-val">три режима, все нужны за цикл</span></div>
+    <div class="seg">
+      <div style="flex:4;background:linear-gradient(90deg,var(--indigo-dim),var(--indigo))"><span>4–7 · сила</span></div>
+      <div style="flex:4;background:linear-gradient(90deg,var(--green-dim),var(--green))"><span>7–11 · средний</span></div>
+      <div style="flex:5;background:linear-gradient(90deg,rgba(245,184,65,.35),var(--amber))"><span>12+ · памп</span></div>
+    </div>
+    <div class="scale" style="margin-top:26px"><span>4</span><span>7</span><span>11</span><span>16+</span></div>
+  </div>
+
+  <div class="tw">
+  <table>
+    <tr><th>Режим</th><th>Повторений</th><th>Отдых</th><th>Что даёт и как применять</th></tr>
+    <tr><td class="k">Силовой</td><td>4–7<br><span class="mono">ниже 4 не опускаться</span></td><td>2+ минуты</td><td>Рост силы, укрепление связок и сухожилий. Обычно на 1–2-м, максимум 3-м упражнении за тренировку. Требует полной перезагрузки нервной системы. <strong>Только здесь допустим лёгкий читинг или форсирование</strong> — больше нигде</td></tr>
+    <tr><td class="k">Средний<br>(билдерский)</td><td>7–11</td><td>1–2 минуты</td><td>Нейромышечная связь, объём и тоннаж, статика кора. Оптимальный баланс: и чувствуешь мышцу, и набиваешь тоннаж</td></tr>
+    <tr><td class="k">Памп</td><td>более 11–12</td><td>короткий</td><td>Кровенаполнение, потенциал для роста. С маленьким весом хуже чувствуешь мышцу, но объём набирается. Хорошо грузит кор в статике</td></tr>
+  </table>
+  </div>
+
+  <div class="flag">
+    <span class="lbl">Частая ошибка</span>
+    <p><strong>Сокращать отдых, когда стал выносливее.</strong> Отдых засекаем и не урезаем: экономию сил бросаем не на уменьшение пауз, а на увеличение рабочего веса. Каждые лишние 30 секунд восстановления повышают концентрацию в следующем подходе. На пульс при выборе отдыха не ориентируемся.</p>
+  </div>
+
+  <h3>Три типа движений</h3>
+  <p>Все упражнения по действию похожи: грудь толкает, спина тянет, бицепс сгибает. Это «упражнения-близнецы», они <strong>взаимозаменяемы</strong> — мышце всё равно, чем ты работаешь, важна механическая нагрузка. Отличаются они только тем, куда направлен вектор силы.</p>
+
+  <div class="two">
+    <div class="card">
+      <h4>Свободные веса</h4>
+      <p>Гантель, штанга, а также брусья и подтягивания. Всё, что можно взять и переставить в любую точку зала. Подчиняется силе тяжести: вес всегда тянет вертикально вниз, поэтому движение подбирают так, чтобы сопротивление приходилось точно в целевую мышцу.</p>
+    </div>
+    <div class="card">
+      <h4>Блоки (кроссоверы)</h4>
+      <p>Уходят от силы тяжести: трос тянет рукоятку обратно к точке выхода, это смещает вектор. Плюс — мышца остаётся под нагрузкой на всей амплитуде, там где с гантелью нагрузка провалилась бы на связки.</p>
+    </div>
+    <div class="card">
+      <h4>Тренажёры и хаммеры</h4>
+      <p>Вектор задан конструкцией, траектория зафиксирована. Нужно только правильно занять позицию и работать в заданной амплитуде.</p>
+    </div>
+    <div class="card">
+      <h4>Практический вывод</h4>
+      <p>Свободные веса лучше всего закрывают <strong>три цели из шести</strong>, поэтому они каркас программы. Но при этом программу можно построить <strong>только на свободных весах</strong> — просто меняешь количество повторений. При нехватке инвентаря один и тот же набор упражнений повторяют в большем числе подходов.</p>
+    </div>
+  </div>
+
+  <div class="tw">
+  <table>
+    <tr><th>Цель</th><th>1 место</th><th>2 место</th><th>3 место</th></tr>
+    <tr><td class="k">Тоннаж за тренировку</td><td>Тренажёры</td><td>Свободные веса</td><td>Блоки</td></tr>
+    <tr><td class="k">Рост силы</td><td><strong>Свободные веса</strong></td><td>—</td><td>—</td></tr>
+    <tr><td class="k">Нейромышечная связь</td><td>Блоки</td><td>Тренажёры</td><td>Свободные веса</td></tr>
+    <tr><td class="k">Максимальный памп</td><td>Тренажёры</td><td>Блоки</td><td>Свободные веса</td></tr>
+    <tr><td class="k">Связки и сухожилия</td><td><strong>Свободные веса</strong></td><td>Блоки</td><td>Тренажёры</td></tr>
+    <tr><td class="k">Кор</td><td><strong>Свободные веса</strong></td><td>—</td><td>—</td></tr>
+  </table>
+  </div>
+
+  <h3>Техника: один принцип на всё</h3>
+
+  <div class="rule">
+    <span class="lbl">Принцип</span>
+    <p><strong>Работаем плечевой костью. Всё, что дальше локтя — «верёвка».</strong> Грудная крепится к плечевой кости, значит жимы идут за счёт её движения. Тяги — тоже. Предплечье и кисть просто рычаг, на эффективность упражнения они не влияют.</p>
+  </div>
+
+  <p>Три частые технические ошибки:</p>
+  <ul>
+    <li><strong>Жим</strong> с прогибом поясницы и приподнятыми плечами → нагрузка уходит с груди на плечи, страдают связки. Правильно: подать грудь вперёд, поясницу прижать к скамье.</li>
+    <li><strong>Тяга</strong> превращается в «болтание руками» без опущенного плеча и собранных лопаток → спина не включается.</li>
+    <li><strong>Дельты:</strong> пытаются учудить с техникой, хотя всё просто — отвести плечевую кость в проекции корпуса: в сторону средняя, назад задняя, вперёд передняя.</li>
+  </ul>
+
+  <h3>Что тренируем, а что можно не тренировать</h3>
+  <p>Ресурсы на восстановление ограничены, «успеть везде» — путь к застою. Основных групп четыре: <strong>спина</strong> (каркас и V-образность, крупная группа, хорошо двигает тоннаж), <strong>грудь</strong> (фронтальный объём), <strong>плечи</strong> (растут медленно, но дают завершённость силуэта, тренировать обязательно), <strong>ноги</strong> — под вопросом.</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Что жертвуем</th><th>Почему это не ломает форму</th></tr>
+    <tr><td class="k">Руки<br>(бицепс, трицепс)</td><td>Бицепс работает на всех тягах спины, трицепс на всех жимах. Отдельная тренировка чаще ведёт к перетренированности. Пик бицепса — генетика; выжать удаётся 1–1,5 см, и то за счёт гликогена и воды. Если хочется морально — 6 лёгких подходов или добивка после основной группы</td></tr>
+    <tr><td class="k">Предплечья и шея</td><td>Предплечья и так постоянно нагружены хватом, отдельная работа → перегруз связок локтя и кисти. Гипертрофировать сверх генетики нереально</td></tr>
+    <tr><td class="k">Ноги</td><td>Миф про «анаболический всплеск тестостерона от ног» не работает: фон этим практически не поднять, более того свободный тестостерон уходит из крови в них. Ноги забирают много ресурсов, за счёт этого проседает верх. Прогрессировать по верху без ног — проверено, в том числе на натуралах</td></tr>
+    <tr><td class="k">Икры</td><td>Можно делать для здоровья вен — это «внутренний массаж вен», профилактика варикоза. По желанию</td></tr>
+  </table>
+  </div>
+
+  <h3>Пресс и поясница</h3>
+  <ul>
+    <li>Единственные мелкие мышцы, которым <strong>действительно нужен</strong> отдельный контроль.</li>
+    <li>Ориентир: если при тяге в наклоне не «ведёт» и чувствуешь жёсткость центра — хватит <strong>5–6 подходов на пресс 2 раза в неделю</strong> и столько же на поясницу.</li>
+    <li><strong>Поясницу тренируем всегда после тяг на спину.</strong> Иначе на спине она уже отработала как стабилизатор — получаешь двойную нагрузку и теряешь в силовых.</li>
+    <li>Косые отдельно не нужны, они подключаются сами при скручиваниях. Их «глубина» — от сухости и генетики.</li>
+    <li>Тяжелоатлетический пояс не всегда нужен: срывы спины идут в основном от <strong>дисбаланса мышц</strong>. Безопасность = мышечный баланс.</li>
+  </ul>
+
+  <h3>Как делить тренировки</h3>
+  <p>Делим <strong>по мышечным группам</strong>: пришёл — делаешь грудь, в другой день спину. Так проще концентрироваться, лучше техника, понятнее подсчёт объёма. <strong>Не круговой тренинг</strong> — там хаос в голове, нет концентрации. <strong>Не full body</strong> — мясо растёт везде по чуть-чуть, объём на группу не набирается. Так можно тренировать сразу, даже новичков после освоения техники, и на набор, и на похудение.</p>
+
+  <h3>Объём: сколько подходов</h3>
+
+  <div class="slider">
+    <div class="slider-head"><span class="slider-name">Подходов на мышечную группу за неделю</span><span class="slider-val">старт 16, потолок 32</span></div>
+    <div class="track">
+      <div class="range g" style="left:35%;width:45%"></div>
+      <div class="pin" style="left:40%"><span>16 — старт</span></div>
+      <div class="pin" style="left:80%"><span>32</span></div>
+    </div>
+    <div class="scale"><span>0</span><span>14</span><span>20</span><span>32</span><span>40</span></div>
+    <p class="slider-note">Рабочий коридор <strong>14–32 подхода</strong> в диапазоне 7–15 повторений. 16 подходов ≈ 4 упражнения по 4 подхода, 32 ≈ 8 упражнений. Плечам обычно дают больше (в шаблоне 20). Мало подходов → станешь сильнее, но не раскачаешься: бодибилдинг любит объём. Потолок при специализации на одну группу — 40.</p>
+  </div>
+
+  <div class="note">
+    <span class="lbl">Секрет качественной сушки у учеников</span>
+    <p>Они <strong>много тренируются и при этом много едят</strong>. Не режут калории в ноль, а тратят их объёмом работы. Это же и ответ клиенту, который хочет больше еды: сначала поднимаем объём тренировок, а не срезаем рацион.</p>
+  </div>
+
+  <h3>Отказ против повтора запаса</h3>
+
+  <div class="rule">
+    <span class="lbl">По умолчанию — повтор запаса до отказа</span>
+    <p>Оставляем одно повторение в запасе. Как выбрать вес: если по плану 6 повторений — берёшь вес, с которым можешь сделать 7, но делаешь 6.</p>
+    <p style="margin-top:10px"><strong>Зачем:</strong> держать нервную систему в комфортном состоянии, без лишнего стресса и перегруза — тогда можно тренироваться много и объёмно.</p>
+  </div>
+
+  <p><strong>Отказ включается дозированно и точечно</strong>, как буст, когда нужно сдвинуть прогресс. Даёт примерно <strong>+5% объёма</strong> и психологически бодрит. Особенно нужен, когда тренировок мало: даёт более выраженный стимул при редких тренировках.</p>
+
+  <div class="flag">
+    <span class="lbl">Что здесь путают чаще всего</span>
+    <ul>
+      <li><strong>Отказ — не «анаболический стимул».</strong> Гормоны в норме держит адекватный тренинг плюс хорошее восстановление (сон, отдых, еда), а не работа до отключки.</li>
+      <li><strong>Не строить всю тренировку на отказе, читинге и форсировании.</strong> Это перегруз нервной системы и связок, потеря концентрации, травмы. Форсированный подход разово в конце — можно, системой — нет.</li>
+      <li><strong>Только сила без пампа</strong> → растёт сила, мышцы выглядят плоско. <strong>Только памп</strong> → классное кровенаполнение, но мышцы плоские и «подслитые», без плотности.</li>
+    </ul>
+  </div>
+
+  <h3>Периодизация «косичка» и частота</h3>
+  <p>Фиксированный сплит на всю жизнь (типа «5×5 из интернета») не рассчитывает ресурсы на восстановление всех систем — ты постоянно в перегрузе, сначала терпишь, потом резкий провал. Периодизация — это когда ты «сплетаешь» нагрузку: на одной неделе группе дали больше, на следующей заметно меньше, чтобы она восстановилась и вышла в плюс. Плюс за цикл каждая группа проходит все три режима.</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Режим</th><th>Частота на одну группу</th><th>Почему</th></tr>
+    <tr><td class="k">Силовой (до 7 повт.)</td><td>примерно раз в 14 дней</td><td>Связки и нервная система восстанавливаются дольше всего</td></tr>
+    <tr><td class="k">Средний (7–11)</td><td>примерно раз в 6–10 дней</td><td>Можно ориентироваться на 8</td></tr>
+    <tr><td class="k">Памп (11+)</td><td>примерно раз в 4–6 дней</td><td>Самое быстрое восстановление</td></tr>
+  </table>
+  </div>
+
+  <div class="card">
+    <h4>Как отказ меняет частоту</h4>
+    <ul>
+      <li>Отказ на <strong>2–4 подходах</strong> группы → <strong>+2 дня</strong> к восстановлению.</li>
+      <li>Отказ на <strong>5–7 подходах</strong> → <strong>+4 дня</strong>.</li>
+      <li>Отказ более чем на 7 подходах постоянно — не делать.</li>
+    </ul>
+  </div>
+
+  <h3>Суперкомпенсация — ради чего все расчёты</h3>
+  <ol>
+    <li>Исходный уровень.</li>
+    <li><strong>Тренировка = провал:</strong> истощение мышц, связок, нервной системы. По-другому не бывает.</li>
+    <li><strong>Восстановление</strong>, и организм запасает чуть больше, чем было — ты стал чуть сильнее.</li>
+    <li>Новую тренировку ставим <strong>именно в этот пик</strong>. Снова провал, уже не такой глубокий, снова суперкомпенсация — и так по нарастающей.</li>
+  </ol>
+  <p>Тренировка позже пика → потенциал не реализован. Постоянно готов, но не тренируешься → проскакиваешь пик, нужно добавить объём. Перегруз, подавленное состояние → суперкомпенсации нет, идёт деградация, нужно разгрузиться. <strong>Рост силовых — признак, что человек в фазе роста, а не разрушения.</strong></p>
+
+  <h3>Шаблон «золотая середина»</h3>
+  <p>Идеализированная программа-ориентир, с неё начинают. Рассчитана на человека с хорошим восстановлением: не в жёстком стрессе, спит 8–9 часов, ест качественно, нет проблем с гормонами. Формат — 4 тренировки в неделю по 1–1,5 часа, без кардио. Каркас недели одинаковый все три недели: <span class="mono">грудь → спина → отдых → ноги → плечи → два дня отдыха</span>. Везде повтор запаса до отказа.</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Неделя</th><th>Грудь</th><th>Спина</th><th>Ноги</th><th>Плечи</th></tr>
+    <tr><td class="k">1 · акцент грудь</td><td><strong>Свободные, сила</strong><br>16 подх., 4–7</td><td>Тренажёры, средний<br>16 подх., 7–11</td><td>Свободные<br>16 подх., 7–11</td><td>10 свободных (7–11) + 10 блоки (11+)<br>20 подходов</td></tr>
+    <tr><td class="k">2 · акцент спина</td><td>Блоки, средний<br>16 подх., 7–11</td><td><strong>Свободные, сила</strong><br>16 подх., до 7</td><td>Тренажёры, сила<br>16 подх., до 7</td><td>Тренажёры + блоки, средний/памп</td></tr>
+    <tr><td class="k">3 · памп</td><td>Не свободные, памп<br>16 подх., ~12</td><td>Не свободные, памп<br>16 подх., ~12</td><td>Свободные, памп</td><td>8 свободных (до 7, <strong>сила</strong>) + 8 (7–11)</td></tr>
+  </table>
+  </div>
+
+  <div class="card">
+    <h4>Логика, которую надо понимать, а не заучивать</h4>
+    <ul>
+      <li>Одна силовая работа за неделю — на одну крупную группу. Спину сознательно не сдваиваем с силовой, даём организму комфорт.</li>
+      <li><strong>На плечах нельзя ставить силу со свободными весами сразу после груди</strong> — будет перегруз связок. Плечи получают силовую только на третьей неделе, когда ноги были в пампе и связки готовы.</li>
+      <li>Ноги на силу делаем в тренажёрах — снимаем лишнюю нагрузку с нервной системы и связок.</li>
+      <li>Трицепс и бицепс добавлены только как объём, следующая нагрузка на трицепс придёт лишь на плечах.</li>
+      <li>Сдвоенный отдых в конце — сознательный выбор: перезагружает физически и морально, успеваешь соскучиться по залу.</li>
+    </ul>
+  </div>
+
+  <h3>Как измерять прогресс</h3>
+  <p>Разовый сплит без отслеживания — работа вслепую, можно годами топтаться на месте. Прогресс всегда отслеживается в динамике: еженедельные замеры плюс регулярные фото. «Холодный взгляд» на цифры честнее субъективных ощущений.</p>
+
+  <div class="two">
+    <div class="card">
+      <h4>Что мерить</h4>
+      <ul>
+        <li><strong>Плечи</strong> — обхват по средней части, на вдохе и на выдохе, записать оба.</li>
+        <li><strong>Грудь/спина</strong> — по обхвату под мышками.</li>
+        <li><strong>Живот</strong> — самое широкое место; <strong>талия</strong> — самое узкое.</li>
+        <li><strong>Бёдра</strong> — по ягодичным, бедро отдельно.</li>
+        <li><strong>Бицепс</strong> — в напряжении и расслабленно. По нему форму не оценивают.</li>
+      </ul>
+      <p>Фокус концентрации — плечевой пояс, грудь и спина.</p>
+    </div>
+    <div class="card">
+      <h4>Как читать замеры (набор массы)</h4>
+      <ul>
+        <li>Вес растёт + талия и живот растут + верх на месте → <strong>ошибка в питании</strong>, набирается жир.</li>
+        <li>Вес растёт + плечи и спина растут + талия на месте → <strong>не вмешивайся</strong>. Не ищи от добра добро: в 99% случаев так делают хуже.</li>
+        <li>3–4 недели без изменений → корректировать объём.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Три вопроса самоанализа</h3>
+
+  <div class="tw">
+  <table>
+    <tr><th>Вопрос</th><th>Как читать ответ</th></tr>
+    <tr><td class="k">Растут ли рабочие веса<br>на свободных весах?</td><td>Спрашивать спустя <strong>3–4 недели</strong>, не через неделю. Прибавил 2,5 кг — уже хорошо. Ключевые движения: тяга штанги и гантелей в наклоне, жим и разведение гантелей, приседания, жим ногами, мёртвая тяга, тяга к подбородку, жим гантелей вверх. Стоит на месте → чаще всего <strong>перегруз</strong>, реже недогруз</td></tr>
+    <tr><td class="k">Стал ли лучше<br>чувствовать мышцы?</td><td>Ярче всего чувствуются ноги, потом грудь; плечи и спина хуже, особенно у новичков. Боль в мышце не равна эффективности, но показывает, попал ли в целевую группу: тренировал грудь, а болят плечи → пересмотреть технику, снять себя на видео. Не чувствует мышцу + замеры стоят → пара недель на тренажёрах и блоках, там ощущения ярче, потом обратно</td></tr>
+    <tr><td class="k">Как в целом себя ощущает?<br>Есть ли желание идти в зал?</td><td><strong>Позывы к отдыху — не лень.</strong> Апатия к тренировкам → на 2–3 недели убрать всю отказную и силовую работу, работать в среднем и пампинговом режиме. Убирая силовую при усталости, прогресс <strong>не теряешь</strong> — объём набираешь другими режимами</td></tr>
+  </table>
+  </div>
+
+  <div class="rule">
+    <span class="lbl">Развилка, которую спрашивают на проверке</span>
+    <p><strong>Прогресс встал. Недогруз или перегруз?</strong> Смотришь на самочувствие и желание тренироваться.</p>
+    <ul>
+      <li><strong>Есть силы, настроение, желание, но прогресс стоит</strong> → это чаще недогруз. Плавно добавляешь подходы, по 2–3 за раз: 16 → 18 → и дальше, вплоть до 32. Или добавляешь точечный отказ.</li>
+      <li><strong>Апатия, нет сил, ведёт</strong> → это перегруз. Убираешь силовую и отказную на 2–3 недели, работаешь в среднем и пампинговом режиме. Не хватает ресурсов совсем → разредить тренировки, например до 3 в неделю с днями отдыха между ними.</li>
+    </ul>
+    <p style="margin-top:10px">И то и другое — <strong>плавно, меняя один параметр</strong>. Перегруз хуже недогруза, поэтому начинаем всегда с меньшего. Силу оценивают только когда цикл повторится: тренировали грудь силой на неделе 1 — вывод делаем после следующей недели 1.</p>
+  </div>
+
+  <h3>Адаптация под условия клиента</h3>
+  <p>Отличаться могут три вещи: число тренировок, время, оборудование. Схема действий всегда одна: взять золотую середину → убрать ненужное → добавить недостающее → вести по замерам и ощущениям. <strong>Периодизация сохраняется всегда</strong> — потребности организма закрываем в любом случае.</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Условие</th><th>Что делаешь</th></tr>
+    <tr><td class="k">3 тренировки,<br>без ног</td><td>Убрать день ног и руки. Начать с 5 упражнений (можно до 6), <strong>20–28 подходов</strong>. Освободившийся ресурс восстановления → больше объёма на верх. Прогресс встал, но силы есть → 3–4 подхода в отказ на грудь, спину, плечи, <strong>отказ в начале тренировки</strong> (первый подход разминочный)</td></tr>
+    <tr><td class="k">2 тренировки</td><td>Ноги и руки убрать полностью, остаются грудь, спина, плечи (одна группа в неделю может не работать). Регулировка через отказ: <strong>24 подхода, из них 5–7 в отказ</strong>, можно до 32. Держать в голове: двух тренировок может <strong>не хватать</strong> для стимула → при застое думать в сторону «больше», а не «меньше»</td></tr>
+    <tr><td class="k">Только свободные веса<br>(дом, бедный зал)</td><td>Начать с 16 подходов. Грудь — сила, до 7. <strong>Спина и плечи — строго более 11 повторений</strong> (памп), чтобы не грузить связки и нервную систему лишний раз. Прогресс встал и ресурсы есть → опуститься до 7–11. Отказ на свободных весах — редко, нагрузка и так высокая</td></tr>
+    <tr><td class="k">Проблемы со спиной<br>и связками</td><td>Акцент на блоки и тренажёры. И наоборот — <strong>добавить больше отказа</strong>, минимум 3–4 подхода, иначе стимула мало. Схему оставляем, свободные веса меняем на блоки и тренажёры плюс отказ</td></tr>
+    <tr><td class="k">Специализация<br>на отстающую группу</td><td>Пример со спиной: спина <strong>32 подхода</strong>, грудь снизить до <strong>16</strong>, плечи <strong>8+8</strong>. Снижение других групп обязательно, иначе ресурсы распылятся. Больше 40 подходов не делать. Растёт то, что тренируешь чаще</td></tr>
+  </table>
+  </div>
+
+  <h3>Продвинутые приёмы</h3>
+  <p>Применять <strong>не часто</strong> — примерно раз в цикл и только после 2–3 базовых циклов, то есть добавлять на 4-й. Это разнообразие и способ сдвинуться с мёртвой точки, а не основа программы.</p>
+  <ul>
+    <li><strong>Суперсет</strong> — два упражнения в один подход без паузы, пампинговый режим. Лучше по схеме «базовое → добивающее».</li>
+    <li><strong>Дропсет</strong> — сделал подход, сбросил вес, продолжил (60 кг × 10 → 50 кг × 5–6). Для максимального кровенаполнения.</li>
+    <li><strong>Пирамида</strong> 12-10-8-6-8-10-12 — опускаешься до 6 и снова поднимаешься, стараясь удержать вес. На 1–2-м упражнении, пока есть силы.</li>
+    <li><strong>Обратная пирамида</strong> — только вниз, силовая манера. Плавно подводит к силовой работе, помогает подобрать вес. Раз в цикл на силовом упражнении.</li>
+  </ul>
+
+  <div class="flag">
+    <span class="lbl">Сводка частых ошибок</span>
+    <ul>
+      <li>Разовый фиксированный сплит на всю жизнь — не рассчитано восстановление.</li>
+      <li>Full body и круговой ради роста — нет концентрации и объёма на группу.</li>
+      <li>Вся тренировка на отказе, читинге, форсировании — перегруз, травмы, падение КПД.</li>
+      <li>Только сила без пампа или только памп без силы — однобокий результат.</li>
+      <li>Тренировать поясницу до или отдельно от спины — двойная нагрузка, минус в силовых.</li>
+      <li>Искать «от добра добро» при явном прогрессе — в 99% случаев хуже.</li>
+      <li>Новичкам сразу «хардкорная база» ради гормонов — без техники это бессмысленный стресс.</li>
+      <li>Оценивать силу на 4–5-м упражнении — там уже нет ресурсов, показатель недостоверен.</li>
+      <li>Проходки на 1–2 повторения — риск травмы перечёркивает всё.</li>
+      <li>Не отслеживать динамику — работа вслепую.</li>
+    </ul>
+  </div>
+</section>
+
+
+<section id="food">
+  <div class="sec-head">
+    <div class="eyebrow">Блок 04 · конспект «Программа питания», модуль 2</div>
+    <h2>Программа питания</h2>
+    <p class="lede">Ключевая идея всего модуля: <strong>мы ориентируемся на продукты, а не на калораж.</strong> Каждый продукт по-разному влияет на форму и на ЖКТ, поэтому одного подсчёта калорий недостаточно.</p>
+  </div>
+
+  <div class="rule">
+    <span class="lbl">Два фактора, по которым оценивается любой продукт</span>
+    <p><strong>Наполненность мышц</strong> — «круглые», плотные, налитые мышцы. И <strong>сухость живота</strong> — жёсткий, подтянутый живот без отёка. Представь два сосуда, которые ты наполняешь: под цель клиента (быстрее сохнуть или лучше наполняться) подбираешь нужный продукт.</p>
+  </div>
+
+  <h3>Пять составляющих рациона</h3>
+  <div class="tw">
+  <table>
+    <tr><th>Компонент</th><th>Что важно знать</th></tr>
+    <tr><td class="k">Белок</td><td>Строительный материал, отвечает за восстановление. Расщепляется на аминокислоты — важен именно их профиль. Токсичен и тяжело переваривается, зато хорошо гасит голод и напрямую в жир не откладывается</td></tr>
+    <tr><td class="k">Углеводы</td><td>Чистая энергия: силы, рабочие веса, объём нагрузки. Дают наполненность и плотность. Все углеводы, простые и сложные, в итоге запасаются как <strong>гликоген</strong> в мышцах и печени. Тренировка создаёт «резервуар» под него</td></tr>
+    <tr><td class="k">Жиры</td><td>Энергия и гормоны. <strong>9 ккал/г</strong> против 4 у белка и углеводов. Замедляют переваривание, дают насыщение</td></tr>
+    <tr><td class="k">Клетчатка</td><td>«Скраб» для кишечника, не усваивается, улучшает пищеварение. Это овощи и зелень</td></tr>
+    <tr><td class="k">Витамины</td><td>При выборе продуктов <strong>на них не концентрируемся</strong> — попасть точно по всем нереально. Базу закрывает нейтральный витаминный комплекс плюс разнообразный рацион</td></tr>
+  </table>
+  </div>
+
+  <h3>Граммовки: считаем на килограмм веса тела</h3>
+  <p>Считаем не на «сухую массу», её точно не измерить, а на общий вес тела — это проще и практичнее.</p>
+
+  <div class="slider">
+    <div class="slider-head"><span class="slider-name">Белок · стабильный</span><span class="slider-val">1,5–2,5 г/кг</span></div>
+    <div class="track">
+      <div class="range g" style="left:37.5%;width:25%"></div>
+      <div class="pin" style="left:50%"><span>старт 2</span></div>
+      <div class="pin" style="left:75%"><span>потолок 3</span></div>
+    </div>
+    <div class="scale"><span>0</span><span>1</span><span>2</span><span>3</span><span>4 г/кг</span></div>
+    <p class="slider-note">Новичок ближе к 1,5, человек с большей мышечной массой ближе к 2,5. Начинать лучше с 1,5 и повышать — у новичка ЖКТ не готов к большому объёму белка. <strong>Выше 3 г/кг не подниматься</strong>: начинаются процессы гниения в ЖКТ. Ориентиры для правки: общий белок по анализам и уровень тренированности. Голодно — белок можно немного добавить.</p>
+  </div>
+
+  <div class="slider">
+    <div class="slider-head"><span class="slider-name">Углеводы · главный рычаг</span><span class="slider-val">0,5–7 г/кг</span></div>
+    <div class="track">
+      <div class="range" style="left:6.25%;width:81.25%"></div>
+      <div class="pin" style="left:37.5%"><span>старт ~3</span></div>
+    </div>
+    <div class="scale"><span>0</span><span>2</span><span>4</span><span>6</span><span>8 г/кг</span></div>
+    <p class="slider-note">Самая динамичная цифра — именно ей ты правишь форму чаще всего. Нет прогресса и ЖКТ работает хорошо → поднимать. Нет улучшения сухости → снижать. <strong>В полный ноль уходить почти никогда не нужно:</strong> минимум углеводов сохраняет сочность и комфорт. Держим углеводы до последнего и урезаем плавно.</p>
+  </div>
+
+  <div class="slider">
+    <div class="slider-head"><span class="slider-name">Жиры · плавающие</span><span class="slider-val">0,5–3 г/кг</span></div>
+    <div class="track">
+      <div class="range a" style="left:12.5%;width:62.5%"></div>
+      <div class="pin" style="left:25%"><span>старт 1</span></div>
+    </div>
+    <div class="scale"><span>0</span><span>1</span><span>2</span><span>3</span><span>4 г/кг</span></div>
+    <p class="slider-note">На сушке уменьшаем, на наборе поднимаем до 3. Поднимаем и тогда, когда некомфортно есть много углеводов. Клетчатка не нормируется — по самочувствию и стулу.</p>
+  </div>
+
+  <div class="rule">
+    <span class="lbl">Принцип фиксированного рациона</span>
+    <p>Клиенту прописывается <strong>конкретная цифра, а не диапазон</strong> «ешь 1,5–2». Погрешность в ±50 г продукта не страшна (это ~10 г белка), но ±50 г белка — уже существенно. Оценка прогресса всегда ведётся по фиксированному рациону, иначе не с чем сравнивать.</p>
+    <p style="margin-top:10px">С нуля: взять средние стартовые значения (белок 2, углеводы 3, жиры 1), дать неделю, посмотреть, как меняется форма, дальше корректировать. <strong>Лучше начинать с большего</strong> — человеку комфортнее, он не голодает, а урезать всегда успеешь.</p>
+  </div>
+
+  <h3>Белки: что чем отличается</h3>
+  <div class="tw">
+  <table>
+    <tr><th>Продукт</th><th>Наполненность</th><th>ЖКТ и живот</th><th>Ключевое</th></tr>
+    <tr><td class="k">Курица, индейка, кролик</td><td>~7/10</td><td>Может давать тяжесть, лёгкое подвздутие</td><td>Идеальный баланс. База для тех, кто не любит готовить</td></tr>
+    <tr><td class="k">Белая рыба, морепродукты</td><td>Ниже</td><td>Отлично, легко усваивается</td><td>Есть токсичные вещества → <strong>не более 1,5 г/кг белка от рыбы</strong>, чередовать, не сидеть постоянно</td></tr>
+    <tr><td class="k">Яйца</td><td>Средне</td><td>Умеренно, бывает подвздутие</td><td>Разрекламированность не оправдана. 2 яйца на утро ради животного жира. Рацион только на яйцах не строить</td></tr>
+    <tr><td class="k">Красная рыба</td><td>Высокая</td><td>Умеренно</td><td>Жирность = полезные жиры. Дорого, те же токсины. Иногда заменять белую на красную</td></tr>
+    <tr><td class="k">Говядина, баранина</td><td>Высокая</td><td>Умеренно</td><td>Для тех, у кого плохая наполненность («подслитые» мышцы, покатые плечи), но хорошо сохнет</td></tr>
+    <tr><td class="k">Свинина</td><td>Нет эффекта</td><td>Не у всех хорошо усваивается</td><td>По минимуму, для максимального прогресса не использовать</td></tr>
+    <tr><td class="k">Молочка, творог</td><td>Нет профита</td><td>Часто вздутие, мешает усвоению других продуктов</td><td>Смысла нет</td></tr>
+  </table>
+  </div>
+
+  <p><strong>Идеальный микс белка:</strong> немного белого мяса + немного белой рыбы или морепродуктов + пара яиц на утро. Чем разнообразнее источники, тем полнее набор аминокислот. Но <strong>белок держат ровным фоном</strong> — не чередуют ради чередования, а выбирают адекватное количество и поддерживают.</p>
+
+  <h3>Углеводы: чем правишь форму</h3>
+  <div class="tw">
+  <table>
+    <tr><th>Продукт</th><th>Наполненность</th><th>Сухость живота</th><th>Ключевое</th></tr>
+    <tr><td class="k">Бурый рис, гречка</td><td>5/10, растёт с количеством</td><td>Отлично, много клетчатки</td><td>Акцент на сухость. Можно много есть и сохнуть, 200–300 г в день. Основа трансформаций «ели много и сохли»</td></tr>
+    <tr><td class="k">Рис басмати, жасмин</td><td>Отлично</td><td>Хорошо, не вредит ЖКТ</td><td>Must-have баланс, для массонабора. <strong>Не путать</strong> с длиннозёрным и круглозёрным для плова</td></tr>
+    <tr><td class="k">Макароны твёрдых сортов</td><td>Высокая</td><td>Забивают ЖКТ, «как тесто»</td><td>Только твёрдые сорта, точечно для разнообразия и наполненности</td></tr>
+    <tr><td class="k">Картофель</td><td>Хорошо, улучшает венозность</td><td>Умеренно</td><td>Только в мундире, запекать. Для тех, кому трудно много есть на наборе</td></tr>
+    <tr><td class="k">Хлебцы</td><td>Минимальная</td><td>Хорошо, даже убирают воду из-под кожи</td><td>Много клетчатки, не подзаливают. Для режима и перекуса. Не шоколадные</td></tr>
+    <tr><td class="k">Ягоды</td><td>—</td><td>Можно даже на сушке</td><td>20–30 г, минимум фруктозы</td></tr>
+    <tr><td class="k">Перловка, булгур, киноа</td><td>Нет выраженного эффекта</td><td>Мягко, приятно</td><td>Для разнообразия, когда надоели другие. Комфорт на первом месте</td></tr>
+    <tr><td class="k">Овсянка</td><td>Нет выраженного эффекта</td><td>~50% людей вздутие</td><td>С утра плюс яйца. При вздутии убрать. Чем быстрее готовится, тем хуже для формы</td></tr>
+  </table>
+  </div>
+
+  <p>Полезные аналогии: <strong>басмати ≈ куриная грудка</strong> (симбиоз), <strong>бурый рис и гречка ≈ белая рыба</strong> (лучше живот, хуже наполненность), <strong>макароны ≈ говядина</strong> (аккуратно).</p>
+
+  <div class="card">
+    <h4>Сладкое, фрукты, мёд, хлеб</h4>
+    <ul>
+      <li><strong>Сладкое и фрукты — всегда после основного приёма пищи</strong> (белок + крупа + жиры, потом фрукт). Тогда вред минимален.</li>
+      <li>Все сахара дают всплеск энергии → «ямку» → желание съесть лишнее.</li>
+      <li><strong>Показатель безопасности фрукта — сладость.</strong> Клубника и голубика кисловаты, это ок; банан приторный — аккуратно.</li>
+      <li>Допускаются: грейпфрут, зелёное кислое яблоко, ананас, киви. Ананас хорошо чистит ЖКТ за счёт волокнистости.</li>
+      <li>Мёд, джемы, сухофрукты, выпечка — пользы для формы нет. Шлифованная мука плохо, цельнозерновой хлеб можно, но названные продукты эффективнее.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>Жиры и овощи</h4>
+    <ul>
+      <li><strong>Оливковое масло</strong> — фаворит. Брать для салата, <strong>не для жарки</strong>, не доводить до кипения. Можно чередовать масла: грецкого ореха, виноградной косточки, льняное (льняное окисляется — немного).</li>
+      <li><strong>Орехи</strong> — кешью или миндаль, <strong>замачивать</strong> на ночь, если ешь много: убирает вредную кислоту. Авокадо — хорошо усваивается. Горький шоколад выше 70% — 20–30 г с утра после еды, для комфорта рациона.</li>
+      <li><strong>Овощи не нормируются.</strong> Больше на сушке (притупляют голод), меньше на массонаборе (чтобы влезло больше другого). Неограниченно: кабачки, брокколи, стручковая фасоль, огурцы, помидоры, зелень.</li>
+      <li><strong>Варёные морковь и свёкла — убираем.</strong></li>
+      <li><strong>Готовка:</strong> любая термическая обработка, кроме жарки на масле. Подгоревшее и тёмное — плохо для ЖКТ. Сухие специи — любые, форме не вредят.</li>
+    </ul>
+  </div>
+
+  <h3>Углеводно-жировое чередование — ядро метода</h3>
+  <p>Главная методология модуля, применяется постоянно — и на сушке, и на массонаборе. <strong>Белок при этом не трогаем</strong>, меняем только источники в рамках фиксированной граммовки. Клетчатку не нормируем. Реально манипулируем только углеводами и жирами.</p>
+
+  <div class="rule">
+    <span class="lbl">Формула замены</span>
+    <p style="font-size:19px;font-family:'Unbounded';font-weight:500;margin-bottom:10px">1 г углеводов = 0,45 г жиров</p>
+    <p>1 г углеводов = 4 ккал, 1 г жиров = 9 ккал, значит 0,45 × 9 ≈ 1 × 4. Для простоты можно считать 0,5. Подсчёт до грамма не нужен — масло меряешь ложкой, погрешность не важна. <strong>Базовый шаг чередования — 100 г углеводов.</strong></p>
+  </div>
+
+  <div class="two">
+    <div class="card">
+      <h4>Смещаемся к жирам, когда</h4>
+      <ul>
+        <li><strong>Массонабор + плохой аппетит</strong> — жиры дают больше калорий в меньшем объёме: 100 г масла ≈ 900 ккал против ~320 у крупы.</li>
+        <li><strong>Вздутие от круп</strong> при хорошей наполненности.</li>
+        <li><strong>Нужен отдых от углеводов</strong> — после возврата они «распирают» сильнее: жиры чистят кишечник, на чистый ЖКТ углеводы заходят лучше.</li>
+        <li><strong>Надоели крупы</strong> — моральный комфорт, открывается простор: красная рыба, авокадо, масла, орехи.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Смещаемся к углеводам, когда</h4>
+      <ul>
+        <li><strong>Нужна наполненность и плотность мышц</strong> — углеводы дают это быстрее и ярче жиров, за счёт гликогена, гарантированно.</li>
+        <li><strong>Плохо растут силовые</strong> — гликоген расходуется быстрее, чем хотелось бы.</li>
+        <li><strong>Слабость, нет энергии, сильный голод.</strong></li>
+      </ul>
+      <p>Углеводы усваиваются в мышцах только при наличии воды.</p>
+    </div>
+  </div>
+
+  <div class="rule">
+    <span class="lbl">Связка с тренировками — это спрашивают на проверке</span>
+    <p><strong>День отдыха → акцент на углеводы. День тренировки → акцент на жиры.</strong></p>
+    <p style="margin-top:10px">Почему именно так: гликоген запасается не мгновенно. Съеденные прямо в день тренировки углеводы дадут в основном подвздутие, а работать человек будет за счёт гликогена, запасённого в предыдущие дни. Жиры в день тренировки комфортнее для ЖКТ — нет вздутия и тошноты на тренировке. <strong>Эффективность тренировки зависит от питания в предыдущие дни.</strong></p>
+  </div>
+
+  <div class="card">
+    <h4>Пример на цифрах (вес 100 кг, 4 г/кг = 400 г углеводов, 50 г жиров)</h4>
+    <ul>
+      <li><strong>День 1:</strong> 400 г углеводов + 50 г жиров.</li>
+      <li><strong>День 2:</strong> 300 г углеводов + 95 г жиров — срезали 100 г углеводов, добавили 45 г жиров по формуле.</li>
+      <li><strong>День 3:</strong> возврат к 400 г углеводов + 50 г жиров.</li>
+    </ul>
+    <p>Усложнённый вариант — «лесенка»: 400 → 350 → 300, жиры корректируются соответственно. Читмилы и всё остальное отталкиваются уже от этой базы.</p>
+  </div>
+
+  <h3>Объём пищи и время приёмов</h3>
+  <ul>
+    <li>Ориентируемся на <strong>суточный объём продуктов</strong>. Есть можно в любое удобное время, когда появляется аппетит — утром, после тренировки, перед сном.</li>
+    <li><strong>Исключение — белок:</strong> делить ровными порциями в течение дня, он токсичен и тяжелее переваривается. Весь за раз не едим.</li>
+    <li>Привязка приёмов к конкретному времени — история для про-атлетов уровня «Олимпии», глобального значения не имеет.</li>
+    <li>Компоновка (больший объём на утро, убрать углеводы с вечера, разделять белковые и углеводные приёмы) — примерно 30% случаев, в основном ради морального комфорта и в основном на массонаборе.</li>
+    <li><strong>Главное — есть, когда появляется голод.</strong> Если игнорировать голод и «пихать» себя, ЖКТ в какой-то момент встаёт и аппетит пропадает совсем.</li>
+  </ul>
+
+  <h3>Пищеварение: три органа, на которые можно влиять</h3>
+  <p>Чем чище и менее обработаны продукты, тем лучше работает вся система и тем больше пользы ты извлекаешь. Поэтому чистое питание — не «старая школа», а способ получить максимальный КПД. <strong>Захламлённый ЖКТ хуже усваивает еду, и рушится вся система.</strong></p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Орган</th><th>Анализы</th><th>Что работает</th></tr>
+    <tr><td class="k">Печень и желчный</td><td>АЛТ/АСТ, билирубин прямой и непрямой</td><td>Часто проблема «печени» на деле в желчном. <strong>Урсодезоксихолевая кислота</strong> — стабилизирует желчный и печень. Гепатопротекторы типа эссенциале по опыту не помогают, иногда ухудшают анализы</td></tr>
+    <tr><td class="k">Поджелудочная</td><td>Инсулин и С-пептид</td><td>Вырабатывает ферменты — отдельные для белков, жиров, углеводов. <strong>Креон 10 000 единиц</strong> во время еды снимает нагрузку. Не постоянно, а на массонаборе при проблемах с перевариванием. Циклы набор/сушка полезны — орган отдыхает</td></tr>
+    <tr><td class="k">Микрофлора</td><td>ХМС по Осипову</td><td>«Второй мозг»: барьер, защита, утилизация токсинов, расщепление веществ. Сладкое и фруктоза кормят патогенную флору → отёк живота, хуже усвоение. Помогает <strong>синбиотик</strong> (пре- и пробиотики), 1 капсула перед сном</td></tr>
+  </table>
+  </div>
+
+  <div class="note">
+    <span class="lbl">Принцип простоты</span>
+    <p>Не гонять всех на УЗИ и дорогие анализы. Сначала — стабилизировать рацион из чистых продуктов и подкормить микрофлору клетчаткой и зеленью: примерно <strong>7 из 10</strong> замечают улучшения уже от этого. При серьёзных диагнозах — к профильному врачу.</p>
+  </div>
+
+  <h3>Как оценивать прогресс и корректировать</h3>
+
+  <div class="two">
+    <div class="card">
+      <h4>Быстрая оценка продукта после еды</h4>
+      <ul>
+        <li><strong>Клонит в сон</strong> → перебор с углеводами.</li>
+        <li><strong>Вздутие, бурление, отрыжка</strong> → продукт плохо усваивается, убрать.</li>
+        <li><strong>Насыщение и комфорт</strong> → продукт подходит.</li>
+      </ul>
+      <h4>Стул</h4>
+      <p>В идеале раз в день, допускается раз в 3 дня на сушке. Проблемы → больше зелени и овощей. Слишком частый → меньше клетчатки: бурый рис и гречку заменить на басмати, он крепит.</p>
+    </div>
+    <div class="card">
+      <h4>Замеры талии и живота</h4>
+      <ul>
+        <li><strong>Растут</strong> → сменить углеводы на «сухие».</li>
+        <li><strong>Отёк живота, нет жёсткости</strong> → тоже на «сухие».</li>
+        <li><strong>Не набирает</strong> → на «наполняющие».</li>
+      </ul>
+      <h4>Общая логика правок</h4>
+      <p>Белок — разнообразно и фоном, фиксированная граммовка. Жиры — стабильны. <strong>Углеводы — главный рычаг</strong>: меняем количество и источник.</p>
+    </div>
+  </div>
+
+  <h3>Читмилы и свободные калории</h3>
+
+  <div class="flag">
+    <span class="lbl">Читдей — никогда</span>
+    <p>Это обжираловка, которая нарушает всю систему: задержки жидкости, тяжёлое возвращение в режим, микрофлора и поджелудочная в шоке, скачки давления от соли, риск срывов. Если человек морально устал — <strong>скорее всего рацион был составлен неправильно</strong>: меняй источники продуктов, подними углеводы и добавь объёма тренировок.</p>
+  </div>
+
+  <div class="card">
+    <h4>Два способа сделать читмил правильно</h4>
+    <ol>
+      <li><strong>Свободные калории с утра после еды</strong> — сначала чистые продукты, потом сверху. ~300–400 ккал, например маленькое пирожное. Больше подходит для массонабора.</li>
+      <li><strong>Отдельный приём пищи</strong> — убрать часть продуктов и заменить свободными калориями. <strong>Белок не убирать никогда</strong>, манипулировать только углеводами и жирами. Пример: убрать 100 г углеводов (400 ккал) + 50 г жиров (450 ккал) = ~750 ккал из свободных продуктов.</li>
+    </ol>
+    <h4>Когда ставить</h4>
+    <ul>
+      <li>На следующий день <strong>после отказной или силовой тренировки</strong> — организм на восстановлении «пожирает» энергию.</li>
+      <li>На следующий день <strong>после тренировки отстающей группы</strong> при специализации — улучшаем её восстановление.</li>
+      <li><strong>«Читмил от безнадёги»</strong> — когда очень тяжело в режиме: перезагрузка нервной системы, профилактика срывов.</li>
+    </ul>
+    <h4>Как</h4>
+    <ul>
+      <li>Продукты — <strong>жирные белково-углеводные: пицца, роллы, бургер.</strong> Не чистое сладкое, это просто углеводы.</li>
+      <li><strong>Креон 10 000 единиц</strong> — 1 капсула до еды. <strong>Вода 4–5 литров</strong> в этот день.</li>
+      <li>Пропорция примерно 70% жирного и 30% сладкого, причём сладкое всегда после еды.</li>
+      <li>Оценка наутро: вес, талия, живот, объёмы. Не подскочило — в следующий раз можно больше.</li>
+      <li>Частота: жёсткого расписания нет, можно раз в неделю одним приёмом, если прогресс хороший.</li>
+    </ul>
+  </div>
+
+  <h3>Алгоритм составления схемы</h3>
+  <ol>
+    <li><strong>Снять исходные замеры и вес</strong> — вес это ориентир для граммовки.</li>
+    <li><strong>Посчитать БЖУ от веса</strong> по диапазонам выше.</li>
+    <li><strong>Набрать продукты целостно</strong> через калькулятор: белок из белковых, углеводы из углеводных, жиры из жировых. Не добирать одно за счёт другого — иначе меняется аминокислотный профиль и эффект.</li>
+    <li><strong>Подобрать продукты под цель:</strong> сохнуть → бурый рис и гречка, белая рыба; наполняться → басмати и макароны, говядина и красная рыба.</li>
+    <li><strong>Задать чередование:</strong> дни отдыха — углеводы, дни тренировок — жиры, шаг 100 г ↔ 45 г.</li>
+    <li><strong>Проверить пищеварение</strong> и при необходимости подключить поддержку по инструкции.</li>
+    <li><strong>Вести по динамике:</strong> замеры, самочувствие, стул. Корректировать в основном углеводами.</li>
+  </ol>
+
+  <div class="card">
+    <h4>Пример: сушка, вес ~80 кг</h4>
+    <ul>
+      <li><strong>Белок</strong> 80 × 2 = 160 г → 50/50 куриная грудка (350 г) + кальмары (420 г).</li>
+      <li><strong>Углеводы</strong> 4 г/кг = 320 г → бурый рис (420 г). Пересыхает и теряет наполненность → заменить на басмати. Не сохнет → урезать до 280 г.</li>
+      <li><strong>Жиры</strong> 80 г → оливковое масло (≈8 ложек) или 60 г масла + 40 г кешью.</li>
+      <li><strong>День тренировки:</strong> срезать 100 г углеводов (убрать ~130 г риса) и добавить 45 г жиров.</li>
+      <li><strong>Правки:</strong> быстро сохнет → кальмары на говядину или сёмгу. Застопорился → углеводы 50/50 бурый рис + макароны. Вес снизился → пересчитать граммовки на новый вес.</li>
+    </ul>
+  </div>
+
+  <div class="flag">
+    <span class="lbl">Частые ошибки по питанию</span>
+    <ul>
+      <li>Ориентироваться только на калораж.</li>
+      <li>Прописывать диапазон вместо фиксированной цифры — теряется база для оценки.</li>
+      <li>«Ешь что хочешь, добирай норму» — свободный рацион убивает ЖКТ.</li>
+      <li>Сладкое и фрукты между приёмами, а не после еды.</li>
+      <li>Строить рацион на одном источнике белка постоянно.</li>
+      <li>Постоянно сидеть на белой или красной рыбе — накопление токсичных веществ.</li>
+      <li>Жарить на масле, есть подгоревшее.</li>
+      <li>Забывать про желчный, поджелудочную и микрофлору при «правильном» калораже.</li>
+      <li>Читдей. В читмиле убирать белок или налегать на сладкое.</li>
+      <li>«Пихать» себя на массонаборе вопреки голоду.</li>
+    </ul>
+  </div>
+</section>
+
+
+<section id="supp">
+  <div class="sec-head">
+    <div class="eyebrow">Блок 05 · конспект «БАДы и спортивное питание», модуль 3</div>
+    <h2>БАДы и спортивное питание</h2>
+    <p class="lede">В модуле всего одна лекция, и это осознанно. <strong>Добавки идут фоном, а не как основа.</strong> Убрать весь спортпит и просто грамотно тренироваться, есть и отдыхать — результат будет, часто даже ярче, чем от закупленной горы банок.</p>
+  </div>
+
+  <div class="rule">
+    <span class="lbl">Зачем добавки вообще нужны — две цели</span>
+    <ol>
+      <li><strong>Восполнение дефицитов.</strong> На тренировках расход микро- и макроэлементов выше, плюс современные продукты сами по себе бедны. Дефициты перекрываем заранее, профилактически. <strong>Сезон роли не играет:</strong> водорастворимые витамины группы B выводятся за сутки-двое, а запаса жирорастворимых «на полгода вперёд» не бывает.</li>
+      <li><strong>Ускорение результата:</strong> памп и кровенаполнение, восстановление, больше трат энергии в покое на сушке.</li>
+    </ol>
+    <p style="margin-top:10px">Обе цели сводятся к одному: <strong>чем меньше в организме дефицитов, тем быстрее прогресс.</strong> Контролировать всё анализами — утопия: огромные деньги и постоянные заборы крови. Поэтому работаем выверенными профилактическими дозировками фоном, а при явных проблемах копаем глубже со спортивным врачом.</p>
+  </div>
+
+  <h3>Топ-3: даётся практически всем</h3>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-v">2 / 1</div><div class="stat-l">Витаминно-минеральный комплекс: 2 капсулы если тренируется, 1 если нет. С утра после еды</div></div>
+    <div class="stat g"><div class="stat-v">10–15 мг/кг</div><div class="stat-l">Омега-3 — суммарно <strong>EPA + DHA</strong> на кг веса в сутки, профилактически</div></div>
+    <div class="stat a"><div class="stat-v">3–5 тыс.</div><div class="stat-l">Витамин D3, единиц в сутки. Мужчинам ближе к 5, девушкам к 3</div></div>
+  </div>
+
+  <div class="card">
+    <h4>Витаминно-минеральный комплекс</h4>
+    <ul>
+      <li>Собирать витамины по отдельности — утопия: сложно организовать по приёму и часть между собой конфликтует. Проще готовый комплекс: выпил с утра после еды и забыл. Из пищи такой набор не набрать.</li>
+      <li><strong>Единственная добавка, где не стоит экономить.</strong> Здесь качество подбора состава реально различается.</li>
+      <li>Дозировка зависит от комплекса: у одних 2 капсулы при тренировках / 1 без, у других 3 таблетки / 2 для профилактики. Смотрим инструкцию.</li>
+      <li>Эффект на глаз не почувствуешь — только по анализам. Огромные проценты от нормы на упаковке производители завышают специально: витамины плохо усваиваются и конфликтуют, реально усвоится доля.</li>
+      <li><strong>Отдыхать от комплекса не нужно.</strong> Из пищи не добрать, поэтому фон на постоянной основе оправдан — регулируем только дозу.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>Омега-3</h4>
+    <ul>
+      <li>Важен <strong>не «рыбий жир» на банке, а количество EPA и DHA в составе</strong> — пользу дают именно эти кислоты.</li>
+      <li><strong>Пример расчёта:</strong> в популярном комплексе 2 капсулы дают примерно 600 мг суммарно. Клиенту 100 кг нужно ~1000 мг в сутки → это 3–4 капсулы.</li>
+      <li>Омега идёт фоном и <strong>в БЖУ не считается</strong> — она константа и на сушке, и на массонаборе. Все манипуляции по жирам делаются внутри обычных продуктов.</li>
+      <li>Бренд не критичен: где кислот меньше — дешевле, где больше — дороже. С утра после еды.</li>
+      <li>Наблюдаем за усвоением: изжога, отрыжка, дискомфорт (частая история с дешёвыми брендами) — меняем производителя.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>Витамин D3</h4>
+    <ul>
+      <li>Дефицит почти у всех. Жирорастворимый, накапливается.</li>
+      <li>Разброс рекомендаций широкий — от 3000 до 10000 единиц. Автор перестраховывается и держит <strong>3–5 тысяч</strong>: лучше чуть недобрать, чем перебрать.</li>
+      <li><strong>Референс по крови:</strong> до 50 — недостаточно, 50–70 — оптимально, до 100 — уровень профилактики онкологии и сердечно-сосудистых. Отсюда и разброс в рекомендациях разных врачей.</li>
+      <li>Российские формы по закону до 400 единиц в капсуле, поэтому их пьют горстью; иностранные — до 10000. Анализ по желанию: витамин D 25-OH.</li>
+    </ul>
+  </div>
+
+  <h3>Топ 4–7: по желанию</h3>
+  <p>Если хочется расширить список. Без глобальных ожиданий — тоже фон.</p>
+
+  <div class="tw">
+  <table>
+    <tr><th>Добавка</th><th>Зачем</th><th>Как</th><th>Нюанс</th></tr>
+    <tr><td class="k">Кальций</td><td>Нейромышечная проводимость — лучше чувствовать и включать мышцу. Плюс расход с потом</td><td>Профилактическая доза, с утра после еды или вторым приёмом</td><td><strong>Форма решает:</strong> хелат и цитрат усваиваются лучше, карбонат и глюконат хуже — неусвоенное откладывается. Смотреть форму на упаковке</td></tr>
+    <tr><td class="k">Цинк</td><td>Нормализует тестостерон (эффект незаметен), иммунитет</td><td>15 мг старт, можно до 30 мг, перед сном</td><td>Экспериментальная добавка. Автор сам давно не пьёт, разницы не заметил</td></tr>
+    <tr><td class="k">Витамин C</td><td>Иммунитет плюс антикатаболик — тормозит разрушение мышц после тренировки</td><td>1000 мг мужчинам, 500 мг женщинам. С утра или после тренировки</td><td>Быстро выводится, перебрать сложно. При признаках простуды — поддержка, но не лечение</td></tr>
+    <tr><td class="k">Троица для щитовидки:<br>тирозин + йодомарин + селен</td><td>Поддержка щитовидки <strong>на сушке</strong>, когда она проседает: ТТГ растёт, свободные Т3/Т4 падают</td><td>Мужчине 80–100 кг стандартная доза, девушкам вдвое меньше. С утра или вторым приёмом</td><td><strong>Это НЕ гормоны:</strong> l-тирозин ≠ эльтироксин, который гормон и назначается врачом. Добавлять, когда прогресс замедляется или ТТГ заметно поднимается — не дожидаясь верхней границы референса. На массонаборе обычно не нужна</td></tr>
+  </table>
+  </div>
+
+  <p>Троица для щитовидки — по опыту автора <strong>самая рабочая из этого списка</strong>: часто помогала стабилизировать состояние щитовидки на сушке.</p>
+
+  <div class="flag">
+    <span class="lbl">За топ-7 — можно забыть</span>
+    <p>Коллаген, тесто-бустеры, магний как отдельный элемент, альфа-липоевая кислота, комплексы для связок, коэнзим. Без них спокойно можно прогрессировать, это в большей степени маркетинг.</p>
+    <ul>
+      <li><strong>Комплексы для связок и суставов — плацебо.</strong> Проблемы связок идут от <strong>мышечного дисбаланса</strong>: спазмированная мышца подтягивает связку. Плюс нет гарантии, что элемент попадёт именно в болевую точку. Решать через остеопата, кинезиолога, массажиста — снять триггеры, а не залить добавками.</li>
+      <li><strong>Тесто-бустеры</strong> — поднятие тестостерона незначительное, выраженного эффекта нет.</li>
+      <li><strong>Дефицит железа</strong> корректируется через стабилизацию ЖКТ и сбалансированный рацион, а не банкой.</li>
+      <li><strong>Принцип — минимализм:</strong> чем больше БАДов свалить вместе, тем хуже они усваиваются и сильнее конфликтуют.</li>
+    </ul>
+  </div>
+
+  <h3>Спортпит: фавориты</h3>
+
+  <div class="two">
+    <div class="card">
+      <h4>Креатин моногидрат</h4>
+      <p>Увеличивает силовые и анаболичность за счёт задержки воды в мышцах. Именно <strong>моногидрат</strong> и именно <strong>порошок</strong> — бюджетнее и удобнее капсул.</p>
+      <ul>
+        <li><strong>5 г с утра после еды</strong>, ровным фоном. Небольшой подъём сахара после еды помогает усвоению — виноградный сок и сиропы «для разгона инсулина» не нужны.</li>
+        <li><strong>Загрузка не нужна:</strong> 10–20 г в день ~10 дней даёт эффект на пару дней раньше, не более. Автор её не использует.</li>
+        <li>Добавка накопительная. Периодизация: месяц пьёшь / месяц не пьёшь, либо фоном постоянно в умеренной дозе. Особенно полезен на массонаборе — сдвигает силовой потолок вверх.</li>
+        <li><strong>Бренд любой бюджетный</strong> — всё сыпется из одного пакета.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Цитрулин + бета-аланин</h4>
+      <p>Дают памп и кровенаполнение целевой мышцы, вывод продуктов распада, меньше закисление.</p>
+      <ul>
+        <li><strong>За 15 минут до тренировки</strong>, можно смешивать вместе.</li>
+        <li>При этой связке <strong>аргинин не нужен</strong> — в предтрениках это уловка.</li>
+        <li>Цитрулин отдельно можно 3 г с утра после еды как фон для восстановления. Без чудес.</li>
+        <li>Бренд любой бюджетный: монопродукт везде одинаковый.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Ноотропы: GABA + 5-HTP</h4>
+      <p>Логика простая: хороший глубокий сон и низкий стресс = хороший прогресс. Стресс и недосып дают отёк воды под кожей и «сливают» форму. Для тех, кто жалуется на плохой сон.</p>
+      <ul>
+        <li><strong>GABA 250 мг + 5-HTP 250 мг перед сном</strong> — минимальная доза, начинать с неё.</li>
+        <li><strong>Цикл: месяц пьёшь / месяц перерыв</strong>, чтобы не выработать психологическую зависимость.</li>
+        <li>Мелатонин — только при джетлаге, для других целей не применять.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Жиросжигатели</h4>
+      <p>Заставляют тратить больше энергии в покое — можно сохнуть, не урезая еду. Серьёзная штука: <strong>только короткими отрезками 2–4 недели</strong> и только опытным атлетам, которые знают, что это на них работает.</p>
+      <ul>
+        <li><strong>Противопоказания:</strong> проблемы с сердечно-сосудистой системой, излишний стресс, плохой сон. Жиросжигатель разгонит организм ещё сильнее, вплоть до нервного срыва.</li>
+        <li>Схема фаворита: 1 капсула с утра после еды, чтобы к вечеру действие ушло и не мешало сну. Вечером не пить.</li>
+        <li><strong>Без жиросжигателей формы достичь можно</strong> — аккуратным урезанием углеводов.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Спортпит: по желанию и ситуативно</h3>
+
+  <div class="card">
+    <h4>Протеин — «король или шут»</h4>
+    <ul>
+      <li><strong>В ~90% случаев белок лучше добирать из чистых продуктов:</strong> форма жёстче и плотнее, меньше проблем с ЖКТ, меньше голода на сушке, разнообразнее аминокислотный профиль.</li>
+      <li>Тяжело съедать норму белка → <strong>сначала снизить белок к нижней границе диапазона</strong>, чтобы он был хотя бы из чистых продуктов. Протеин — только если совсем не успеваешь есть: разъезды, насыщенный ритм.</li>
+      <li><strong>Цена не ориентир, ориентир — тест на себе.</strong> Даже дорогой сывороточный может давать дискомфорт, а дешёвый подойти.</li>
+      <li>Если плохо усваивается молочный белок (вздутие от молока и творога) — сывороточный, скорее всего, не подойдёт. <strong>Воспаление ЖКТ не всегда проявляется вздутием</strong>: может быть скрытым и позже ухудшать аппетит на массонаборе и давать отёк живота.</li>
+      <li>При необходимости — растительный (соевый) протеин, порция ~30 г: жертвуем пищевой ценностью ради сохранности ЖКТ.</li>
+      <li>Виды: концентрат (менее очищен), изолят (больше очистки, дороже, для сушки), гидролизат (90–95% чистого белка, при проблемах с молочным белком может усваиваться лучше). Часто проще и дешевле купить стейк красной рыбы.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>Гейнер — «убийца ЖКТ»</h4>
+    <p>Протеин плюс углеводы. Убивает микрофлору и аппетит — сладкое между приёмами, — а углеводы в порошке усваиваются иначе, «пролетают как скраб» и нужного эффекта не дают. Дешевизна за счёт некачественных углеводов, по сути сахара. <strong>Смысла в гейнерах нет.</strong></p>
+    <p><strong>Альтернатива — амилопектин</strong> для тех, кто не успевает поесть: крахмалистая структура, высокий ГИ, быстро усваивается, наполненность неплохая, дискомфорта меньше. Вписывается в суточную норму углеводов — например, из 300 г углеводов 200 из продуктов и 100 из амилопектина. Но при возможности — всегда чистая пища.</p>
+  </div>
+
+  <div class="tw">
+  <table>
+    <tr><th>Добавка</th><th>Суть и вывод</th><th>Как</th></tr>
+    <tr><td class="k">Глютамин</td><td>Профилактика иммунитета, на сушке. Ярко выраженного эффекта нет</td><td>5 г (мужчина 60–70 кг) до 10 г (тяжелее или девушке) перед сном. Бренд любой</td></tr>
+    <tr><td class="k">Аминокислотные комплексы</td><td>Полный аминокислотный профиль, дают хорошую плотность и жёсткость мышц. Но дорого</td><td><strong>От 20 таблеток в день</strong> для заметного эффекта, заменяют часть белка. Здесь <strong>бренд важен</strong>: у дешёвых аналогов обычно 3–5 аминокислот</td></tr>
+    <tr><td class="k">BCAA</td><td>Три незаменимые аминокислоты. Ждут многого — <strong>на форму эффекта нет</strong>: нужен полный профиль, а не три. Соотношения 2:1:1 или 8:1:1 роли не играют</td><td>Скорее «для удовольствия»: сладкая вода на тренировке, на диете как безвредный сладкий вкус</td></tr>
+    <tr><td class="k">L-карнитин</td><td><strong>Жиросжигающего эффекта нет.</strong> Даёт чуть больше энергии на кардио — доля процента</td><td>500 мг – 1 г перед кардио или тренировкой, вид любой</td></tr>
+    <tr><td class="k">Предтреники</td><td>Стимуляторы, автор не сторонник: намешано всё подряд. Концентрация от кофеина, памп от цитрулина и бета-аланина — которые и так в составе. <strong>Не «распампит в 5 раз».</strong> Риск апатии к тренировкам без них, зажора после сушки, перегруза ЦНС</td><td>Лучше отдохнуть или снизить объём тренировки</td></tr>
+    <tr><td class="k">Кофеин</td><td>Улучшает <strong>концентрацию</strong>, а не энергию — чистая энергия только от углеводов</td><td>1–2 таблетки за 20 минут до тренировки, начать с одной. Противопоказания: давление, сосуды</td></tr>
+    <tr><td class="k">Таурин</td><td>Мягко улучшает концентрацию без резких подъёмов и провалов. <strong>Не путать с тироксином и тирозином</strong></td><td>~1 г с утра, перед днями с высокой мозговой активностью</td></tr>
+  </table>
+  </div>
+
+  <p>Кофеин и таурин <strong>не накапливаются</strong>, в отличие от витаминов: простимулировали и вышли. Не чаще примерно раза в неделю, чтобы не было психологической подсадки.</p>
+
+  <h3>Где экономить, а где тратиться</h3>
+  <div class="two">
+    <div class="card">
+      <h4>Стоит потратиться</h4>
+      <p>Витаминно-минеральный комплекс и аминокислотные комплексы — всё многокомпонентное, где качество подбора реально различается.</p>
+    </div>
+    <div class="card">
+      <h4>Можно смело экономить</h4>
+      <p>Креатин, цитрулин, бета-аланин, глютамин, L-карнитин — монопродукты, «всё из одного пакета». Переплата за раскрученный бренд смысла не имеет.</p>
+    </div>
+  </div>
+  <p>Главное при покупке — <strong>надёжный поставщик и внимательное чтение состава</strong>. Некоторые добавляют ферменты в протеин, чтобы скрыть вздутие, — но воспаление ЖКТ это не отменяет.</p>
+
+  <h3>Готовая схема приёма по времени дня</h3>
+  <div class="tw">
+  <table>
+    <tr><th>Когда</th><th>Что</th></tr>
+    <tr><td class="k">С утра после еды<br>одной охапкой</td><td>Витаминно-минеральный комплекс, омега-3, витамин D3, креатин 5 г, цитрулин 3 г фоном, жиросжигатель если он в схеме. При достаточном количестве воды проблем с пищеварением не будет</td></tr>
+    <tr><td class="k">Вторым приёмом пищи</td><td>Кальций, троица для щитовидки — чтобы не конфликтовали с витаминами при расширенном списке</td></tr>
+    <tr><td class="k">За 15–20 минут<br>до тренировки</td><td>Цитрулин + бета-аланин на памп, кофеин на концентрацию, L-карнитин перед кардио</td></tr>
+    <tr><td class="k">После тренировки</td><td>Витамин C как антикатаболик</td></tr>
+    <tr><td class="k">Перед сном</td><td>GABA + 5-HTP при плохом сне, цинк, глютамин</td></tr>
+  </table>
+  </div>
+
+  <div class="rule">
+    <span class="lbl">Как собрать список клиенту</span>
+    <ol>
+      <li><strong>База, обязательно:</strong> витаминно-минеральный комплекс, омега-3 по EPA+DHA, витамин D3. Всё с утра после еды.</li>
+      <li><strong>По желанию:</strong> кальций в форме хелат или цитрат, цинк, витамин C, троица для щитовидки — на сушке.</li>
+      <li><strong>Для ускорения:</strong> креатин фоном под силовые, цитрулин + бета-аланин под памп, GABA + 5-HTP при плохом сне, жиросжигатель — только спринтом и без противопоказаний.</li>
+      <li><strong>Ситуативно:</strong> протеин или амилопектин, если не успевает поесть; кофеин и таурин на концентрацию.</li>
+      <li><strong>Начинать с минимальных доз</strong>, наблюдать за усвоением и самочувствием, повышать при необходимости: увеличить всегда можно, уменьшить сложнее.</li>
+    </ol>
+  </div>
+
+  <div class="flag">
+    <span class="lbl">Частые ошибки по добавкам</span>
+    <ul>
+      <li>Делать ставку на добавки как на основу — они только фон.</li>
+      <li>Пытаться контролировать все витамины еженедельными анализами.</li>
+      <li>Собирать витамины по отдельности вместо готового комплекса.</li>
+      <li>Экономить на витаминно-минеральном комплексе — здесь качество как раз важно.</li>
+      <li>Выбирать омегу по надписи «рыбий жир», а не по количеству EPA + DHA.</li>
+      <li>Завышать дозу D3 в погоне за верхней границей референса.</li>
+      <li>Ждать эффекта от комплексов для связок и тесто-бустеров.</li>
+      <li>Сваливать много БАДов вместе — хуже усваиваются и конфликтуют.</li>
+      <li>Пить жиросжигатель долго или при проблемах с сердцем, сном, стрессом.</li>
+      <li>Гейнер как способ набора. Протеин по цене, а не по тесту на себе.</li>
+      <li>Подсаживаться на предтреники и стимуляторы.</li>
+      <li>Путать таурин с тироксином и тирозином, а l-тирозин — с гормоном эльтироксином.</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <span class="lbl">Рамка роли</span>
+    <p>Всё выше — методология и личный опыт автора, изложенные в ознакомительном формате, а не назначение. По лекарственным препаратам дозировки смотрим по инструкции, при серьёзных вопросах — к врачу. Гормоны, рецептурные препараты и вмешательство в женский цикл — не твоя зона ни при каких обстоятельствах.</p>
+  </div>
+</section>
+
+
+<section id="cheat">
+  <div class="sec-head">
+    <div class="eyebrow">Блок 06</div>
+    <h2>Шпаргалка</h2>
+    <p class="lede">Всё, что чаще всего нужно вспомнить прямо в диалоге с клиентом — на одном экране.</p>
+  </div>
+
+  <h3>Цифры</h3>
+  <div class="tw">
+  <table>
+    <tr><th>Блок</th><th>Показатель</th><th>Значение</th></tr>
+    <tr><td class="k" rowspan="5">Анализы</td><td>Период до пересдачи</td><td><strong>~6 недель</strong></td></tr>
+    <tr><td>Отдых перед пересдачей на печень и креатинин</td><td>4–5 дней</td></tr>
+    <tr><td>ТТГ, рабочий ориентир</td><td>около 2 при референсе 0,4–4</td></tr>
+    <tr><td>Гематокрит</td><td>&gt;51% — внимание, ~54% на препаратах — тревога</td></tr>
+    <tr><td>Жиры при плохих липидах</td><td>минимум 1 г/кг, можно до 1,5</td></tr>
+
+    <tr><td class="k" rowspan="4">Сон</td><td>Норма засыпания</td><td>5–30 минут</td></tr>
+    <tr><td>Правило сомнологов</td><td>не заснул за <strong>15 минут</strong> — встать</td></tr>
+    <tr><td>Кофеин</td><td>не позже чем за 6 часов до сна</td></tr>
+    <tr><td>Дневной сон</td><td>не дольше 20–30 минут</td></tr>
+
+    <tr><td class="k" rowspan="6">Тренировки</td><td>Объём на группу</td><td>14–32 подхода, <strong>старт 16</strong></td></tr>
+    <tr><td>Режимы повторений</td><td>4–7 сила · 7–11 средний · 12+ памп</td></tr>
+    <tr><td>Частота: сила / средний / памп</td><td>~14 дней / 6–10 дней / 4–6 дней</td></tr>
+    <tr><td>Отказ добавляет к восстановлению</td><td>2–4 подхода = +2 дня; 5–7 = +4 дня</td></tr>
+    <tr><td>Кор</td><td>5–6 подходов 2 раза в неделю</td></tr>
+    <tr><td>Шаг добавления объёма</td><td>+2–3 подхода за раз</td></tr>
+
+    <tr><td class="k" rowspan="5">Питание</td><td>Белок</td><td>1,5–2,5 г/кг, потолок 3</td></tr>
+    <tr><td>Углеводы</td><td>0,5–7 г/кг, главный рычаг</td></tr>
+    <tr><td>Жиры</td><td>0,5–3 г/кг</td></tr>
+    <tr><td>Формула замены</td><td><strong>1 г углеводов = 0,45 г жиров</strong></td></tr>
+    <tr><td>Шаг чередования</td><td>100 г углеводов</td></tr>
+
+    <tr><td class="k" rowspan="5">БАДы</td><td>Омега-3</td><td>10–15 мг EPA+DHA на кг веса</td></tr>
+    <tr><td>Витамин D3</td><td>3–5 тыс. единиц (мужчинам ближе к 5)</td></tr>
+    <tr><td>Витаминно-минеральный комплекс</td><td>полная доза при тренировках, ниже без них</td></tr>
+    <tr><td>Креатин</td><td>5 г ровным фоном, без загрузки</td></tr>
+    <tr><td>Цитрулин + бета-аланин</td><td>за 15 минут до тренировки</td></tr>
+  </table>
+  </div>
+
+  <h3>Развилки, на которых чаще всего ошибаются</h3>
+  <div class="tw">
+  <table>
+    <tr><th>Ситуация</th><th>Правильный ход</th></tr>
+    <tr><td class="k">Одна плохая сдача анализов, но форма и самочувствие в порядке</td><td>Пометка + работа базой + пересдача через 6 недель. Не действуем по одной точке</td></tr>
+    <tr><td class="k">Клиент верит гаджету больше, чем себе</td><td>Ориентир — самочувствие. Браслет годится как актиграф, фазы сна он не определяет. Нормальный сон не чиним</td></tr>
+    <tr><td class="k">Прогресс встал, есть силы и желание</td><td>Скорее недогруз: плавно +2–3 подхода, вплоть до 32, или точечный отказ</td></tr>
+    <tr><td class="k">Прогресс встал, апатия и нет сил</td><td>Перегруз: убрать силовую и отказную на 2–3 недели, работать в среднем и пампинговом режиме</td></tr>
+    <tr><td class="k">Прогресс идёт, всё хорошо</td><td><strong>Ничего не трогаем.</strong> От добра добра не ищут</td></tr>
+    <tr><td class="k">Клиент хочет больше еды</td><td>Сначала поднимаем объём тренировок. Кардио — крайняя мера: форму делаем питанием и объёмом работы</td></tr>
+    <tr><td class="k">Клиент хочет читдей</td><td>Читмил, отдельным приёмом или с утра после еды. Белок не убираем. Читдей — никогда</td></tr>
+    <tr><td class="k">Вздутие и отёк живота при верном калораже</td><td>Смотрим на пищеварение: чистота продуктов, желчный, поджелудочная, микрофлора. Не режем калории ещё сильнее</td></tr>
+    <tr><td class="k">Клиент просит «что-нибудь для щитовидки»</td><td>Сначала база и приоритеты. Троица — поддержка, не гормоны. Гормоны щитовидки — только эндокринолог</td></tr>
+    <tr><td class="k">Серьёзное отклонение в анализах или в самочувствии</td><td>Направляешь к профильному врачу и фиксируешь это. Свою рамку не переходишь</td></tr>
+  </table>
+  </div>
+
+  <div class="rule">
+    <span class="lbl">Как это звучит в работе</span>
+    <p>Три вопроса, которые ты задаёшь себе перед каждой корректировкой: <strong>1)</strong> есть ли у меня динамика или я реагирую на одну точку? <strong>2)</strong> отработала ли база, прежде чем я усложняю? <strong>3)</strong> меняю ли я один параметр или сразу несколько?</p>
+    <p style="margin-top:10px">Если на все три ответ правильный — решение почти наверняка верное, даже если конкретную цифру ты забыл.</p>
+  </div>
+</section>
+
+<footer>
+  <p><strong>Что дальше.</strong> Прочитал выжимку — проходи мини-чек и тест. Порог по тесту 80% (24 из 30), блок «Анализы крови» нужно закрыть без ошибок. Потом полные конспекты: там нюансы, разборы и примеры из практики, которых здесь нет.</p>
+  <p style="margin-top:14px">Внутренний документ SorokinFit. Материал носит методологический характер и не является медицинским назначением. При серьёзных отклонениях в анализах или самочувствии специалист направляет клиента к профильному врачу — эндокринологу, сомнологу и так далее.</p>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav a'));
+  var secs  = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  function sync(){
+    var y = window.scrollY + 120, cur = 0;
+    secs.forEach(function(s,i){ if(s && s.offsetTop <= y) cur = i; });
+    links.forEach(function(a,i){ a.classList.toggle('on', i === cur); });
+  }
+  window.addEventListener('scroll', sync, {passive:true});
+  window.addEventListener('resize', sync);
+  sync();
+})();
+</script>
+
+
+<script>
+(function(){
+  var g=document.getElementById('gate'), i=document.getElementById('gate-in'),
+      b=document.getElementById('gate-btn'), e=document.getElementById('gate-err'),
+      c=document.querySelector('.gate-card');
+  function open(){
+    document.body.classList.remove('locked');
+    g.remove();
+    window.scrollTo(0,0);
+    window.dispatchEvent(new Event('scroll'));
+  }
+  function check(){
+    if(btoa(i.value.trim())==='MjY='){ open(); return; }
+    e.classList.add('on'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
+    i.value=''; i.focus();
+  }
+  b.addEventListener('click', check);
+  i.addEventListener('keydown', function(ev){ if(ev.key==='Enter') check(); });
+  i.addEventListener('input', function(){ e.classList.remove('on'); });
+  i.focus();
+})();
+</script>
+</body>
+</html>
