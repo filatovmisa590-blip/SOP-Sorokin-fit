@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ядро — пространство управления</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+:root{
+  --bg:#f4f3f0; --bg2:#eceae6;
+  --card:#fff; --ink:#14141a; --ink2:#33333c; --muted:#71717d; --faint:#a2a2ad;
+  --line:#e6e4df; --line2:#d8d5ce;
+  --acc:#c8202a; --acc2:#e8434d; --acc-deep:#8e1219; --acc-soft:#fdeced;
+  --green:#1f7a4c; --green-soft:#e6f3ec; --blue:#2b4f9e; --blue-soft:#e9eefa;
+  --amber:#a8760f; --amber-soft:#fbf1dc; --gold:#a8801f; --gray:#8b8b95;
+  --r-sm:10px; --r:14px; --r-lg:20px; --r-xl:26px;
+  --sh-xs:0 1px 2px rgba(15,15,20,.04);
+  --sh-sm:0 2px 4px rgba(15,15,20,.05), 0 1px 2px rgba(15,15,20,.04);
+  --sh:0 4px 10px rgba(15,15,20,.05), 0 12px 28px rgba(15,15,20,.07);
+  --sh-lg:0 10px 24px rgba(15,15,20,.09), 0 34px 70px rgba(15,15,20,.16);
+  --sh-xl:0 20px 50px rgba(15,15,20,.16), 0 60px 120px rgba(15,15,20,.22);
+  --ez:cubic-bezier(.22,.9,.28,1);
+}
+html{ scroll-behavior:smooth; }
+body{ background:var(--bg); color:var(--ink); font-family:'Inter',system-ui,sans-serif;
+  min-height:100vh; padding:0 20px 96px; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  background-image:radial-gradient(1200px 500px at 50% -220px, rgba(200,32,42,.05), transparent 70%); }
+.wrap{ max-width:1020px; margin:0 auto; }
+::selection{ background:var(--ink); color:#fff; }
+
+/* ─── HEADER ─── */
+header{ padding:52px 0 26px; }
+.head-main{ display:flex; align-items:center; gap:22px; }
+.emblem{ width:64px; height:64px; flex-shrink:0; border-radius:19px; position:relative; overflow:hidden;
+  background:linear-gradient(145deg,#22222a,#0e0e13); display:flex; align-items:center; justify-content:center;
+  box-shadow:0 8px 22px rgba(15,15,20,.28), inset 0 1px 0 rgba(255,255,255,.09); }
+.emblem::after{ content:''; position:absolute; inset:0; background:linear-gradient(160deg,rgba(255,255,255,.14),transparent 46%); }
+.emblem span{ font-size:29px; color:var(--acc2); line-height:1; position:relative; z-index:1; }
+.head-text{ flex:1; min-width:0; }
+.eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.26em; text-transform:uppercase;
+  color:var(--acc); margin-bottom:9px; font-weight:500; }
+.head-text h1{ font-family:'Archivo',sans-serif; font-size:clamp(32px,6vw,54px); font-weight:800; line-height:.92;
+  letter-spacing:-.028em; text-transform:uppercase; }
+.head-text h1 em{ font-style:normal; color:var(--acc); }
+.head-sub{ font-size:13.5px; color:var(--muted); margin-top:12px; max-width:56ch; line-height:1.6; }
+
+/* ─── TABS ─── */
+.tabs{ display:flex; margin:30px 0 26px; background:var(--card); border:1px solid var(--line);
+  border-radius:var(--r-lg); padding:6px; box-shadow:var(--sh-sm); position:relative; }
+.tab{ flex:1; padding:13px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em;
+  text-transform:uppercase; border:none; border-radius:14px; cursor:pointer; background:transparent;
+  color:var(--muted); transition:color .2s var(--ez), background .24s var(--ez), transform .18s var(--ez); text-align:center; font-weight:500; }
+.tab.active{ background:var(--ink); color:#fff; box-shadow:0 3px 10px rgba(15,15,20,.2); }
+.tab:hover:not(.active){ color:var(--ink); background:var(--bg2); }
+.tab:active{ transform:scale(.975); }
+.panel{ display:none; }
+.panel.active{ display:block; animation:rise .38s var(--ez); }
+@keyframes rise{ from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;} }
+
+/* ─── SHARED ─── */
+.info{ width:20px; height:20px; flex-shrink:0; border:1.5px solid var(--line2); background:var(--card);
+  color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center; cursor:pointer; line-height:1; padding:0;
+  transition:all .2s var(--ez); }
+.info:hover{ background:var(--acc); color:#fff; border-color:var(--acc); transform:scale(1.15) rotate(8deg); }
+.section-intro{ background:linear-gradient(140deg,#1b1b22,#0f0f14); color:#e7e7ea; border-radius:var(--r-lg);
+  padding:24px 28px; margin-bottom:22px; font-size:14px; line-height:1.65; box-shadow:var(--sh);
+  position:relative; overflow:hidden; }
+.section-intro::before{ content:''; position:absolute; top:-60%; right:-10%; width:320px; height:320px;
+  background:radial-gradient(circle, rgba(200,32,42,.18), transparent 68%); pointer-events:none; }
+.section-intro b{ color:#fff; font-weight:600; }
+.section-intro .si-red{ color:var(--acc2); font-weight:600; }
+.intro-head{ display:flex; align-items:center; gap:11px; margin-bottom:10px; position:relative; }
+.intro-head .it{ font-family:'Archivo',sans-serif; font-size:16px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+.intro-head .info{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.2); color:#c9c9d0; }
+.intro-head .info:hover{ background:var(--acc); border-color:var(--acc); color:#fff; }
+.controls{ display:flex; gap:11px; align-items:center; flex-wrap:wrap; margin-bottom:20px; }
+.chips{ display:flex; gap:7px; flex-wrap:wrap; flex:1; }
+.chip{ padding:8px 15px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em;
+  text-transform:uppercase; border:1.5px solid var(--line2); border-radius:22px; background:var(--card);
+  color:var(--muted); cursor:pointer; transition:all .18s var(--ez); }
+.chip:hover{ border-color:var(--ink); color:var(--ink); transform:translateY(-1px); }
+.chip.active{ background:var(--ink); color:#fff; border-color:var(--ink); box-shadow:0 3px 9px rgba(15,15,20,.18); }
+.search{ background:var(--card); border:1.5px solid var(--line2); border-radius:12px; padding:10px 15px;
+  font-family:'Inter',sans-serif; font-size:13px; color:var(--ink); outline:none; min-width:160px; transition:all .18s var(--ez); }
+.search:focus{ border-color:var(--acc); box-shadow:0 0 0 4px rgba(200,32,42,.08); }
+.search::placeholder{ color:var(--faint); }
+.btn{ padding:11px 20px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.07em;
+  text-transform:uppercase; border:1.5px solid var(--ink); border-radius:12px; cursor:pointer; background:transparent;
+  color:var(--ink); transition:all .2s var(--ez); white-space:nowrap; font-weight:500; }
+.btn:hover{ background:var(--ink); color:#fff; transform:translateY(-1px); box-shadow:0 5px 14px rgba(15,15,20,.2); }
+.btn:active{ transform:translateY(0); }
+.btn-primary{ background:var(--ink); color:#fff; box-shadow:0 3px 10px rgba(15,15,20,.18); }
+.btn-primary:hover{ background:#000; }
+.btn-red{ background:var(--acc); color:#fff; border-color:var(--acc); box-shadow:0 3px 12px rgba(200,32,42,.3); }
+.btn-red:hover{ background:var(--acc-deep); border-color:var(--acc-deep); box-shadow:0 6px 18px rgba(200,32,42,.36); }
+.btn-ghost{ border-color:var(--line2); color:var(--muted); }
+.btn-ghost:hover{ background:var(--bg2); color:var(--ink); border-color:var(--line2); box-shadow:var(--sh-sm); }
+.btn-sm{ padding:8px 15px; font-size:10px; }
+
+/* ─── EDITOR ─── */
+.editor{ background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:26px 28px;
+  margin-bottom:22px; box-shadow:var(--sh); animation:rise .3s var(--ez); }
+.ed-title{ font-family:'Archivo',sans-serif; font-size:17px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.02em; margin-bottom:20px; }
+.ed-row{ margin-bottom:16px; }
+.ed-row:last-of-type{ margin-bottom:0; }
+.ed-label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+.ed-row input[type=text], .ed-row input[type=number], .ed-row textarea, .ed-row select{ width:100%;
+  background:var(--bg); border:1.5px solid var(--line); border-radius:12px; padding:12px 15px;
+  font-family:'Inter',sans-serif; font-size:13.5px; color:var(--ink); resize:vertical; outline:none;
+  line-height:1.6; transition:all .18s var(--ez); }
+.ed-row textarea{ min-height:70px; }
+.ed-row input:focus, .ed-row textarea:focus, .ed-row select:focus{ border-color:var(--acc); background:#fff;
+  box-shadow:0 0 0 4px rgba(200,32,42,.08); }
+.ed-row input::placeholder, .ed-row textarea::placeholder{ color:var(--faint); }
+.ed-row select{ cursor:pointer; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%2371717d' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 15px center; padding-right:38px; }
+.ed-actions{ display:flex; gap:10px; margin-top:22px; }
+
+/* ─── PRINCIPLE CARD ─── */
+.empty-state{ text-align:center; color:var(--muted); padding:64px 28px; background:var(--card);
+  border:1px dashed var(--line2); border-radius:var(--r-lg); line-height:1.7; font-size:14px; }
+.p-card{ background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:22px 24px;
+  margin-bottom:13px; box-shadow:var(--sh-sm); transition:all .22s var(--ez); position:relative; overflow:hidden; }
+.p-card::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:transparent; transition:background .22s; }
+.p-card:hover{ border-color:var(--line2); box-shadow:var(--sh); transform:translateY(-2px); }
+.p-card:hover::before{ background:var(--acc); }
+.p-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:13px; }
+.cat-tag{ display:inline-flex; align-items:center; gap:7px; font-family:'IBM Plex Mono',monospace; font-size:9px;
+  letter-spacing:.1em; text-transform:uppercase; font-weight:500; color:var(--muted); }
+.cat-tag .dot{ width:8px; height:8px; border-radius:2.5px; background:var(--gray); }
+.cat-life .dot{ background:var(--green); } .cat-life{ color:var(--green); }
+.cat-company .dot{ background:var(--blue); } .cat-company{ color:var(--blue); }
+.cat-people .dot{ background:var(--acc); } .cat-people{ color:var(--acc); }
+.cat-decisions .dot{ background:var(--ink); } .cat-decisions{ color:var(--ink2); }
+.cat-money .dot{ background:var(--gold); } .cat-money{ color:var(--gold); }
+.cat-other .dot{ background:var(--gray); } .cat-other{ color:var(--gray); }
+.p-actions{ display:flex; gap:6px; opacity:0; transition:opacity .2s; }
+.p-card:hover .p-actions{ opacity:1; }
+.icon-btn{ width:30px; height:30px; border:1.5px solid var(--line2); background:var(--card); color:var(--muted);
+  border-radius:9px; cursor:pointer; font-size:13px; line-height:1; display:flex; align-items:center;
+  justify-content:center; transition:all .18s var(--ez); }
+.icon-btn:hover{ background:var(--ink); color:#fff; border-color:var(--ink); transform:translateY(-1px); }
+.icon-btn.del:hover{ background:var(--acc); border-color:var(--acc); }
+.p-trigger{ font-size:12.5px; color:var(--muted); margin-bottom:7px; }
+.p-trigger .tw{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--faint); margin-right:7px; }
+.p-rule{ font-family:'Archivo',sans-serif; font-size:19px; font-weight:600; line-height:1.35; letter-spacing:-.015em; }
+.p-why{ font-size:13px; color:var(--muted); line-height:1.6; margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
+.p-why .ww{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--acc); margin-right:7px; }
+.seed-badge{ font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--faint); border:1px solid var(--line2); border-radius:5px; padding:2px 7px; margin-left:9px; }
+
+/* ─── MACHINE ─── */
+.mach-bar{ display:flex; gap:11px; align-items:center; flex-wrap:wrap; margin-bottom:22px; }
+.mach-title{ flex:1; min-width:190px; background:var(--card); border:1.5px solid var(--line2); border-radius:12px;
+  padding:12px 17px; font-family:'Archivo',sans-serif; font-size:15px; font-weight:600; color:var(--ink);
+  outline:none; transition:all .18s var(--ez); }
+.mach-title:focus{ border-color:var(--acc); box-shadow:0 0 0 4px rgba(200,32,42,.08); }
+.mach-title::placeholder{ color:var(--faint); font-weight:400; }
+.mach-sel{ background:var(--card); border:1.5px solid var(--line2); border-radius:12px; padding:11px 34px 11px 15px;
+  font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--muted); cursor:pointer; outline:none; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%2371717d' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 13px center; max-width:210px; transition:all .18s; }
+.mach-sel:hover{ border-color:var(--ink); }
+.loop-note{ background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:19px 24px;
+  margin-bottom:20px; display:flex; align-items:center; gap:19px; box-shadow:var(--sh-sm); }
+.loop-ico{ width:46px; height:46px; flex-shrink:0; border-radius:14px; background:linear-gradient(145deg,#22222a,#0e0e13);
+  color:var(--acc2); display:flex; align-items:center; justify-content:center; font-size:23px;
+  box-shadow:0 5px 14px rgba(15,15,20,.22); }
+.loop-txt{ font-size:13px; color:var(--muted); line-height:1.6; }
+.loop-txt b{ color:var(--ink); font-weight:600; }
+.steps{ display:flex; flex-direction:column; gap:12px; }
+.step{ background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:22px 24px;
+  box-shadow:var(--sh-sm); border-left:3px solid var(--line2); transition:box-shadow .22s var(--ez); }
+.step:hover{ box-shadow:var(--sh); }
+.step.s1{ border-left-color:var(--ink); } .step.s2{ border-left-color:var(--acc); }
+.step.s3{ border-left-color:var(--blue); } .step.s4{ border-left-color:var(--green); } .step.s5{ border-left-color:var(--gold); }
+.step-head{ display:flex; align-items:center; gap:12px; margin-bottom:13px; }
+.step-num{ width:32px; height:32px; flex-shrink:0; border-radius:10px; background:var(--ink); color:#fff;
+  font-family:'Archivo',sans-serif; font-size:15px; font-weight:700; display:flex; align-items:center;
+  justify-content:center; box-shadow:0 3px 8px rgba(15,15,20,.2); }
+.step.s2 .step-num{ background:var(--acc); box-shadow:0 3px 8px rgba(200,32,42,.28); }
+.step.s3 .step-num{ background:var(--blue); } .step.s4 .step-num{ background:var(--green); } .step.s5 .step-num{ background:var(--gold); }
+.step-title{ font-family:'Archivo',sans-serif; font-size:18px; font-weight:700; letter-spacing:-.015em; flex:1; }
+.step-hint{ font-size:12.5px; color:var(--muted); margin-bottom:13px; line-height:1.55; }
+.step textarea{ width:100%; background:var(--bg); border:1.5px solid var(--line); border-radius:12px;
+  padding:12px 15px; font-family:'Inter',sans-serif; font-size:13.5px; color:var(--ink); resize:vertical;
+  outline:none; min-height:78px; line-height:1.65; transition:all .18s var(--ez); }
+.step textarea:focus{ border-color:var(--acc); background:#fff; box-shadow:0 0 0 4px rgba(200,32,42,.08); }
+.step textarea::placeholder{ color:var(--faint); }
+.fork{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:15px; }
+.fork-btn{ padding:15px 13px; border:1.5px solid var(--line2); border-radius:13px; cursor:pointer;
+  background:var(--bg); transition:all .2s var(--ez); text-align:center; }
+.fork-btn:hover{ border-color:var(--ink); transform:translateY(-2px); box-shadow:var(--sh-sm); }
+.fork-btn.sel-design{ background:var(--ink); border-color:var(--ink); box-shadow:0 5px 14px rgba(15,15,20,.2); }
+.fork-btn.sel-people{ background:var(--acc); border-color:var(--acc); box-shadow:0 5px 14px rgba(200,32,42,.28); }
+.fork-btn.sel-both{ background:var(--ink2); border-color:var(--ink2); box-shadow:0 5px 14px rgba(15,15,20,.2); }
+.fork-btn[class*="sel-"] .fb-t, .fork-btn[class*="sel-"] .fb-d{ color:#fff; }
+.fb-t{ font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--ink); }
+.fb-d{ font-size:11px; color:var(--muted); margin-top:5px; line-height:1.4; }
+
+/* ═══════ КАРТОЧКИ ИГРОКОВ ═══════ */
+.roster{ background:linear-gradient(165deg,#16161d 0%,#0d0d12 100%); border-radius:var(--r-xl);
+  padding:30px 26px; box-shadow:var(--sh-lg); position:relative; overflow:hidden; }
+.roster::before{ content:''; position:absolute; top:-30%; left:50%; transform:translateX(-50%);
+  width:900px; height:520px; background:radial-gradient(ellipse, rgba(200,32,42,.13), transparent 66%); pointer-events:none; }
+.pgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(184px,1fr)); gap:18px; position:relative; }
+.fc{ position:relative; border-radius:19px; padding:0; cursor:pointer; overflow:hidden; aspect-ratio:3/4.15;
+  transition:transform .3s var(--ez), box-shadow .3s var(--ez); box-shadow:0 10px 26px rgba(0,0,0,.4); }
+.fc::after{ content:''; position:absolute; inset:0; border-radius:19px; pointer-events:none;
+  background:linear-gradient(155deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,.05) 30%, transparent 52%); }
+.fc::before{ content:''; position:absolute; inset:0; border-radius:19px; pointer-events:none; z-index:3;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.2), inset 0 -40px 60px rgba(0,0,0,.13); }
+.fc:hover{ transform:translateY(-9px) scale(1.022); box-shadow:0 22px 46px rgba(0,0,0,.5); }
+.fc.bronze{ background:linear-gradient(158deg,#8a5a31 0%,#c68b57 22%,#e8b98c 45%,#b0743f 72%,#7a4c27 100%); }
+.fc.silver{ background:linear-gradient(158deg,#8e9298 0%,#c2c6cc 22%,#eceef1 45%,#a9adb4 72%,#83878e 100%); }
+.fc.gold{ background:linear-gradient(158deg,#a97d20 0%,#dfb54c 22%,#f8e29b 45%,#cfa235 72%,#96701c 100%); }
+.fc.icon{ background:linear-gradient(158deg,#0d0d11 0%,#26262e 26%,#3a3a45 45%,#1a1a21 72%,#08080b 100%); }
+.fc.icon::before{ box-shadow:inset 0 0 0 1px rgba(240,214,150,.34), inset 0 -40px 60px rgba(0,0,0,.4); }
+.fc-in{ position:relative; z-index:2; height:100%; display:flex; flex-direction:column; padding:17px 16px 15px; }
+.fc-hd{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.fc-ovr{ font-family:'Archivo',sans-serif; font-size:44px; font-weight:800; line-height:.84; color:#16161b;
+  letter-spacing:-.045em; text-shadow:0 1px 0 rgba(255,255,255,.28); }
+.fc-pos{ font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.13em;
+  color:#16161b; opacity:.62; margin-top:5px; }
+.fc-ava{ width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center;
+  font-family:'Archivo',sans-serif; font-size:19px; font-weight:800; color:#16161b;
+  background:rgba(255,255,255,.28); box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 2px 7px rgba(0,0,0,.11); }
+.fc.icon .fc-ovr,.fc.icon .fc-pos,.fc.icon .fc-ava,.fc.icon .fc-nm,.fc.icon .fc-rl,.fc.icon .fc-av,.fc.icon .fc-ak,.fc.icon .fc-bs{ color:#f2dfae; }
+.fc.icon .fc-ovr{ text-shadow:0 1px 2px rgba(0,0,0,.5); }
+.fc.icon .fc-ava{ background:rgba(242,223,174,.13); box-shadow:inset 0 0 0 1px rgba(242,223,174,.3); }
+.fc.icon .fc-ln{ background:linear-gradient(90deg,transparent,rgba(242,223,174,.42),transparent); }
+.fc-nm{ font-family:'Archivo',sans-serif; font-size:15px; font-weight:800; line-height:1.1; color:#16161b;
+  letter-spacing:-.018em; text-transform:uppercase; margin-top:13px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.fc-rl{ font-size:9.5px; color:#16161b; opacity:.6; margin-top:4px; line-height:1.3;
+  display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
+.fc-ln{ height:1px; background:linear-gradient(90deg,transparent,rgba(0,0,0,.26),transparent); margin:12px 0 11px; }
+.fc-at{ display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; }
+.fc-a{ display:flex; align-items:baseline; gap:6px; }
+.fc-av{ font-family:'Archivo',sans-serif; font-size:14px; font-weight:800; color:#16161b; min-width:22px; }
+.fc-ak{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.07em; color:#16161b; opacity:.62; }
+.fc-ft{ margin-top:auto; padding-top:11px; }
+.fc-bs{ font-family:'IBM Plex Mono',monospace; font-size:8.5px; letter-spacing:.05em; color:#16161b; opacity:.66;
+  display:flex; align-items:center; gap:4px; }
+.fc-bs b{ font-weight:700; opacity:1; }
+.fc-st{ position:absolute; top:0; right:0; z-index:4; font-family:'IBM Plex Mono',monospace; font-size:7.5px;
+  letter-spacing:.09em; text-transform:uppercase; padding:5px 11px; border-radius:0 19px 0 12px;
+  background:rgba(20,20,26,.72); color:#fff; backdrop-filter:blur(3px); }
+.fc.icon .fc-st{ background:rgba(242,223,174,.16); color:#f2dfae; }
+.roster-empty{ text-align:center; padding:56px 26px; color:#8b8b98; font-size:14px; line-height:1.7; position:relative; }
+.roster-empty b{ color:#e7e7ea; }
+
+/* детали */
+.pm-head{ display:flex; align-items:center; gap:16px; }
+.pm-ovr{ width:64px; height:64px; border-radius:16px; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; flex-shrink:0; box-shadow:0 5px 16px rgba(15,15,20,.2); }
+.pm-ovr .n{ font-family:'Archivo',sans-serif; font-size:26px; font-weight:800; line-height:1; }
+.pm-ovr .p{ font-family:'IBM Plex Mono',monospace; font-size:8px; margin-top:3px; opacity:.72; letter-spacing:.1em; }
+.pm-ovr.icon{ background:linear-gradient(145deg,#26262e,#0d0d11); color:#f2dfae; }
+.pm-ovr.gold{ background:linear-gradient(145deg,#dfb54c,#f8e29b); color:#16161b; }
+.pm-ovr.silver{ background:linear-gradient(145deg,#c2c6cc,#eceef1); color:#16161b; }
+.pm-ovr.bronze{ background:linear-gradient(145deg,#c68b57,#e8b98c); color:#16161b; }
+.pos-tbl{ display:grid; gap:7px; }
+.pos-row{ display:grid; grid-template-columns:1fr 54px 36px; align-items:center; gap:12px; background:var(--bg);
+  border:1px solid var(--line); border-radius:11px; padding:10px 14px; font-size:12.5px; transition:all .18s; }
+.pos-row.best{ border-color:var(--ink); background:#fff; box-shadow:var(--sh-sm); }
+.pos-nm{ color:var(--ink2); }
+.pos-row.best .pos-nm{ font-weight:600; }
+.pos-bar{ height:6px; background:var(--bg2); border-radius:3px; overflow:hidden; }
+.pos-bar i{ display:block; height:100%; background:var(--gray); border-radius:3px; transition:width .5s var(--ez); }
+.pos-row.best .pos-bar i{ background:var(--acc); }
+.pos-v{ font-family:'Archivo',sans-serif; font-size:15px; font-weight:800; text-align:right; color:var(--ink2); }
+.attr-edit{ display:grid; gap:11px; }
+.attr-e{ display:grid; grid-template-columns:128px 1fr 42px; align-items:center; gap:13px; }
+.attr-e label{ font-size:12.5px; color:var(--ink2); }
+.attr-e label span{ display:block; font-size:10px; color:var(--faint); margin-top:1px; }
+.attr-e input[type=range]{ width:100%; accent-color:var(--acc); cursor:pointer; height:5px; }
+.attr-e output{ font-family:'Archivo',sans-serif; font-size:16px; font-weight:800; text-align:right; }
+.attr-row{ display:grid; grid-template-columns:132px 1fr 36px; align-items:center; gap:12px; margin-bottom:8px; }
+.attr-nm{ font-size:12px; color:var(--ink2); }
+.attr-nm span{ color:var(--faint); font-size:10px; }
+.attr-bar{ height:7px; background:var(--bg2); border-radius:4px; overflow:hidden; }
+.attr-bar i{ display:block; height:100%; border-radius:4px; transition:width .55s var(--ez); }
+.attr-v{ font-family:'IBM Plex Mono',monospace; font-size:12px; text-align:right; color:var(--ink2); }
+.pc-block{ margin-top:20px; }
+.pc-h{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--faint); margin-bottom:11px; display:flex; align-items:center; gap:10px; }
+.pc-h::after{ content:''; flex:1; height:1px; background:var(--line); }
+.pc-metric{ display:flex; align-items:baseline; gap:10px; margin-top:16px; padding:12px 15px; background:var(--bg);
+  border:1px solid var(--line); border-radius:12px; }
+.pc-metric .ml{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--faint); white-space:nowrap; }
+.pc-metric .mv{ font-size:13px; font-weight:500; color:var(--ink); }
+.vas{ display:grid; gap:9px; }
+.vas-row{ display:grid; grid-template-columns:108px 1fr; gap:14px; align-items:start; background:var(--bg);
+  border:1px solid var(--line); border-radius:12px; padding:12px 15px; }
+.vas-l{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--muted); padding-top:2px; }
+.vas-t{ font-size:12.5px; line-height:1.55; color:var(--ink); }
+.vas-t.empty{ color:var(--faint); }
+.vtag{ display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:8.5px; letter-spacing:.06em;
+  text-transform:uppercase; padding:3px 8px; border-radius:5px; margin-left:8px; vertical-align:1px; font-weight:600; }
+.vtag.ok{ background:var(--green-soft); color:var(--green); }
+.vtag.no{ background:var(--acc-soft); color:var(--acc); }
+.vtag.q{ background:var(--amber-soft); color:var(--amber); }
+.fit{ display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+.fit-box{ background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:13px 15px; }
+.fit-box .fh{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  margin-bottom:9px; font-weight:600; }
+.fit-box.g .fh{ color:var(--green); } .fit-box.b .fh{ color:var(--acc); }
+.fit-box ul{ list-style:none; }
+.fit-box li{ font-size:12.5px; line-height:1.5; color:var(--ink2); padding:4px 0 4px 15px; position:relative; }
+.fit-box li::before{ content:''; position:absolute; left:0; top:12px; width:5px; height:5px; border-radius:50%; }
+.fit-box.g li::before{ background:var(--green); } .fit-box.b li::before{ background:var(--acc); }
+.fit-box .empty{ font-size:12.5px; color:var(--faint); }
+.bel-list{ display:grid; gap:7px; }
+.bel-row{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:13px; background:var(--bg);
+  border:1px solid var(--line); border-radius:12px; padding:11px 15px; }
+.bel-a{ font-size:12.5px; color:var(--ink); }
+.bel-lv{ display:flex; align-items:center; gap:10px; }
+.bel-txt{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--muted); white-space:nowrap; }
+.dots{ display:flex; gap:4px; }
+.dots i{ width:8px; height:8px; border-radius:50%; background:var(--line2); }
+.dots i.on{ background:var(--blue); }
+.dots i.on.hi{ background:var(--green); }
+.tl{ display:grid; }
+.tl-i{ display:grid; grid-template-columns:86px 1fr; gap:14px; font-size:12.5px; padding:10px 0;
+  border-bottom:1px dashed var(--line); }
+.tl-i:last-child{ border-bottom:none; }
+.tl-d{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--acc); }
+.tl-t{ color:var(--ink2); line-height:1.55; }
+.wl{ display:grid; gap:8px; }
+.wl-i{ display:grid; grid-template-columns:110px 1fr; gap:14px; background:var(--bg); border-left:2px solid var(--amber);
+  border-radius:0 12px 12px 0; padding:11px 15px; font-size:12.5px; }
+.wl-w{ font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--amber); text-transform:uppercase; letter-spacing:.05em; }
+.wl-b{ color:var(--ink2); line-height:1.5; }
+.pg-box{ background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:13px 15px; }
+.pg-val{ font-size:12.5px; line-height:1.55; color:var(--ink); white-space:pre-wrap; }
+.ed-grid2{ display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+.ed-hint{ font-size:11.5px; color:var(--faint); margin-top:8px; line-height:1.5; }
+.ed-sep{ height:1px; background:var(--line); margin:24px 0 20px; }
+.ed-sec{ font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.06em; color:var(--acc); margin-bottom:15px; }
+.vsel{ display:flex; gap:6px; margin-top:8px; }
+.vsel button{ flex:1; padding:7px 4px; font-family:'IBM Plex Mono',monospace; font-size:9px; text-transform:uppercase;
+  border:1.5px solid var(--line2); border-radius:8px; background:#fff; color:var(--muted); cursor:pointer; transition:all .16s var(--ez); }
+.vsel button:hover{ border-color:var(--ink); color:var(--ink); }
+.vsel button.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
+.bel-edit-row{ display:grid; grid-template-columns:1fr 132px 32px; gap:8px; margin-bottom:7px; align-items:center; }
+.bel-edit-row input,.bel-edit-row select{ background:var(--bg); border:1.5px solid var(--line); border-radius:10px;
+  padding:10px 13px; font-family:'Inter',sans-serif; font-size:13px; outline:none; color:var(--ink); transition:all .18s; }
+.bel-edit-row input:focus,.bel-edit-row select:focus{ border-color:var(--acc); background:#fff; }
+.bel-edit-row select{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; cursor:pointer; }
+.auto-w{ font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--blue); }
+.ai-box{ background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:17px 19px; margin-bottom:16px; }
+.ai-box .ah{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:10px; }
+.ai-box textarea{ width:100%; min-height:160px; background:#fff; border:1.5px solid var(--line); border-radius:11px;
+  padding:13px 15px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; line-height:1.6; color:var(--ink);
+  resize:vertical; outline:none; transition:all .18s; }
+.ai-box textarea:focus{ border-color:var(--acc); box-shadow:0 0 0 4px rgba(200,32,42,.08); }
+.ai-steps{ counter-reset:s; margin-bottom:17px; }
+.ai-step{ counter-increment:s; position:relative; padding-left:34px; font-size:13.5px; color:var(--ink2);
+  line-height:1.6; margin-bottom:11px; }
+.ai-step::before{ content:counter(s); position:absolute; left:0; top:0; width:23px; height:23px; border-radius:50%;
+  background:var(--ink); color:#fff; font-family:'IBM Plex Mono',monospace; font-size:11px;
+  display:flex; align-items:center; justify-content:center; }
+
+/* ─── MODAL ─── */
+.sheet-overlay{ position:fixed; inset:0; background:rgba(12,12,16,.62); backdrop-filter:blur(7px);
+  display:none; align-items:center; justify-content:center; z-index:1000; padding:22px; }
+.sheet-overlay.open{ display:flex; animation:fade .24s; }
+@keyframes fade{ from{opacity:0} to{opacity:1} }
+.sheet{ background:var(--card); border-radius:var(--r-xl); max-width:580px; width:100%; max-height:88vh;
+  overflow-y:auto; box-shadow:var(--sh-xl); animation:pop .34s var(--ez); }
+@keyframes pop{ from{opacity:0; transform:scale(.94) translateY(18px);} to{opacity:1; transform:none;} }
+.sheet-head{ padding:28px 32px 20px; border-bottom:1px solid var(--line); display:flex; align-items:flex-start;
+  justify-content:space-between; gap:16px; position:sticky; top:0; background:var(--card);
+  border-radius:var(--r-xl) var(--r-xl) 0 0; z-index:2; }
+.sheet-kicker{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--acc); margin-bottom:7px; }
+.sheet-title{ font-family:'Archivo',sans-serif; font-size:22px; font-weight:700; line-height:1.18; letter-spacing:-.018em; }
+.sheet-close{ width:36px; height:36px; border-radius:50%; border:1.5px solid var(--line2); background:var(--bg);
+  color:var(--muted); font-size:16px; cursor:pointer; flex-shrink:0; display:flex; align-items:center;
+  justify-content:center; transition:all .2s var(--ez); line-height:1; }
+.sheet-close:hover{ background:var(--ink); color:#fff; border-color:var(--ink); transform:rotate(90deg); }
+.sheet-body{ padding:24px 32px 32px; }
+.sheet-body p{ font-size:14.5px; line-height:1.7; color:var(--ink2); margin-bottom:14px; }
+.sheet-body p:last-child{ margin-bottom:0; }
+.sheet-body b{ font-weight:600; color:var(--ink); }
+.dalio-note{ background:var(--acc-soft); border:1px solid #f5d2d4; border-radius:14px; padding:17px 19px; margin-top:8px; }
+.dalio-note .dn-l{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--acc); margin-bottom:9px; }
+.dalio-note p{ font-size:13.5px; margin-bottom:0; color:var(--ink2); }
+.toast{ position:fixed; left:50%; bottom:32px; transform:translateX(-50%) translateY(24px); background:var(--ink);
+  color:#fff; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.05em; padding:14px 26px;
+  border-radius:12px; box-shadow:var(--sh-lg); opacity:0; pointer-events:none; transition:all .3s var(--ez); z-index:2000; }
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+.stamp{ font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--faint); text-align:center;
+  margin-top:36px; letter-spacing:.14em; }
+
+/* ─── DASHBOARD ─── */
+.dash-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:26px; }
+.stat{ background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:22px 16px;
+  text-align:center; box-shadow:var(--sh-sm); transition:all .22s var(--ez); }
+.stat:hover{ transform:translateY(-3px); box-shadow:var(--sh); }
+.stat-num{ font-family:'Archivo',sans-serif; font-size:38px; font-weight:800; line-height:1; color:var(--ink); letter-spacing:-.03em; }
+.stat-lbl{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); margin-top:10px; }
+.dash-section-title{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--muted); margin:0 0 14px; display:flex; align-items:center; gap:10px; }
+.dash-section-title::before{ content:''; width:18px; height:2px; background:var(--acc); border-radius:2px; }
+.pod-card{ background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:22px 24px;
+  box-shadow:var(--sh-sm); margin-bottom:26px; border-left:3px solid var(--gold); }
+.pod-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:13px; }
+.pod-empty{ background:var(--card); border:1px dashed var(--line2); border-radius:var(--r-lg); padding:28px;
+  text-align:center; color:var(--muted); margin-bottom:26px; }
+.backup-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+.backup-note{ font-size:12px; color:var(--muted); line-height:1.6; }
+
+/* ─── DECISION ─── */
+.dec-voters-head{ display:flex; align-items:center; justify-content:space-between; font-family:'IBM Plex Mono',monospace;
+  font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:22px 0 13px; }
+.voter-row{ display:flex; align-items:center; gap:9px; margin-bottom:9px; }
+.voter-name{ width:140px; flex-shrink:0; background:var(--card); border:1.5px solid var(--line2); border-radius:11px;
+  padding:10px 13px; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink); outline:none; transition:all .18s; }
+.voter-name:focus{ border-color:var(--acc); box-shadow:0 0 0 4px rgba(200,32,42,.08); }
+.voter-w{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.voter-w-lbl{ font-family:'IBM Plex Mono',monospace; font-size:9px; text-transform:uppercase; color:var(--faint); }
+.voter-weight{ background:var(--card); border:1.5px solid var(--line2); border-radius:11px; padding:10px 9px;
+  font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--ink); outline:none; cursor:pointer; }
+.voter-choice{ flex:1; min-width:100px; background:var(--card); border:1.5px solid var(--line2); border-radius:11px;
+  padding:10px 13px; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink); outline:none; transition:all .18s; }
+.voter-choice:focus{ border-color:var(--acc); box-shadow:0 0 0 4px rgba(200,32,42,.08); }
+.dec-bar{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px;
+  margin-bottom:10px; box-shadow:var(--sh-sm); transition:all .2s; }
+.dec-bar.top{ border-color:var(--ink); box-shadow:var(--sh); }
+.dec-bar-head{ display:flex; align-items:baseline; justify-content:space-between; gap:11px; margin-bottom:11px; }
+.dec-bar-label{ font-family:'Archivo',sans-serif; font-size:16px; font-weight:700; }
+.dec-bar-meta{ font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); white-space:nowrap; }
+.dec-bar-track{ height:9px; background:var(--bg2); border-radius:5px; overflow:hidden; }
+.dec-bar-fill{ height:100%; background:var(--ink); border-radius:5px; transition:width .55s var(--ez); }
+.dec-bar.top .dec-bar-fill{ background:var(--acc); }
+.dec-note{ background:var(--acc-soft); border:1px solid #f5d2d4; border-radius:14px; padding:15px 18px;
+  font-size:13.5px; line-height:1.6; color:var(--ink2); margin-top:6px; }
+.dec-note.ok{ background:var(--green-soft); border-color:#c9e5d5; }
+.icon-btn.fav-on{ color:var(--gold); border-color:var(--gold); }
+.icon-btn.fav-on:hover{ background:var(--gold); color:#fff; border-color:var(--gold); }
+
+@media print{.tabs,.controls,.info,.editor,.mach-bar,.icon-btn,.sheet-overlay,.toast,.loop-note{ display:none !important; }
+  body{ background:#fff; } .roster{ background:#fff; padding:0; box-shadow:none; }.p-card,.step,.section-intro{ box-shadow:none !important; }
+}
+@media(max-width:760px){
+  body{ padding:0 14px 72px; }
+  header{ padding:34px 0 20px; }.head-main{ gap:15px; } .emblem{ width:52px; height:52px; border-radius:16px; }.emblem span{ font-size:24px; }.dash-stats{ grid-template-columns:repeat(2,1fr); }.voter-row{ flex-wrap:wrap; }.voter-name,.voter-choice{ width:100%; flex:1 1 100%; }.fit,.ed-grid2{ grid-template-columns:1fr; }.vas-row,.tl-i,.wl-i{ grid-template-columns:1fr; gap:7px; }.bel-edit-row{ grid-template-columns:1fr 108px 32px; }.fork{ grid-template-columns:1fr; }.pgrid{ grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:13px; }.roster{ padding:20px 16px; border-radius:20px; }.fc-ovr{ font-size:36px; } .fc-nm{ font-size:13px; }.tabs{ overflow-x:auto; } .tab{ padding:11px 6px; font-size:10px; }.section-intro,.editor{ padding:20px 18px; }.sheet-head,.sheet-body{ padding-left:20px; padding-right:20px; }.attr-e{ grid-template-columns:104px 1fr 36px; gap:10px; }
+}
+.toast-undo{margin-left:12px;background:var(--acc);color:#fff;border:0;border-radius:6px;padding:4px 11px;font-family:'Manrope',sans-serif;font-weight:700;font-size:12px;cursor:pointer}
+.trash-wrap{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:rgba(0,0,0,.02)}
+.trash-hd{display:flex;justify-content:space-between;align-items:center;font-family:'Unbounded',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.trash-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.trash-nm b{font-family:'Manrope',sans-serif;font-size:14px}
+.trash-nm span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.trash-btns{display:flex;gap:7px}
+.conf{margin-top:14px;padding-top:13px;border-top:1px dashed var(--line)}
+.conf-t{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--muted);font-family:'Manrope',sans-serif}
+.conf-t b{font-family:'Unbounded',sans-serif;font-size:14px;color:var(--ink)}
+.conf-bar{height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
+.conf-bar i{display:block;height:100%;border-radius:3px}
+.conf-l{margin-top:6px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="head-main">
+    <div class="emblem"><span>&#9673;</span></div>
+    <div class="head-text">
+      <div class="eyebrow">Пространство управления</div>
+      <h1>Ядро<em>.</em></h1>
+      <div class="head-sub">Свод правил, по которым принимаются решения. Дело — это механизм: цель → разрыв → диагноз → новый дизайн. И главное: КТО важнее, чем ЧТО.</div>
+    </div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('overview')">Обзор</button>
+  <button class="tab" onclick="switchTab('principles')">Принципы</button>
+  <button class="tab" onclick="switchTab('machine')">Машина</button>
+  <button class="tab" onclick="switchTab('people')">Люди</button>
+  <button class="tab" onclick="switchTab('decision')">Решение</button>
+</div>
+<!-- ПРИНЦИПЫ -->
+<div class="panel" id="panel-principles">
+  <div class="section-intro">
+    <div class="intro-head"><span class="it">Мои принципы</span><button class="info" onclick="openHelp('principles')">?</button></div>
+    <span class="si-red">Боль + рефлексия = прогресс.</span> Каждый раз, когда жизнь или бизнес подкидывают ситуацию — формулируй правило: <b>«когда случается X → делаю Y, потому что Z»</b>. Со временем это станет твоим личным сводом, по которому ты принимаешь решения на автопилоте.
+  </div>
+  <div class="controls">
+    <div class="chips" id="catChips"></div>
+    <input class="search" id="prinSearch" placeholder="Поиск по принципам…" oninput="renderPrinciples()">
+    <button class="btn btn-primary" onclick="openPrinEditor()">+ Принцип</button>
+  </div>
+  <div id="prinEditor"></div>
+  <div id="prinList"></div>
+</div>
+<!-- МАШИНА -->
+<div class="panel" id="panel-machine">
+  <div class="section-intro">
+    <div class="intro-head"><span class="it">Машина</span><button class="info" onclick="openHelp('machine')">?</button></div>
+    Ты — <b>конструктор</b>, смотришь на свою машину сверху. Машина = <b>люди + дизайн</b>. Она выдаёт результаты. Разрыв между результатом и целью — это <span class="si-red">проблема</span>. Пройди 5 шагов, чтобы закрыть разрыв и улучшить машину.
+  </div>
+  <div class="mach-bar">
+    <input class="mach-title" id="machTitle" placeholder="Название разбора (напр.: Кураторы — узкое место)" oninput="onMachTitle(this.value)">
+    <select class="mach-sel" id="machPicker" onchange="onMachPick(this.value)"></select>
+    <button class="btn btn-primary btn-sm" onclick="saveMachine()">Сохранить</button>
+    <button class="btn btn-ghost btn-sm" onclick="newMachine()">Новый</button>
+  </div>
+  <div class="loop-note">
+    <div class="loop-ico">&#8635;</div>
+    <div class="loop-txt"><b>Это петля, а не разовое действие.</b> Прошёл круг — машина стала сильнее, цели выросли, появились новые проблемы. Так и эволюционируешь.</div>
+  </div>
+  <div class="steps">
+    <div class="step s1">
+      <div class="step-head"><div class="step-num">1</div><div class="step-title">Цели</div><button class="info" onclick="openHelp('goals')">?</button></div>
+      <div class="step-hint">Чётко и по приоритету. Не путай цели с задачами. Чего ты реально хочешь?</div>
+      <textarea id="m-goals" placeholder="Например: вырасти ×3 по выручке за 6 мес, не теряя качество доставки"></textarea>
+    </div>
+    <div class="step s2">
+      <div class="step-head"><div class="step-num">2</div><div class="step-title">Проблемы</div><button class="info" onclick="openHelp('problems')">?</button></div>
+      <div class="step-hint">Где результат не дотягивает до цели? Не мирись с проблемами и не сглаживай их.</div>
+      <textarea id="m-problems" placeholder="Например: специалисты перегружены, не успеваем брать новых клиентов без потери качества"></textarea>
+    </div>
+    <div class="step s3">
+      <div class="step-head"><div class="step-num">3</div><div class="step-title">Диагноз</div><button class="info" onclick="openHelp('diagnose')">?</button></div>
+      <div class="step-hint">Доберись до корня. Ключевой вопрос: это поломка в дизайне механизма или в человеке?</div>
+      <div class="fork">
+        <div class="fork-btn" id="fk-design" onclick="setCause('design')"><div class="fb-t">Дизайн</div><div class="fb-d">Процесс/система настроены неверно</div></div>
+        <div class="fork-btn" id="fk-people" onclick="setCause('people')"><div class="fb-t">Человек</div><div class="fb-d">Не тот человек или не хватает навыка</div></div>
+        <div class="fork-btn" id="fk-both" onclick="setCause('both')"><div class="fb-t">И то, и то</div><div class="fb-d">И система, и люди</div></div>
+      </div>
+      <textarea id="m-root" placeholder="Корневая причина: нет системы, которая обучает и сертифицирует → каждый новый человек делается вручную"></textarea>
+    </div>
+    <div class="step s4">
+      <div class="step-head"><div class="step-num">4</div><div class="step-title">Дизайн</div><button class="info" onclick="openHelp('design')">?</button></div>
+      <div class="step-hint">Перепроектируй машину так, чтобы обойти проблему. Новый процесс и/или нужные люди.</div>
+      <textarea id="m-design" placeholder="Например: конвейер обучения — модули → стажировка под наставником → экзамен → допуск к клиентам"></textarea>
+    </div>
+    <div class="step s5">
+      <div class="step-head"><div class="step-num">5</div><div class="step-title">Делай</div><button class="info" onclick="openHelp('do')">?</button></div>
+      <div class="step-hint">Доведи до конца. Конкретные действия: кто, что, к какому сроку.</div>
+      <textarea id="m-actions" placeholder="1. Собрать модули обучения до 15.09&#10;2. Запустить первую группу из 2 чел&#10;3. Прописать критерии экзамена"></textarea>
+    </div>
+  </div>
+  <div class="controls" style="margin-top:18px;justify-content:flex-end;">
+    <button class="btn btn-red" onclick="extractPrincipleFromMachine()">Извлечь принцип</button>
+    <button class="btn btn-ghost" onclick="exportMachine()">Скопировать текст</button>
+    <button class="btn" onclick="window.print()">Распечатать</button>
+  </div>
+</div>
+<!-- ЛЮДИ -->
+<div class="panel" id="panel-people">
+  <div class="section-intro">
+    <div class="intro-head"><span class="it">Карточки игроков</span><button class="info" onclick="openHelp('people')">?</button></div>
+    <span class="si-red">КТО важнее, чем ЧТО.</span> Карточка нужна, чтобы не ставить человека туда, где его сильные стороны не работают.
+    Рейтинг считается <b>под роль</b> — один и тот же человек может быть слабым специалистом и сильным продавцом.
+  </div>
+  <div class="controls">
+    <div class="chips" id="statusChips"></div>
+    <input class="search" id="peopleSearch" placeholder="Поиск…" oninput="renderPeople()">
+    <button class="btn btn-red" onclick="openAiImport()">Собрать через ИИ</button>
+    <button class="btn btn-primary" onclick="openPersonEditor()">+ Вручную</button>
+  </div>
+  <div id="aiPanel"></div>
+  <div id="personEditor"></div>
+  <div id="peopleList"></div>
+</div>
+<!-- ОБЗОР -->
+<div class="panel active" id="panel-overview">
+  <div class="section-intro">
+    <div class="intro-head"><span class="it">Обзор</span></div>
+    Вся система  в одном месте. Ниже — твоя статистика и принцип на сегодня. <span class="si-red">Перечитывай принципы регулярно</span> — так они становятся автоматизмом.
+  </div>
+  <div class="dash-stats" id="dashStats"></div>
+  <div class="dash-section-title">Принцип на сегодня</div>
+  <div id="dashPod"></div>
+  <div class="dash-section-title">Данные и резервная копия</div>
+  <div class="backup-row">
+    <button class="btn btn-ghost btn-sm" onclick="exportPrinciplesDoc()">Принципы → документ</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportAll()">Скачать копию</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importAll(this)">
+    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()">Импорт из копии</button>
+  </div>
+  <div class="backup-note">Данные хранятся в этом браузере. Чтобы перенести на другое устройство — скачай копию и импортируй её там.</div>
+</div>
+<!-- РЕШЕНИЕ -->
+<div class="panel" id="panel-decision">
+  <div class="section-intro">
+    <div class="intro-head"><span class="it">Решение по компетентности</span><button class="info" onclick="openHelp('decision')">?</button></div>
+    <span class="si-red">Не по головам, а по компетентности.</span> Собери, кто какую позицию занимает, и взвесь голоса по доверию — кто реально разбирается в вопросе.
+    Если человек есть в карточках, вес подставится из его карточки автоматически.
+  </div>
+  <div class="mach-bar">
+    <input class="mach-title" id="decTitle" placeholder="Название решения (напр.: Менять ли оффер)" oninput="onDecTitle(this.value)">
+    <select class="mach-sel" id="decPicker" onchange="onDecPick(this.value)"></select>
+    <button class="btn btn-primary btn-sm" onclick="saveDec()">Сохранить</button>
+    <button class="btn btn-ghost btn-sm" onclick="newDec()">Новое</button>
+  </div>
+  <div class="step s3" style="border-left-color:var(--blue);">
+    <div class="step-head"><div class="step-num" style="background:var(--blue);">?</div><div class="step-title">Вопрос</div></div>
+    <textarea id="dec-question" placeholder="Что решаем? Сформулируй как вопрос" oninput="onDecQuestion(this.value)"></textarea>
+  </div>
+  <div class="dec-voters-head"><span>Участники и их позиции</span></div>
+  <datalist id="peopleNames"></datalist>
+  <div id="decVoters"></div>
+  <button class="btn btn-ghost btn-sm" style="margin-top:6px;" onclick="addVoter()">+ участник</button>
+  <div class="dash-section-title" style="margin-top:22px;">Итог по компетентности</div>
+  <div id="decResult"></div>
+  <div class="controls" style="margin-top:16px;justify-content:flex-end;">
+    <button class="btn btn-ghost" onclick="exportDec()">Скопировать текст</button>
+  </div>
+</div>
+<div class="stamp">Ядро · пространство управления</div>
+</div><!-- /wrap -->
+<div class="sheet-overlay" id="modalOverlay" onclick="if(event.target===this)closeHelp()">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div><div class="sheet-kicker">Как это работает</div><div class="sheet-title" id="modalTitle"></div></div>
+      <button class="sheet-close" onclick="closeHelp()">&#10005;</button>
+    </div>
+    <div class="sheet-body" id="modalBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const CATS = [
+  {id:'life', label:'Жизнь', cls:'cat-life'},
+  {id:'company', label:'Компания', cls:'cat-company'},
+  {id:'people', label:'Люди', cls:'cat-people'},
+  {id:'decisions', label:'Решения', cls:'cat-decisions'},
+  {id:'money', label:'Деньги', cls:'cat-money'},
+  {id:'other', label:'Другое', cls:'cat-other'}
+];
+const STATUSES = [
+  {id:'learning', label:'Обучается', cls:'st-learning'},
+  {id:'testing', label:'Проверяется', cls:'st-testing'},
+  {id:'trusted', label:'Надёжен', cls:'st-trusted'},
+  {id:'wrong', label:'Не на своём месте', cls:'st-wrong'}
+];
+const DISC_RU = [
+  {k:'d', nm:'Напор', sub:'решения, контроль'},
+  {k:'i', nm:'Влияние', sub:'люди, убеждение'},
+  {k:'s', nm:'Устойчивость', sub:'терпение, рутина'},
+  {k:'c', nm:'Правила', sub:'процедуры, детали'}
+];
+const BEL_LABEL = {0:'нет данных',1:'низкое',2:'ниже среднего',3:'среднее',4:'высокое',5:'эталон'};
+function catOf(id){ return CATS.find(c=>c.id===id)||CATS[CATS.length-1]; }
+function statusOf(id){ return STATUSES.find(s=>s.id===id)||STATUSES[0]; }
+const LS={ get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } } };
+const K_TRASH='dalio_trash_v1';
+const K_PRIN='dalio_principles_v1', K_PEOPLE='dalio_people_v1', K_MACH='dalio_machines_v1', K_MACH_CUR='dalio_machine_cur_v1', K_SEED='dalio_seeded_v1', K_DEC='dalio_decisions_v1', K_DEC_CUR='dalio_decision_cur_v1';
+function loadArr(k){ try{ return JSON.parse(LS.get(k)||'[]')||[]; }catch(e){ return []; } }
+function saveArr(k,a){ LS.set(k, JSON.stringify(a)); }
+let principles=loadArr(K_PRIN), people=loadArr(K_PEOPLE), machines=loadArr(K_MACH);
+let trash=loadArr(K_TRASH);
+let prinFilter='all', prinEditId=null, statusFilter='all', personEditId=null;
+let curMachine={ id:'',title:'',goals:'',problems:'',cause:'',root:'',design:'',actions:'',savedAt:0 };
+let edBel=[], edTrack=[], edWatch=[], aiUpdateId=null;
+const SEED=[
+  {id:'seed1',category:'life',trigger:'Когда что-то пошло не так или больно',rule:'Боль — это сигнал. Останавливаюсь и разбираю её, а не проскакиваю.',why:'Боль + рефлексия = прогресс. Без рефлексии та же боль вернётся.',seed:true,createdAt:Date.now()-5},
+  {id:'seed2',category:'decisions',trigger:'Перед важным решением',rule:'Взвешиваю мнения по компетентности — кто реально разбирается в вопросе, а не по статусу или громкости.',why:'Идея-меритократия даёт лучшие решения, чем иерархия или простой консенсус.',seed:true,createdAt:Date.now()-4},
+  {id:'seed3',category:'people',trigger:'При найме и расстановке людей',rule:'Сначала правильный человек, потом задача. КТО важнее, чем ЧТО.',why:'Слабого человека не вытащит даже хорошая задача и система.',seed:true,createdAt:Date.now()-3},
+  {id:'seed4',category:'company',trigger:'Когда одна и та же ошибка повторяется',rule:'Превращаю проблему в регламент или механизм, а не латаю разово.',why:'Система предотвращает повторение; разовое решение — нет.',seed:true,createdAt:Date.now()-2},
+  {id:'seed5',category:'life',trigger:'Когда реальность не такая, как хочется',rule:'Смотрю на реальность как есть, а не как мне удобно. Радикальная правда.',why:'Решения на основе иллюзий — это плохие решения.',seed:true,createdAt:Date.now()-1}
+];
+const HELP={
+  principles:{ title:'Мои принципы', body:`<p>Принципы — это твои <b>правила на повторяющиеся ситуации</b>. Один раз продумал, как правильно поступать — и дальше не решаешь заново каждый раз, а действуешь по своему правилу.</p><p>Формула простая: <b>«когда случается X → делаю Y, потому что Z»</b>. Триггер, само правило, и урок за ним.</p><div class="dalio-note"><div class="dn-l">Почему так</div><p>Не копируй чужие принципы вслепую. Бери их как пример, но выписывай <b>свои</b> — под свой характер, бизнес и ценности. Лучшие принципы рождаются из собственной боли и ошибок.</p></div>` },
+  machine:{ title:'Машина', body:`<p>Смотри на себя сверху, как <b>конструктор на свой механизм</b>. Машина состоит из двух вещей: <b>людей и дизайна</b> (процессов). Она выдаёт результаты.</p><p>Сравни результат с целью. Разрыв между ними — это проблема. Твоя работа — не «делать задачи внутри машины», а <b>чинить и улучшать саму машину</b>.</p><div class="dalio-note"><div class="dn-l">Почему так</div><p>Пять шагов — это петля: цели → проблемы → диагноз → дизайн → делай → и снова цели. Каждый круг машина становится сильнее.</p></div>` },
+  goals:{ title:'Шаг 1 · Цели', body:`<p>Чётко определи, <b>чего ты хочешь</b>, и расставь приоритеты. Нельзя получить всё — выбирай.</p><p>Не путай цели с задачами: цель — это «куда», задача — это «что сделать по пути».</p>` },
+  problems:{ title:'Шаг 2 · Проблемы', body:`<p>Найди, где <b>результат не дотягивает до цели</b>. Это и есть проблемы.</p><p>Не мирись с ними и не сглаживай. Самое опасное — делать вид, что их нет.</p>` },
+  diagnose:{ title:'Шаг 3 · Диагноз', body:`<p>Доберись до <b>корневой причины</b>, а не борись с симптомом.</p><p>Ключевая развилка: это поломка в <b>дизайне</b> (процесс настроен неверно) или в <b>человеке</b> (не тот человек / не хватает навыка)? Ответ определяет, что чинить.</p>` },
+  design:{ title:'Шаг 4 · Дизайн', body:`<p>Перепроектируй машину так, чтобы <b>обойти проблему</b> — не разово, а на будущее.</p><p>Корень в дизайне — меняй процесс. Корень в человеке — обучение, замена или перестановка.</p>` },
+  do:{ title:'Шаг 5 · Делай', body:`<p>Доведи задуманное <b>до результата</b>. План без исполнения ничего не стоит.</p><p>Распиши: кто, что и к какому сроку. Потом вернись и проверь — сработало ли.</p>` },
+  people:{ title:'Карточки игроков', body:`<p><b>КТО важнее, чем ЧТО.</b> Сначала правильные люди, потом задачи и стратегия.</p><p>Карточки появились из наблюдения: людей раз за разом ставят на задачи, к которым они не приспособлены. Смысл карточки — <b>чтобы при раздаче задач было видно, кто на что годится</b>, и решение принималось по данным, а не по впечатлению.</p><p>Порядок полей не случайный. Сначала <b>ценности</b>, потом <b>способности</b>, потом <b>навыки</b> — именно в этом порядке, потому что навыки добираются обучением, а первые два практически нет.</p><div class="dalio-note"><div class="dn-l">Почему так</div><p>«Люди обычно меняются не так уж сильно». Не строй план на том, что человек станет другим — строй на том, какой он есть, и ставь его туда, где его сильные стороны работают, а слабые не мешают.</p></div>` },
+  bel:{ title:'Доверие по компетентности', body:`<p>Это ответ на вопрос: <b>по каким темам мнению этого человека можно верить</b>, а по каким — нет.</p><p>Доверие зарабатывается результатами, а не должностью и не стажем. Человек может быть эталоном в продажах и нулём в аналитике — и это нормально, если записано.</p><p>Уровни: <b>нет данных → низкое → ниже среднего → среднее → высокое → эталон</b>. «Нет данных» — честный статус для новичка, он не оскорбителен.</p><div class="dalio-note"><div class="dn-l">Зачем это здесь</div><p>Во вкладке «Решение» вес голоса подставляется именно отсюда. Пока у человека нет результатов, его мнение не весит — и спор выигрывает не громкость, а доказанная компетентность.</p></div>` },
+  decision:{ title:'Решение по компетентности', body:`<p>Когда решение спорное, не считай голоса поровну. Взвесь их по <b>доверию</b> — насколько каждый участник реально разбирается именно в этом вопросе.</p><p>Собери позиции, поставь вес 1–5 (или он подставится из карточки), и система покажет, какой вариант сильнее по компетентности. Часто он отличается от мнения большинства — ради этого момента инструмент и нужен.</p><div class="dalio-note"><div class="dn-l">Почему так</div><p>Идея-меритократия = радикальная правда + радикальная прозрачность + решения, взвешенные по компетентности. Не диктатура и не «один человек — один голос».</p></div>` }
+};
+function openHelp(k){ const h=HELP[k]; if(!h)return; document.getElementById('modalTitle').textContent=h.title; document.getElementById('modalBody').innerHTML=h.body; document.getElementById('modalOverlay').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeHelp(){ document.getElementById('modalOverlay').classList.remove('open'); document.body.style.overflow=''; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeHelp(); });
+function v(id){ const e=document.getElementById(id); return e?e.value:''; }
+function setV(id,val){ const e=document.getElementById(id); if(e) e.value=val||''; }
+function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function uid(){ return 'x'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36); }
+function fmtDate(ts){ if(!ts)return '—'; const d=new Date(ts); return d.toLocaleDateString('ru-RU'); }
+function lines(s){ return (s||'').split('\n').map(x=>x.trim()).filter(Boolean); }
+let undoT;
+function undoToast(msg,label,fn){
+  const el=document.getElementById('toast'); window.__undoFn=fn;
+  el.innerHTML=esc(msg)+' <button class="toast-undo" onclick="(window.__undoFn||function(){})();document.getElementById(\'toast\').classList.remove(\'show\')">'+esc(label)+'</button>';
+  el.classList.add('show'); clearTimeout(toastT); clearTimeout(undoT);
+  undoT=setTimeout(()=>{ el.classList.remove('show'); },9000);
+}
+let toastT; function toast(m){ const el=document.getElementById('toast'); el.textContent=m; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1800); }
+function copyText(t){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(()=>toast('Скопировано в буфер'),()=>fallbackCopy(t)); } else fallbackCopy(t); }
+function fallbackCopy(t){ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); try{ document.execCommand('copy'); toast('Скопировано'); }catch(e){ toast('Не удалось'); } document.body.removeChild(ta); }
+/* ── ПРИНЦИПЫ ── */
+function renderCatChips(){
+  const counts={}; principles.forEach(p=>counts[p.category]=(counts[p.category]||0)+1);
+  let h=`<button class="chip ${prinFilter==='all'?'active':''}" onclick="setPrinFilter('all')">Все · ${principles.length}</button>`;
+  CATS.forEach(c=>{ const n=counts[c.id]||0; if(n>0) h+=`<button class="chip ${prinFilter===c.id?'active':''}" onclick="setPrinFilter('${c.id}')">${c.label} · ${n}</button>`; });
+  document.getElementById('catChips').innerHTML=h;
+}
+function setPrinFilter(f){ prinFilter=f; renderPrinciples(); }
+function renderPrinciples(){
+  renderCatChips();
+  const q=(document.getElementById('prinSearch').value||'').toLowerCase();
+  const el=document.getElementById('prinList');
+  if(!principles.length){ el.innerHTML='<div class="empty-state">Пока пусто. Нажми «+ Принцип» и выпиши первое правило — из ситуации, которая уже была.</div>'; return; }
+  let list=principles.filter(p=>(prinFilter==='all'||p.category===prinFilter)&&(!q||(p.rule+' '+(p.trigger||'')+' '+(p.why||'')).toLowerCase().includes(q)));
+  list.sort((a,b)=>((b.fav?1:0)-(a.fav?1:0))||((b.createdAt||0)-(a.createdAt||0)));
+  if(!list.length){ el.innerHTML='<div class="empty-state">Ничего не нашлось по этому фильтру.</div>'; return; }
+  el.innerHTML=list.map(p=>{ const c=catOf(p.category); return `<div class="p-card">
+    <div class="p-top">
+      <span class="cat-tag ${c.cls}"><span class="dot"></span>${c.label}${p.seed?'<span class="seed-badge">пример</span>':''}</span>
+      <div class="p-actions"><button class="icon-btn ${p.fav?'fav-on':''}" onclick="toggleFav('${p.id}')" title="В избранное">${p.fav?'&#9733;':'&#9734;'}</button><button class="icon-btn" onclick="openPrinEditor('${p.id}')">&#9998;</button><button class="icon-btn del" onclick="delPrin('${p.id}')">&times;</button></div>
+    </div>
+    ${p.trigger?`<div class="p-trigger"><span class="tw">Когда</span>${esc(p.trigger)}</div>`:''}
+    <div class="p-rule">${esc(p.rule)}</div>
+    ${p.why?`<div class="p-why"><span class="ww">Почему</span>${esc(p.why)}</div>`:''}
+  </div>`; }).join('');
+}
+function openPrinEditor(id){
+  prinEditId=id||null; const p=id?principles.find(x=>x.id===id):null;
+  const opts=CATS.map(c=>`<option value="${c.id}" ${p&&p.category===c.id?'selected':''}>${c.label}</option>`).join('');
+  document.getElementById('prinEditor').innerHTML=`<div class="editor">
+    <div class="ed-title">${id?'Редактировать принцип':'Новый принцип'}</div>
+    <div class="ed-row"><label class="ed-label">Категория</label><select id="pe-cat">${opts}</select></div>
+    <div class="ed-row"><label class="ed-label">Ситуация / триггер — когда применять</label><input type="text" id="pe-trigger" value="${p?esc(p.trigger):''}" placeholder="Когда случается…"></div>
+    <div class="ed-row"><label class="ed-label">Принцип — само правило</label><textarea id="pe-rule" placeholder="…поступаю так">${p?esc(p.rule):''}</textarea></div>
+    <div class="ed-row"><label class="ed-label">Почему / урок за этим</label><textarea id="pe-why" placeholder="…потому что">${p?esc(p.why):''}</textarea></div>
+    <div class="ed-actions"><button class="btn btn-red btn-sm" onclick="savePrin()">Сохранить</button><button class="btn btn-ghost btn-sm" onclick="closePrinEditor()">Отмена</button></div>
+  </div>`;
+  document.getElementById('pe-rule').focus();
+}
+function savePrin(){
+  const rule=document.getElementById('pe-rule').value.trim(); if(!rule){ toast('Впиши сам принцип'); return; }
+  const obj={ id:prinEditId||uid(), category:document.getElementById('pe-cat').value, trigger:document.getElementById('pe-trigger').value.trim(), rule, why:document.getElementById('pe-why').value.trim(), seed:false, createdAt:Date.now() };
+  if(prinEditId){ const i=principles.findIndex(x=>x.id===prinEditId); if(i>=0){ obj.createdAt=principles[i].createdAt; obj.fav=principles[i].fav; principles[i]=obj; } } else principles.unshift(obj);
+  saveArr(K_PRIN,principles); closePrinEditor(); renderPrinciples(); toast('Принцип сохранён');
+}
+function delPrin(id){ if(!confirm('Удалить принцип?'))return; principles=principles.filter(x=>x.id!==id); saveArr(K_PRIN,principles); renderPrinciples(); toast('Удалено'); }
+function closePrinEditor(){ document.getElementById('prinEditor').innerHTML=''; prinEditId=null; }
+/* ── ЛЮДИ: модель ── */
+const ATTRS=[
+  {k:'nap', nm:'Напор',        sub:'доводит до решения'},
+  {k:'kom', nm:'Коммуникация', sub:'располагает, влияет'},
+  {k:'sis', nm:'Системность',  sub:'регламент, детали'},
+  {k:'vyn', nm:'Выносливость', sub:'рутина, дистанция'},
+  {k:'obu', nm:'Обучаемость',  sub:'меняется после ОС'},
+  {k:'avt', nm:'Автономность', sub:'работает без надзора'}
+];
+const ROLES=[
+  {id:'specialist', nm:'Специалист · ведение', pos:'СПЕЦ', w:{vyn:25,sis:25,obu:15,kom:15,avt:15,nap:5}},
+  {id:'diagnost',   nm:'Диагност · продажи',   pos:'ДИАГ', w:{nap:30,kom:30,obu:15,avt:10,vyn:10,sis:5}},
+  {id:'coordinator',nm:'Координатор · заявки', pos:'КООР', w:{kom:25,sis:25,vyn:20,nap:15,obu:10,avt:5}},
+  {id:'manager',    nm:'Руководитель',         pos:'РУК',  w:{avt:25,nap:20,sis:20,kom:20,obu:10,vyn:5}},
+  {id:'universal',  nm:'Универсал',            pos:'УНИВ', w:{nap:17,kom:17,sis:17,vyn:17,obu:16,avt:16}}
+];
+function roleOf(id){ return ROLES.find(r=>r.id===id)||ROLES[4]; }
+function ovrFor(p,roleId){
+  const w=roleOf(roleId).w; let sum=0,tot=0;
+  ATTRS.forEach(a=>{ const v=parseInt(p.attrs&&p.attrs[a.k],10); if(!isNaN(v)){ sum+=v*w[a.k]; tot+=w[a.k]; } });
+  return tot?Math.round(sum/tot):0;
+}
+function hasAttrs(p){ return ATTRS.some(a=>{ const v=parseInt(p.attrs&&p.attrs[a.k],10); return !isNaN(v); }); }
+function bestPos(p){
+  if(!hasAttrs(p)) return null;
+  let best=null; ROLES.forEach(r=>{ if(r.id==='universal')return; const o=ovrFor(p,r.id); if(!best||o>best.ovr) best={role:r,ovr:o}; });
+  return best;
+}
+function confOf(p){
+  if(!hasAttrs(p)) return 0;
+  var s2=0;
+  s2 += Math.min(40, lines(p.track).length*5);
+  var b=Array.isArray(p.bel)?p.bel:[];
+  if(b.length){ var c=b.filter(function(x){return (+x.lv||0)>0;}).length; s2 += Math.round(c/b.length*25); }
+  var vt=p.vTag||{};
+  ['values','abilities','skills'].forEach(function(k){ if(vt[k]==='ok') s2+=10; else if(vt[k]==='q') s2+=4; });
+  s2 -= lines(p.gaps).length*4;
+  return Math.max(0,Math.min(100,s2));
+}
+function confLabel(c){
+  if(c<35) return 'мало данных — рейтинг пока гипотеза';
+  if(c<65) return 'проверено наполовину — рейтинг предварительный';
+  return 'данных достаточно — рейтингу можно верить';
+}
+function tierOf(o){ return o>=88?'icon':(o>=78?'gold':(o>=66?'silver':'bronze')); }
+function migratePerson(p){
+  if(!p.attrs){
+    p.attrs={nap:'',kom:'',sis:'',vyn:'',obu:'',avt:''};
+    if(p.disc){ // старые DISC → атрибуты
+      const d=parseInt(p.disc.d,10), i=parseInt(p.disc.i,10), st=parseInt(p.disc.s,10), c=parseInt(p.disc.c,10);
+      const sc=x=>isNaN(x)?'':String(Math.min(99,Math.max(20,Math.round(30+x*1.3))));
+      p.attrs.nap=sc(d); p.attrs.kom=sc(i); p.attrs.vyn=sc(st); p.attrs.sis=sc(c);
+    }
+  }
+  if(!p.roleId) p.roleId='universal';
+  if(!Array.isArray(p.history)) p.history=[];
+  ['mbti','metric','values','abilities','skills','track','watch','conflicts','gaps','notes'].forEach(k=>{ if(p[k]===undefined) p[k]=''; });
+  if(!p.vTag) p.vTag={values:'',abilities:'',skills:''};
+  if(p.fitGood===undefined) p.fitGood=p.strengths||'';
+  if(p.fitBad===undefined) p.fitBad=p.weaknesses||'';
+  if(!Array.isArray(p.bel)) p.bel = p.believable ? [{area:p.believable, lv:2}] : [];
+  return p;
+}
+people=people.map(migratePerson);
+function belMax(p){ if(!p||!Array.isArray(p.bel)||!p.bel.length) return 0; return Math.max.apply(null,p.bel.map(b=>+b.lv||0)); }
+function findPersonByName(n){ if(!n)return null; const q=n.trim().toLowerCase(); return people.find(p=>(p.name||'').trim().toLowerCase()===q)||null; }
+/* ── ЛЮДИ: сетка карточек ── */
+function renderStatusChips(){
+  const counts={}; people.forEach(p=>counts[p.status]=(counts[p.status]||0)+1);
+  let h=`<button class="chip ${statusFilter==='all'?'active':''}" onclick="setStatusFilter('all')">Все · ${people.length}</button>`;
+  STATUSES.forEach(s=>{ const n=counts[s.id]||0; if(n>0) h+=`<button class="chip ${statusFilter===s.id?'active':''}" onclick="setStatusFilter('${s.id}')">${s.label} · ${n}</button>`; });
+  document.getElementById('statusChips').innerHTML=h;
+}
+function setStatusFilter(f){ statusFilter=f; renderPeople(); }
+function renderPeople(){
+  renderStatusChips();
+  const el=document.getElementById('peopleList');
+  const sEl=document.getElementById('peopleSearch');
+  const q=((sEl&&sEl.value)||'').toLowerCase();
+  if(!people.length){ el.innerHTML='<div class="roster"><div class="roster-empty">Пока никого.<br><b>Собрать через ИИ</b> — опишешь человека словами, карточка соберётся сама.</div></div>'+trashHtml(); return; }
+  let list=people.filter(p=>(statusFilter==='all'||p.status===statusFilter)&&(!q||((p.name||'')+' '+(p.role||'')+' '+(p.fitGood||'')+' '+(p.fitBad||'')).toLowerCase().includes(q)));
+  if(!list.length){ el.innerHTML='<div class="roster"><div class="roster-empty">Никого по этому фильтру.</div></div>'+trashHtml(); return; }
+  list=list.slice().sort((a,b)=>ovrFor(b,b.roleId)-ovrFor(a,a.roleId));
+  el.innerHTML='<div class="roster"><div class="pgrid">'+list.map(p=>{
+    const r=roleOf(p.roleId), o=ovrFor(p,p.roleId), st=statusOf(p.status);
+    const tier=hasAttrs(p)?tierOf(o):'silver';
+    const init=(p.name||'?').trim().charAt(0).toUpperCase();
+    const attrs=ATTRS.map(a=>{ const val=parseInt(p.attrs&&p.attrs[a.k],10);
+      return `<div class="fc-a"><span class="fc-av">${isNaN(val)?'—':val}</span><span class="fc-ak">${a.nm.slice(0,3).toUpperCase()}</span></div>`; }).join('');
+    const bp=bestPos(p);
+    const bestLine = bp && bp.role.id!==p.roleId
+      ? `<div class="fc-bs">↗ сильнее как <b>${bp.role.pos}</b> · ${bp.ovr}</div>`
+      : (hasAttrs(p)?`<div class="fc-bs">✓ на своей позиции</div>`:`<div class="fc-bs">нет оценки</div>`);
+    return `<div class="fc ${tier}" onclick="openPersonDetail('${p.id}')">
+      <span class="fc-st">${st.label}</span>
+      <div class="fc-in">
+        <div class="fc-hd">
+          <div><div class="fc-ovr">${hasAttrs(p)?o:'—'}</div><div class="fc-pos">${r.pos}</div></div>
+          <div class="fc-ava">${esc(init)}</div>
+        </div>
+        <div class="fc-nm">${esc(p.name)}</div>
+        ${p.role?`<div class="fc-rl">${esc(p.role)}</div>`:''}
+        <div class="fc-ln"></div>
+        <div class="fc-at">${attrs}</div>
+        <div class="fc-ft">${bestLine}</div>
+      </div>
+    </div>`;
+  }).join('')+'</div></div>'+trashHtml();
+}
+/* ── ЛЮДИ: детальная модалка ── */
+function vasBlock(p){
+  if(!p.values&&!p.abilities&&!p.skills) return '';
+  const tg=t=>t==='ok'?'<span class="vtag ok">подтверждено</span>':(t==='no'?'<span class="vtag no">не проверено</span>':(t==='q'?'<span class="vtag q">под вопросом</span>':''));
+  const row=(l,txt,tag)=>`<div class="vas-row"><div class="vas-l">${l}</div><div class="vas-t ${txt?'':'empty'}">${txt?esc(txt):'—'}${txt?tg(tag):''}</div></div>`;
+  return `<div class="pc-block"><div class="pc-h">Ценности · Способности · Навыки</div><div class="vas">
+    ${row('Ценности',p.values,p.vTag&&p.vTag.values)}${row('Способности',p.abilities,p.vTag&&p.vTag.abilities)}${row('Навыки',p.skills,p.vTag&&p.vTag.skills)}
+  </div></div>`;
+}
+function fitBlock(p){
+  if(!p.fitGood&&!p.fitBad) return '';
+  const ul=s=>{ const a=lines(s); return a.length?`<ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<div class="empty">—</div>'; };
+  return `<div class="pc-block"><div class="pc-h">Куда ставить</div><div class="fit">
+    <div class="fit-box g"><div class="fh">Играет сильно</div>${ul(p.fitGood)}</div>
+    <div class="fit-box b"><div class="fh">Ломается</div>${ul(p.fitBad)}</div></div></div>`;
+}
+function belBlock(p){
+  if(!Array.isArray(p.bel)||!p.bel.length) return '';
+  const rows=p.bel.map(b=>{ const lv=+b.lv||0;
+    const dots=[1,2,3,4,5].map(i=>`<i class="${i<=lv?'on'+(lv>=4?' hi':''):''}"></i>`).join('');
+    return `<div class="bel-row"><div class="bel-a">${esc(b.area)}</div><div class="bel-lv"><span class="bel-txt">${BEL_LABEL[lv]||'нет данных'}</span><div class="dots">${dots}</div></div></div>`; }).join('');
+  return `<div class="pc-block"><div class="pc-h">Доверие по вопросам</div><div class="bel-list">${rows}</div></div>`;
+}
+function trackBlock(p){
+  const a=lines(p.track); if(!a.length) return '';
+  const rows=a.map(x=>{ const m=x.match(/^([^—|]{1,18})[—|]\s*(.+)$/); return m?`<div class="tl-i"><div class="tl-d">${esc(m[1].trim())}</div><div class="tl-t">${esc(m[2].trim())}</div></div>`:`<div class="tl-i"><div class="tl-d">—</div><div class="tl-t">${esc(x)}</div></div>`; }).join('');
+  return `<div class="pc-block"><div class="pc-h">Track record</div><div class="tl">${rows}</div></div>`;
+}
+function gapBlock(p){
+  const g=lines(p.gaps), c=lines(p.conflicts);
+  if(!g.length&&!c.length) return '';
+  let h='<div class="pc-block"><div class="pc-h">Что под вопросом</div>';
+  if(c.length) h+=`<div class="fit-box b" style="margin-bottom:9px"><div class="fh">Источники разошлись</div><ul>${c.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+  if(g.length) h+=`<div class="pg-box"><div class="pc-h" style="margin-bottom:7px">Каких данных не хватает</div><ul style="list-style:none">${g.map(x=>`<li style="font-size:12.5px;color:var(--ink2);padding:3px 0 3px 15px;position:relative;line-height:1.5"><span style="position:absolute;left:0;top:0;color:var(--amber)">·</span>${esc(x)}</li>`).join('')}</ul></div>`;
+  return h+'</div>';
+}
+function watchBlock(p){
+  const a=lines(p.watch); if(!a.length) return '';
+  const rows=a.map(x=>{ const m=x.match(/^([^—|]{1,22})[—|]\s*(.+)$/); return m?`<div class="wl-i"><div class="wl-w">${esc(m[1].trim())}</div><div class="wl-b">${esc(m[2].trim())}</div></div>`:`<div class="wl-i"><div class="wl-w">следить</div><div class="wl-b">${esc(x)}</div></div>`; }).join('');
+  return `<div class="pc-block"><div class="pc-h">За чем следить</div><div class="wl">${rows}</div></div>`;
+}
+function posTable(p){
+  if(!hasAttrs(p)) return '';
+  const rows=ROLES.filter(r=>r.id!=='universal').map(r=>({r,o:ovrFor(p,r.id)})).sort((a,b)=>b.o-a.o);
+  const mx=rows[0].o||1;
+  return `<div class="pc-block"><div class="pc-h">Рейтинг по позициям</div><div class="pos-tbl">${
+    rows.map((x,i)=>`<div class="pos-row ${i===0?'best':''}"><div class="pos-nm">${x.r.nm}</div><div class="pos-bar"><i style="width:${Math.round(x.o/mx*100)}%"></i></div><div class="pos-v">${x.o}</div></div>`).join('')
+  }</div><div class="ed-hint" style="margin-top:9px">Один и тот же человек может быть слабым на одной позиции и сильным на другой — цифры считаются по весам роли.</div></div>`;
+}
+function openPersonDetail(id){
+  const p=people.find(x=>x.id===id); if(!p)return;
+  const r=roleOf(p.roleId), o=ovrFor(p,p.roleId), st=statusOf(p.status), tier=hasAttrs(p)?tierOf(o):'silver';
+  const attrRows=ATTRS.map(a=>{ const v=parseInt(p.attrs&&p.attrs[a.k],10);
+    return `<div class="attr-row">
+      <div class="attr-nm">${a.nm} <span>· ${a.sub}</span></div>
+      <div class="attr-bar"><i style="width:${isNaN(v)?0:v}%;background:${isNaN(v)?'#ccc':(v>=75?'var(--green)':(v<=45?'var(--acc)':'var(--ink)'))}"></i></div>
+      <div class="attr-v">${isNaN(v)?'—':v}</div></div>`; }).join('');
+  document.getElementById('modalTitle').innerHTML=`<div class="pm-head">
+      <div class="pm-ovr ${tier}"><div class="n">${hasAttrs(p)?o:'—'}</div><div class="p">${r.pos}</div></div>
+      <div><div>${esc(p.name)}</div><div style="font-family:'Inter';font-size:12px;font-weight:400;color:var(--muted);margin-top:3px">${esc(p.role||r.nm)} · ${st.label}</div></div>
+    </div>`;
+  document.querySelector('.sheet-kicker').textContent='Карточка игрока';
+  document.getElementById('modalBody').innerHTML=`
+    ${p.metric?`<div class="pc-metric" style="margin-top:0"><span class="ml">Метрика роли</span><span class="mv">${esc(p.metric)}</span></div>`:''}
+    ${hasAttrs(p)?`<div class="pc-block"><div class="pc-h">Атрибуты</div>${attrRows}
+      <div class="conf"><div class="conf-t"><span>Насколько проверено</span><b>${confOf(p)}%</b></div><div class="conf-bar"><i style="width:${confOf(p)}%;background:${confOf(p)>=65?'var(--green)':(confOf(p)<35?'var(--acc)':'var(--ink)')}"></i></div><div class="conf-l">${confLabel(confOf(p))}</div></div>${p.mbti?`<div style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;background:var(--ink);color:#fff;padding:3px 9px;border-radius:5px;margin-top:6px">${esc(p.mbti)}</div>`:''}</div>`:''}
+    ${posTable(p)}${vasBlock(p)}${fitBlock(p)}${belBlock(p)}${trackBlock(p)}${watchBlock(p)}${gapBlock(p)}${historyBlock(p)}
+    ${p.notes?`<div class="pc-block"><div class="pc-h">Заметки</div><div class="pg-box"><div class="pg-val">${esc(p.notes)}</div></div></div>`:''}
+    <div style="display:flex;gap:9px;margin-top:22px">
+      <button class="btn btn-red btn-sm" onclick="openAiUpdate('${p.id}')">Дополнить через ИИ</button>
+      <button class="btn btn-primary btn-sm" onclick="closeHelp();openPersonEditor('${p.id}')">Редактировать</button>
+      <button class="btn btn-ghost btn-sm" onclick="copyPersonCard('${p.id}')">Скопировать текстом</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeHelp();delPerson('${p.id}')">Удалить</button>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('open'); document.body.style.overflow='hidden';
+}
+/* ── ЛЮДИ: редактор ── */
+function vTagBtns(cur){
+  const opts=[['ok','подтверждено'],['q','под вопросом'],['no','не проверено']];
+  return `<div class="vsel">${opts.map(o=>`<button type="button" class="${cur===o[0]?'on':''}" onclick="setVTag('${o[0]}',this)">${o[1]}</button>`).join('')}</div>`;
+}
+function setVTag(val,btn){ const wrap=btn.parentNode.parentNode; Array.from(btn.parentNode.children).forEach(b=>b.classList.remove('on')); btn.classList.add('on'); wrap.setAttribute('data-v',val); }
+function getVTag(id){ const el=document.getElementById(id); return el?(el.getAttribute('data-v')||''):''; }
+function renderBelEditor(){
+  const el=document.getElementById('belEditor'); if(!el)return;
+  el.innerHTML=edBel.map((b,i)=>{
+    const opts=[0,1,2,3,4,5].map(l=>`<option value="${l}" ${(+b.lv||0)===l?'selected':''}>${BEL_LABEL[l]}</option>`).join('');
+    return `<div class="bel-edit-row">
+      <input type="text" value="${esc(b.area)}" placeholder="Область — напр.: продажи по скрипту" oninput="edBel[${i}].area=this.value">
+      <select onchange="edBel[${i}].lv=+this.value">${opts}</select>
+      <button type="button" class="icon-btn del" onclick="edBel.splice(${i},1);renderBelEditor()">&times;</button></div>`;
+  }).join('') + `<button type="button" class="btn btn-ghost btn-sm" style="margin-top:4px" onclick="edBel.push({area:'',lv:0});renderBelEditor()">+ область</button>`;
+}
+function openPersonEditor(id){
+  personEditId=id||null; const p=id?migratePerson(people.find(x=>x.id===id)||{}):null;
+  edBel = p&&Array.isArray(p.bel) ? JSON.parse(JSON.stringify(p.bel)) : [];
+  const sOpts=STATUSES.map(x=>`<option value="${x.id}" ${p&&p.status===x.id?'selected':''}>${x.label}</option>`).join('');
+  const rOpts=ROLES.map(x=>`<option value="${x.id}" ${p&&p.roleId===x.id?'selected':''}>${x.nm}</option>`).join('');
+  const at=(p&&p.attrs)||{};
+  const sliders=ATTRS.map(a=>{ const v=parseInt(at[a.k],10); const val=isNaN(v)?50:v;
+    return `<div class="attr-e"><label>${a.nm}<span>${a.sub}</span></label>
+      <input type="range" min="1" max="99" value="${val}" id="at-${a.k}" oninput="document.getElementById('ao-${a.k}').textContent=this.value">
+      <output id="ao-${a.k}">${val}</output></div>`; }).join('');
+  document.getElementById('personEditor').innerHTML=`<div class="editor">
+    <div class="ed-title">${id?'Редактировать карточку':'Новая карточка'}</div>
+    <div class="ed-grid2">
+      <div class="ed-row"><label class="ed-label">Имя</label><input type="text" id="pp-name" value="${p?esc(p.name):''}" placeholder="Имя"></div>
+      <div class="ed-row"><label class="ed-label">Должность словами</label><input type="text" id="pp-role" value="${p?esc(p.role):''}" placeholder="Напр.: специалист по трансформации"></div>
+    </div>
+    <div class="ed-grid2">
+      <div class="ed-row"><label class="ed-label">Позиция — по ней считается рейтинг</label><select id="pp-roleid">${rOpts}</select></div>
+      <div class="ed-row"><label class="ed-label">Статус</label><select id="pp-status">${sOpts}</select></div>
+    </div>
+    <div class="ed-row"><label class="ed-label">Метрика роли — одна цифра, по которой судим</label><input type="text" id="pp-metric" value="${p?esc(p.metric):''}" placeholder="Напр.: доходимость клиентов до результата"></div>
+    <div class="ed-sep"></div><div class="ed-sec">Атрибуты · 1–99</div>
+    <div class="attr-edit">${sliders}</div>
+    <div class="ed-hint">Ставь по наблюдениям, тест не нужен. 50 — средний человек, 75+ — заметно сильная сторона, 40 и ниже — слабое место.</div>
+    <div class="ed-row" style="margin-top:12px"><label class="ed-label">Тип личности, если проходил</label><input type="text" id="pp-mbti" value="${p?esc(p.mbti):''}" placeholder="Напр.: INTJ · Архитектор"></div>
+    <div class="ed-sep"></div><div class="ed-sec">Ценности · Способности · Навыки</div>
+    <div class="ed-row" id="pp-values-tag" data-v="${p&&p.vTag?esc(p.vTag.values):''}"><label class="ed-label">Ценности — во что верит, как поступает</label><textarea id="pp-values" placeholder="Напр.: справедливость обмена, спорит в лицо">${p?esc(p.values):''}</textarea>${vTagBtns(p&&p.vTag?p.vTag.values:'')}</div>
+    <div class="ed-row" id="pp-abilities-tag" data-v="${p&&p.vTag?esc(p.vTag.abilities):''}"><label class="ed-label">Способности — как устроено мышление</label><textarea id="pp-abilities" placeholder="Напр.: анализ, скорость, работа под давлением">${p?esc(p.abilities):''}</textarea>${vTagBtns(p&&p.vTag?p.vTag.abilities:'')}</div>
+    <div class="ed-row" id="pp-skills-tag" data-v="${p&&p.vTag?esc(p.vTag.skills):''}"><label class="ed-label">Навыки — что умеет руками</label><textarea id="pp-skills" placeholder="Напр.: ведение клиентов, CRM, чтение анализов">${p?esc(p.skills):''}</textarea>${vTagBtns(p&&p.vTag?p.vTag.skills:'')}</div>
+    <div class="ed-hint">Порядок не случайный: навыки добираются обучением, ценности и способности — практически нет.</div>
+    <div class="ed-sep"></div><div class="ed-sec">Куда ставить</div>
+    <div class="ed-grid2">
+      <div class="ed-row"><label class="ed-label">Играет сильно — по строке</label><textarea id="pp-fitgood" placeholder="Давление&#10;Автономия&#10;Быстрый старт">${p?esc(p.fitGood):''}</textarea></div>
+      <div class="ed-row"><label class="ed-label">Ломается — по строке</label><textarea id="pp-fitbad" placeholder="Рутина&#10;Чужой протокол&#10;Детали">${p?esc(p.fitBad):''}</textarea></div>
+    </div>
+    <div class="ed-sep"></div><div class="ed-sec">Доверие по вопросам <button class="info" type="button" onclick="openHelp('bel')" style="vertical-align:2px">?</button></div>
+    <div id="belEditor"></div>
+    <div class="ed-hint">Отсюда берётся вес голоса во вкладке «Решение».</div>
+    <div class="ed-sep"></div><div class="ed-sec">История и контроль</div>
+    <div class="ed-row"><label class="ed-label">Track record — формат: дата — что было</label><textarea id="pp-track" placeholder="07.08 — подписал без правок&#10;15.08 — сдал экзамен">${p?esc(p.track):''}</textarea></div>
+    <div class="ed-row"><label class="ed-label">За чем следить — формат: когда — что</label><textarea id="pp-watch" placeholder="недели 1–2 — карточки&#10;месяц 2–3 — рутина">${p?esc(p.watch):''}</textarea></div>
+    <div class="ed-row"><label class="ed-label">Заметки</label><textarea id="pp-note" placeholder="Наблюдения, договорённости">${p?esc(p.notes):''}</textarea></div>
+    <div class="ed-actions"><button class="btn btn-red btn-sm" onclick="savePerson()">Сохранить</button><button class="btn btn-ghost btn-sm" onclick="closePersonEditor()">Отмена</button></div>
+  </div>`;
+  renderBelEditor(); document.getElementById('pp-name').focus();
+  document.getElementById('personEditor').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function savePerson(){
+  const name=v('pp-name').trim(); if(!name){ toast('Впиши имя'); return; }
+  const attrs={}; ATTRS.forEach(a=>{ const el=document.getElementById('at-'+a.k); attrs[a.k]=el?String(el.value):''; });
+  const obj={ id:personEditId||uid(), name, role:v('pp-role').trim(), roleId:v('pp-roleid'), status:v('pp-status'),
+    metric:v('pp-metric').trim(), attrs, mbti:v('pp-mbti').trim(),
+    values:v('pp-values').trim(), abilities:v('pp-abilities').trim(), skills:v('pp-skills').trim(),
+    vTag:{ values:getVTag('pp-values-tag'), abilities:getVTag('pp-abilities-tag'), skills:getVTag('pp-skills-tag') },
+    fitGood:v('pp-fitgood').trim(), fitBad:v('pp-fitbad').trim(),
+    bel: edBel.filter(b=>b.area&&b.area.trim()).map(b=>({area:b.area.trim(), lv:+b.lv||0})),
+    track:v('pp-track').trim(), watch:v('pp-watch').trim(), notes:v('pp-note').trim(), createdAt:Date.now() };
+  if(personEditId){ const i=people.findIndex(x=>x.id===personEditId); if(i>=0){ obj.createdAt=people[i].createdAt; people[i]=obj; } } else people.unshift(obj);
+  saveArr(K_PEOPLE,people); closePersonEditor(); renderPeople(); renderVoters(); toast('Карточка сохранена');
+}
+function delPerson(id){
+  const i=people.findIndex(x=>x.id===id); if(i<0) return;
+  const p=people[i];
+  trash.unshift(Object.assign({},p,{_delAt:Date.now()}));
+  if(trash.length>40) trash=trash.slice(0,40);
+  people.splice(i,1);
+  saveArr(K_PEOPLE,people); saveArr(K_TRASH,trash);
+  renderPeople(); renderVoters&&renderVoters();
+  undoToast('«'+(p.name||'Карточка')+'» убрана в корзину','Вернуть',function(){ restorePerson(p.id); });
+}
+function restorePerson(id){
+  const i=trash.findIndex(x=>x.id===id); if(i<0){ toast('В корзине не найдено'); return; }
+  const p=trash.splice(i,1)[0]; delete p._delAt;
+  if(people.some(x=>x.id===p.id)) p.id=uid();
+  people.unshift(migratePerson(p));
+  saveArr(K_PEOPLE,people); saveArr(K_TRASH,trash);
+  renderPeople(); renderVoters&&renderVoters(); toast('«'+(p.name||'Карточка')+'» возвращена');
+}
+function purgePerson(id){
+  const p=trash.find(x=>x.id===id); if(!p) return;
+  if(!confirm('Стереть «'+(p.name||'карточку')+'» навсегда? Это уже не отменить.')) return;
+  trash=trash.filter(x=>x.id!==id); saveArr(K_TRASH,trash); renderPeople(); toast('Стёрто навсегда');
+}
+function purgeAll(){
+  if(!trash.length) return;
+  if(!confirm('Стереть всю корзину ('+trash.length+')? Это уже не отменить.')) return;
+  trash=[]; saveArr(K_TRASH,trash); renderPeople(); toast('Корзина пуста');
+}
+function trashHtml(){
+  if(!trash.length) return '';
+  return '<div class="trash-wrap"><div class="trash-hd"><span>Корзина · '+trash.length+'</span>'+
+    '<button class="btn btn-ghost btn-sm" onclick="purgeAll()">Стереть всё</button></div>'+
+    trash.map(function(p){ return '<div class="trash-row"><div class="trash-nm"><b>'+esc(p.name||'Без имени')+'</b>'+
+      '<span>'+esc(p.role||roleOf(p.roleId).nm)+' · удалена '+fmtDate(p._delAt)+'</span></div>'+
+      '<div class="trash-btns"><button class="btn btn-primary btn-sm" onclick="restorePerson(\''+p.id+'\')">Вернуть</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="purgePerson(\''+p.id+'\')">Стереть</button></div></div>'; }).join('')+
+    '<div class="ed-hint" style="margin-top:10px">Удалённые карточки лежат здесь, пока не сотрёшь вручную. Со всеми данными: атрибуты, трек-рекорд, история рейтинга.</div></div>';
+}
+function closePersonEditor(){ document.getElementById('personEditor').innerHTML=''; personEditId=null; edBel=[]; }
+function copyPersonCard(id){
+  const p=people.find(x=>x.id===id); if(!p)return;
+  const r=roleOf(p.roleId);
+  const L=['КАРТОЧКА ИГРОКА — '+p.name, (p.role||r.nm)+' · '+statusOf(p.status).label];
+  if(hasAttrs(p)) L.push('Рейтинг: '+ovrFor(p,p.roleId)+' ('+r.pos+')');
+  if(p.metric) L.push('Метрика роли: '+p.metric); L.push('');
+  if(hasAttrs(p)) L.push('АТРИБУТЫ: '+ATTRS.map(a=>a.nm+' '+(p.attrs[a.k]||'—')).join(' · ')+(p.mbti?'  ['+p.mbti+']':''));
+  if(hasAttrs(p)){ L.push('ПО ПОЗИЦИЯМ: '+ROLES.filter(x=>x.id!=='universal').map(x=>x.pos+' '+ovrFor(p,x.id)).join(' · ')); }
+  if(p.values) L.push('ЦЕННОСТИ: '+p.values);
+  if(p.abilities) L.push('СПОСОБНОСТИ: '+p.abilities);
+  if(p.skills) L.push('НАВЫКИ: '+p.skills);
+  if(p.fitGood){ L.push(''); L.push('ИГРАЕТ СИЛЬНО:'); lines(p.fitGood).forEach(x=>L.push('  • '+x)); }
+  if(p.fitBad){ L.push('ЛОМАЕТСЯ:'); lines(p.fitBad).forEach(x=>L.push('  • '+x)); }
+  if(p.bel&&p.bel.length){ L.push(''); L.push('ДОВЕРИЕ:'); p.bel.forEach(b=>L.push('  • '+b.area+' — '+BEL_LABEL[+b.lv||0])); }
+  if(p.track){ L.push(''); L.push('TRACK RECORD:'); lines(p.track).forEach(x=>L.push('  '+x)); }
+  if(p.watch){ L.push(''); L.push('ЗА ЧЕМ СЛЕДИТЬ:'); lines(p.watch).forEach(x=>L.push('  '+x)); }
+  if(p.conflicts){ L.push(''); L.push('ИСТОЧНИКИ РАЗОШЛИСЬ:'); lines(p.conflicts).forEach(x=>L.push('  '+x)); }
+  if(p.gaps){ L.push(''); L.push('НЕ ХВАТАЕТ ДАННЫХ:'); lines(p.gaps).forEach(x=>L.push('  '+x)); }
+  if(p.notes){ L.push(''); L.push('ЗАМЕТКИ: '+p.notes); }
+  copyText(L.join('\n'));
+}
+/* ── ЛЮДИ: сборка через ИИ ── */
+const AI_PROMPT = `Ты помогаешь собрать карточку сотрудника для системы управления командой. Твоя задача — честная оценка, а не вежливая.
+
+Я дам тебе материалы о человеке. Они бывают разной надёжности, поэтому опирайся на них строго в таком порядке:
+
+1. ФАКТЫ И РЕЗУЛЬТАТЫ — цифры, метрики, что человек реально сделал и чем это закончилось. Самый надёжный источник.
+2. НАБЛЮДАЕМОЕ ПОВЕДЕНИЕ — переписки, расшифровки звонков и разборов, как вёл себя под давлением, как отреагировал на обратную связь. Особенно ценно: изменил ли он поведение после разбора — по этому лучше всего видно обучаемость.
+3. BIG FIVE — если проходил. Из тестов личности он самый надёжный.
+4. DISC, MBTI и прочие — учитывай в последнюю очередь. У них слабая повторяемость: при повторном прохождении значительная часть людей получает другой результат.
+
+Если источники противоречат друг другу — верь тому, который выше в списке, и обязательно опиши противоречие в поле conflicts. Не усредняй и не сглаживай.
+
+Оцени человека по шести атрибутам от 1 до 99, где 50 — средний человек, 75+ — заметно сильная сторона, 40 и ниже — слабое место:
+- nap (Напор): доводит до решения, держит давление, не сдаётся
+- kom (Коммуникация): располагает к себе, объясняет, влияет на людей
+- sis (Системность): работает по регламенту, не теряет детали, заполняет что положено
+- vyn (Выносливость): держит рутину и длинную дистанцию без потери качества
+- obu (Обучаемость): быстро осваивает новое и реально меняет поведение после обратной связи
+- avt (Автономность): работает без надзора, сам принимает решения
+
+Верни ТОЛЬКО валидный JSON без markdown-обёртки и без комментариев:
+
+{
+  "name": "Имя Фамилия",
+  "role": "должность словами",
+  "roleId": "specialist | diagnost | coordinator | manager | universal",
+  "status": "learning | testing | trusted | wrong",
+  "metric": "одна цифра, по которой судим этого человека",
+  "attrs": { "nap": 50, "kom": 50, "sis": 50, "vyn": 50, "obu": 50, "avt": 50 },
+  "mbti": "результаты тестов одной строкой, если были",
+  "values": "во что верит и как поступает",
+  "abilities": "как устроено мышление",
+  "skills": "что умеет делать руками",
+  "vTag": { "values": "ok|q|no", "abilities": "ok|q|no", "skills": "ok|q|no" },
+  "fitGood": ["куда ставить — короткими пунктами"],
+  "fitBad": ["куда не ставить — короткими пунктами"],
+  "bel": [ { "area": "по какому вопросу можно доверять", "lv": 0 } ],
+  "track": ["дата — что произошло, с фактами и цифрами"],
+  "watch": ["когда — за чем следить"],
+  "conflicts": ["где источники разошлись и какому ты поверил"],
+  "gaps": ["каких данных не хватило, чтобы оценить точнее"],
+  "notes": "что ещё важно знать"
+}
+
+Правила:
+- vTag: ok — подтверждено фактами, q — под вопросом, no — данных нет
+- bel.lv: 0 нет данных, 1 низкое, 2 ниже среднего, 3 среднее, 4 высокое, 5 эталон. Новому человеку без результатов ставь 0 — это честно, а не обидно
+- Не выдумывай. Если атрибут оценить не по чему — ставь 50 и напиши об этом в gaps
+- Не смягчай выводы. Если человек не подходит под роль — так и напиши
+- В track складывай только факты с датами, без интерпретаций
+
+Материалы о человеке:
+`;
+function buildUpdatePrompt(p){
+  const cur={ attrs:p.attrs, roleId:p.roleId, status:p.status, metric:p.metric,
+    values:p.values, abilities:p.abilities, skills:p.skills, vTag:p.vTag,
+    fitGood:lines(p.fitGood), fitBad:lines(p.fitBad), bel:p.bel,
+    track:lines(p.track), watch:lines(p.watch), conflicts:lines(p.conflicts), gaps:lines(p.gaps), notes:p.notes };
+  return `Ты обновляешь уже существующую карточку сотрудника новыми данными. Твоя задача — честная оценка, а не вежливая.
+
+ВОТ ТЕКУЩАЯ КАРТОЧКА ЧЕЛОВЕКА ПО ИМЕНИ ${p.name}:
+
+`+JSON.stringify(cur,null,2)+`
+
+Ниже я дам НОВЫЕ материалы о нём. Опирайся на них строго в таком порядке надёжности:
+
+1. ФАКТЫ И РЕЗУЛЬТАТЫ — цифры, метрики, что человек реально сделал и чем это закончилось.
+2. НАБЛЮДАЕМОЕ ПОВЕДЕНИЕ — переписки, расшифровки звонков и разборов, как вёл себя под давлением, как отреагировал на обратную связь.
+3. BIG FIVE — если проходил.
+4. DISC, MBTI и прочие — в последнюю очередь, у них слабая повторяемость.
+
+Правила обновления:
+- Атрибуты пересматривай только если новые данные реально что-то показали. Не двигай цифру просто так — но и не бойся двигать резко, если факты того требуют.
+- В track добавляй ТОЛЬКО новые факты с датами. Старые не повторяй.
+- В watch и gaps убирай то, что уже закрыто новыми данными, и добавляй то, что появилось.
+- Уровни доверия (bel) поднимай только под подтверждённый результат, а не под старание.
+- Если новые данные противоречат старой оценке — так и напиши в conflicts, с указанием, что поменялось и почему.
+- Не смягчай. Если человек показал себя хуже, чем считалось, — снижай цифры.
+
+Верни ТОЛЬКО валидный JSON без markdown-обёртки. Формат тот же, что у карточки выше, плюс поле "changed" — одной строкой, что именно изменилось и почему:
+
+{
+  "roleId": "specialist | diagnost | coordinator | manager | universal",
+  "status": "learning | testing | trusted | wrong",
+  "metric": "",
+  "attrs": { "nap": 50, "kom": 50, "sis": 50, "vyn": 50, "obu": 50, "avt": 50 },
+  "values": "", "abilities": "", "skills": "",
+  "vTag": { "values": "ok|q|no", "abilities": "ok|q|no", "skills": "ok|q|no" },
+  "fitGood": [], "fitBad": [],
+  "bel": [ { "area": "", "lv": 0 } ],
+  "track": ["только новые факты"],
+  "watch": ["актуальный список целиком"],
+  "conflicts": ["только новые противоречия"],
+  "gaps": ["актуальный список целиком"],
+  "notes": "",
+  "changed": "что изменилось после этих данных и почему"
+}
+
+НОВЫЕ МАТЕРИАЛЫ:
+`;
+}
+function openAiUpdate(id){
+  const p=people.find(x=>x.id===id); if(!p)return;
+  closeHelp();
+  aiUpdateId=id;
+  document.getElementById('personEditor').innerHTML='';
+  const prompt=buildUpdatePrompt(p);
+  window.__updPrompt=prompt;
+  document.getElementById('aiPanel').innerHTML=`<div class="editor">
+    <div class="ed-title">Дополнить карточку · ${esc(p.name)}</div>
+    <div class="ai-steps">
+      <div class="ai-step">Копируешь промпт — в него уже вшита текущая карточка ${esc(p.name)}, ИИ увидит, что о нём известно.</div>
+      <div class="ai-step">Дописываешь снизу новые материалы: результаты, переписки, как отработал, что сказал на разборе.</div>
+      <div class="ai-step">Вставляешь ответ сюда. Старое не затрётся — новые факты добавятся к истории, а рейтинг пересчитается.</div>
+    </div>
+    <div class="controls" style="margin-bottom:14px">
+      <button class="btn btn-primary btn-sm" onclick="copyText(window.__updPrompt)">Скопировать промпт</button>
+      <button class="btn btn-ghost btn-sm" onclick="showUpdPrompt()">Посмотреть</button>
+    </div>
+    <div class="ai-box"><div class="ah">Ответ от ИИ · JSON</div>
+      <textarea id="aiUpdJson" placeholder='{ "attrs": { … }, "track": [ … ], "changed": "…" }'></textarea></div>
+    <div class="ed-actions">
+      <button class="btn btn-red btn-sm" onclick="applyAiUpdate()">Обновить карточку</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('aiPanel').innerHTML='';aiUpdateId=null">Отмена</button>
+    </div>
+  </div>`;
+  document.getElementById('aiPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function showUpdPrompt(){
+  document.querySelector('.sheet-kicker').textContent='Промпт дополнения';
+  document.getElementById('modalTitle').textContent='Промпт';
+  document.getElementById('modalBody').innerHTML=`<div class="ai-box"><textarea readonly style="min-height:340px">${esc(window.__updPrompt||'')}</textarea></div>
+    <div style="margin-top:14px"><button class="btn btn-primary btn-sm" onclick="copyText(window.__updPrompt)">Скопировать</button></div>`;
+  document.getElementById('modalOverlay').classList.add('open'); document.body.style.overflow='hidden';
+}
+function mergeLines(oldStr,arr){
+  const o=lines(oldStr), n=Array.isArray(arr)?arr.filter(Boolean).map(String):[];
+  const seen=new Set(o.map(x=>x.trim().toLowerCase()));
+  n.forEach(x=>{ const k=x.trim().toLowerCase(); if(k&&!seen.has(k)){ o.push(x.trim()); seen.add(k); } });
+  return o.join('\n');
+}
+function applyAiUpdate(){
+  const p=people.find(x=>x.id===aiUpdateId); if(!p){ toast('Карточка не найдена'); return; }
+  let raw=(document.getElementById('aiUpdJson').value||'').trim();
+  if(!raw){ toast('Вставь ответ от ИИ'); return; }
+  raw=raw.replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
+  const i=raw.indexOf('{'), j=raw.lastIndexOf('}');
+  if(i>=0&&j>i) raw=raw.slice(i,j+1);
+  let d; try{ d=JSON.parse(raw); }catch(e){ toast('Не похоже на JSON'); return; }
+  // снимок до обновления
+  const prevOvr=ovrFor(p,p.roleId), prevRole=p.roleId;
+  if(!Array.isArray(p.history)) p.history=[];
+  const arr=x=>Array.isArray(x)?x.filter(Boolean).map(String):[];
+  const cl=x=>{ const n=parseInt(x,10); return isNaN(n)?'':String(Math.max(1,Math.min(99,n))); };
+  // атрибуты
+  if(d.attrs) ATTRS.forEach(a=>{ const v=cl(d.attrs[a.k]); if(v!=='') p.attrs[a.k]=v; });
+  // простые поля — только если пришли непустыми
+  ['metric','values','abilities','skills','notes'].forEach(k=>{ if(d[k]&&String(d[k]).trim()) p[k]=String(d[k]).trim(); });
+  if(d.roleId&&ROLES.some(r=>r.id===d.roleId)) p.roleId=d.roleId;
+  if(d.status&&STATUSES.some(x=>x.id===d.status)) p.status=d.status;
+  if(d.vTag) ['values','abilities','skills'].forEach(k=>{ if(d.vTag[k]) p.vTag[k]=d.vTag[k]; });
+  // списки-замены
+  if(arr(d.fitGood).length) p.fitGood=arr(d.fitGood).join('\n');
+  if(arr(d.fitBad).length) p.fitBad=arr(d.fitBad).join('\n');
+  if(arr(d.watch).length) p.watch=arr(d.watch).join('\n');
+  if(arr(d.gaps).length) p.gaps=arr(d.gaps).join('\n');
+  // списки-дополнения
+  p.track=mergeLines(p.track,arr(d.track));
+  p.conflicts=mergeLines(p.conflicts,arr(d.conflicts));
+  // доверие: по области
+  if(Array.isArray(d.bel)) d.bel.filter(b=>b&&b.area).forEach(b=>{
+    const key=String(b.area).trim().toLowerCase();
+    const ex=(p.bel||[]).find(x=>String(x.area).trim().toLowerCase()===key);
+    const lv=Math.max(0,Math.min(5,parseInt(b.lv,10)||0));
+    if(ex) ex.lv=lv; else (p.bel=p.bel||[]).push({area:String(b.area).trim(), lv});
+  });
+  // история
+  const newOvr=ovrFor(p,p.roleId);
+  p.history.push({ t:Date.now(), from:prevOvr, to:newOvr, role:p.roleId, roleFrom:prevRole,
+                   why:String(d.changed||'').trim() });
+  saveArr(K_PEOPLE,people);
+  document.getElementById('aiPanel').innerHTML=''; aiUpdateId=null;
+  renderPeople(); renderVoters();
+  const delta=newOvr-prevOvr;
+  toast(delta===0?'Карточка обновлена':('Рейтинг '+prevOvr+' → '+newOvr+' ('+(delta>0?'+':'')+delta+')'));
+  setTimeout(()=>openPersonDetail(p.id),260);
+}
+function historyBlock(p){
+  if(!Array.isArray(p.history)||!p.history.length) return '';
+  const rows=p.history.slice().reverse().map(h=>{
+    const d=h.to-h.from, sign=d>0?'+':'';
+    const col=d>0?'var(--green)':(d<0?'var(--acc)':'var(--muted)');
+    return `<div class="tl-i"><div class="tl-d">${fmtDate(h.t)}</div><div class="tl-t">
+      <b style="color:${col}">${h.from} → ${h.to}${d?` (${sign}${d})`:''}</b>${h.roleFrom!==h.role?` · позиция ${roleOf(h.roleFrom).pos} → ${roleOf(h.role).pos}`:''}
+      ${h.why?`<div style="color:var(--muted);margin-top:3px">${esc(h.why)}</div>`:''}</div></div>`;
+  }).join('');
+  return `<div class="pc-block"><div class="pc-h">Динамика рейтинга</div><div class="tl">${rows}</div></div>`;
+}
+function openAiImport(){
+  document.getElementById('personEditor').innerHTML='';
+  document.getElementById('aiPanel').innerHTML=`<div class="editor">
+    <div class="ed-title">Собрать карточку через ИИ</div>
+    <div class="ai-steps">
+      <div class="ai-step">Копируешь промпт кнопкой ниже и вставляешь в любой ИИ.</div>
+      <div class="ai-step">Под промптом складываешь всё, что есть о человеке. Чем ниже в списке — тем меньше веса, но лишним не будет:<br>
+        <span style="color:var(--muted);font-size:12.5px">— цифры и результаты: конверсия, сколько довёл, что сделал<br>
+        — переписки и расшифровки звонков или разборов<br>
+        — как отреагировал на обратную связь: изменил поведение или нет<br>
+        — результаты тестов, если проходил</span></div>
+      <div class="ai-step">ИИ вернёт JSON. Целиком копируешь его сюда и жмёшь «Собрать карточку».</div>
+    </div>
+    <div class="controls" style="margin-bottom:14px">
+      <button class="btn btn-primary btn-sm" onclick="copyText(AI_PROMPT)">Скопировать промпт</button>
+      <button class="btn btn-ghost btn-sm" onclick="showPromptText()">Посмотреть промпт</button>
+    </div>
+    <div class="ai-box">
+      <div class="ah">Ответ от ИИ · JSON</div>
+      <textarea id="aiJson" placeholder='{ "name": "…", "attrs": { … } }'></textarea>
+    </div>
+    <div class="ed-actions">
+      <button class="btn btn-red btn-sm" onclick="importFromAi()">Собрать карточку</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('aiPanel').innerHTML=''">Отмена</button>
+    </div>
+  </div>`;
+  document.getElementById('aiPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function showPromptText(){
+  document.querySelector('.sheet-kicker').textContent='Промпт для ИИ';
+  document.getElementById('modalTitle').textContent='Промпт';
+  document.getElementById('modalBody').innerHTML=`<div class="ai-box"><textarea readonly style="min-height:340px">${esc(AI_PROMPT)}</textarea></div>
+    <div style="margin-top:14px"><button class="btn btn-primary btn-sm" onclick="copyText(AI_PROMPT)">Скопировать</button></div>`;
+  document.getElementById('modalOverlay').classList.add('open'); document.body.style.overflow='hidden';
+}
+function importFromAi(){
+  let raw=(document.getElementById('aiJson').value||'').trim();
+  if(!raw){ toast('Вставь ответ от ИИ'); return; }
+  raw=raw.replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
+  const i=raw.indexOf('{'), j=raw.lastIndexOf('}');
+  if(i>=0&&j>i) raw=raw.slice(i,j+1);
+  let d; try{ d=JSON.parse(raw); }catch(e){ toast('Не похоже на JSON — проверь ответ'); return; }
+  if(!d||!d.name){ toast('В ответе нет имени'); return; }
+  const arr=x=>Array.isArray(x)?x.filter(Boolean).join('\n'):(typeof x==='string'?x:'');
+  const cl=x=>{ const n=parseInt(x,10); return isNaN(n)?'':String(Math.max(1,Math.min(99,n))); };
+  const at={}; ATTRS.forEach(a=>{ at[a.k]=cl(d.attrs&&d.attrs[a.k]); });
+  const validRole=ROLES.some(r=>r.id===d.roleId)?d.roleId:'universal';
+  const validSt=STATUSES.some(s=>s.id===d.status)?d.status:'testing';
+  const obj={ id:uid(), name:String(d.name).trim(), role:String(d.role||'').trim(), roleId:validRole, status:validSt,
+    metric:String(d.metric||'').trim(), attrs:at, mbti:String(d.mbti||'').trim(),
+    values:String(d.values||'').trim(), abilities:String(d.abilities||'').trim(), skills:String(d.skills||'').trim(),
+    vTag:{ values:(d.vTag&&d.vTag.values)||'', abilities:(d.vTag&&d.vTag.abilities)||'', skills:(d.vTag&&d.vTag.skills)||'' },
+    fitGood:arr(d.fitGood), fitBad:arr(d.fitBad),
+    bel: Array.isArray(d.bel)?d.bel.filter(b=>b&&b.area).map(b=>({area:String(b.area).trim(), lv:Math.max(0,Math.min(5,parseInt(b.lv,10)||0))})):[],
+    track:arr(d.track), watch:arr(d.watch), conflicts:arr(d.conflicts), gaps:arr(d.gaps), notes:String(d.notes||'').trim(), createdAt:Date.now() };
+  const dup=findPersonByName(obj.name);
+  if(dup && !confirm('Карточка «'+obj.name+'» уже есть. Добавить ещё одну?')) return;
+  people.unshift(obj); saveArr(K_PEOPLE,people);
+  document.getElementById('aiPanel').innerHTML='';
+  renderPeople(); renderVoters(); toast('Карточка собрана');
+  setTimeout(()=>openPersonDetail(obj.id),250);
+}
+/* ── МАШИНА ── */
+function freshMachine(){ return { id:'',title:'',goals:'',problems:'',cause:'',root:'',design:'',actions:'',savedAt:0 }; }
+function saveDraft(){ LS.set(K_MACH_CUR, JSON.stringify(curMachine)); }
+function pullMachine(){ curMachine.goals=v('m-goals'); curMachine.problems=v('m-problems'); curMachine.root=v('m-root'); curMachine.design=v('m-design'); curMachine.actions=v('m-actions'); saveDraft(); }
+function populateMachine(){ setV('m-goals',curMachine.goals); setV('m-problems',curMachine.problems); setV('m-root',curMachine.root); setV('m-design',curMachine.design); setV('m-actions',curMachine.actions); document.getElementById('machTitle').value=curMachine.title||''; highlightFork(); renderMachPicker(); }
+function highlightFork(){ ['design','people','both'].forEach(c=>{ const el=document.getElementById('fk-'+c); if(el) el.className='fork-btn'+(curMachine.cause===c?' sel-'+c:''); }); }
+function setCause(c){ curMachine.cause=(curMachine.cause===c?'':c); highlightFork(); saveDraft(); }
+function onMachTitle(val){ curMachine.title=val; saveDraft(); }
+function renderMachPicker(){
+  const sel=document.getElementById('machPicker'); let h=`<option value="">Сохранённые разборы…</option>`;
+  machines.slice().sort((a,b)=>(b.savedAt||0)-(a.savedAt||0)).forEach(m=>{ h+=`<option value="${m.id}">${esc((m.title||'Без названия').slice(0,38))} · ${fmtDate(m.savedAt)}</option>`; });
+  sel.innerHTML=h; sel.value='';
+}
+function onMachPick(id){ if(!id)return; const m=machines.find(x=>x.id===id); if(!m)return; curMachine=JSON.parse(JSON.stringify(m)); populateMachine(); saveDraft(); toast('Разбор открыт'); }
+function machDirty(){ return !!(curMachine.goals||curMachine.problems||curMachine.root||curMachine.design||curMachine.actions||curMachine.cause); }
+function saveMachine(){
+  pullMachine();
+  if(!curMachine.id) curMachine.id=uid();
+  if(!curMachine.title||!curMachine.title.trim()){ curMachine.title=curMachine.goals?curMachine.goals.trim().slice(0,38):'Разбор от '+new Date().toLocaleDateString('ru-RU'); document.getElementById('machTitle').value=curMachine.title; }
+  curMachine.savedAt=Date.now();
+  const i=machines.findIndex(x=>x.id===curMachine.id); const snap=JSON.parse(JSON.stringify(curMachine));
+  if(i>=0) machines[i]=snap; else machines.push(snap);
+  saveArr(K_MACH,machines); saveDraft(); renderMachPicker(); toast('Разбор сохранён');
+}
+function newMachine(){ pullMachine(); if(machDirty()){ if(!confirm('Новый разбор? Текущий сохранится, только если ты нажал «Сохранить».'))return; } curMachine=freshMachine(); populateMachine(); saveDraft(); }
+function exportMachine(){
+  pullMachine(); const cm={design:'Дизайн механизма',people:'Человек',both:'Дизайн и люди'};
+  const L=[]; L.push('МАШИНА'+(curMachine.title?' — '+curMachine.title:'')); L.push(fmtDate(Date.now())); L.push('');
+  if(curMachine.goals) L.push('1. ЦЕЛИ: '+curMachine.goals);
+  if(curMachine.problems) L.push('2. ПРОБЛЕМЫ: '+curMachine.problems);
+  if(curMachine.cause||curMachine.root) L.push('3. ДИАГНОЗ'+(curMachine.cause?' ['+cm[curMachine.cause]+']':'')+': '+(curMachine.root||''));
+  if(curMachine.design) L.push('4. ДИЗАЙН: '+curMachine.design);
+  if(curMachine.actions) L.push('5. ДЕЛАЙ: '+curMachine.actions);
+  copyText(L.join('\n'));
+}
+/* ── РЕШЕНИЕ ── */
+let decisions=loadArr(K_DEC);
+let curDecision=freshDecision();
+let podIndex=-1;
+function freshDecision(){ return { id:'',title:'',question:'',voters:[],savedAt:0 }; }
+function saveDecDraft(){ LS.set(K_DEC_CUR, JSON.stringify(curDecision)); }
+function onDecTitle(val){ curDecision.title=val; saveDecDraft(); }
+function onDecQuestion(val){ curDecision.question=val; saveDecDraft(); }
+function pullDec(){ curDecision.question=v('dec-question'); saveDecDraft(); }
+function setVoter(i,field,val){
+  if(!curDecision.voters[i])return;
+  curDecision.voters[i][field]=val;
+  if(field==='name'){
+    const p=findPersonByName(val);
+    if(p){ const w=belMax(p); curDecision.voters[i].weight=w>0?w:1; curDecision.voters[i].auto=w>0?p.bel.find(b=>(+b.lv||0)===w).area:'нет данных'; }
+    else curDecision.voters[i].auto='';
+    renderVoters();
+  }
+  saveDecDraft(); if(field!=='name') computeDecision();
+}
+function addVoter(){ curDecision.voters.push({name:'',weight:3,choice:'',auto:''}); renderVoters(); saveDecDraft(); }
+function delVoter(i){ curDecision.voters.splice(i,1); renderVoters(); computeDecision(); saveDecDraft(); }
+function renderVoters(){
+  const el=document.getElementById('decVoters'); if(!el)return;
+  const dl=document.getElementById('peopleNames'); if(dl) dl.innerHTML=people.map(p=>`<option value="${esc(p.name)}"></option>`).join('');
+  el.innerHTML=curDecision.voters.map((x,i)=>{
+    const wopts=[1,2,3,4,5].map(w=>`<option value="${w}" ${(+x.weight||3)===w?'selected':''}>${w}</option>`).join('');
+    return `<div class="voter-row">
+      <input class="voter-name" list="peopleNames" value="${esc(x.name||'')}" placeholder="Имя" oninput="setVoter(${i},'name',this.value)">
+      <div class="voter-w"><span class="voter-w-lbl">вес</span><select class="voter-weight" onchange="setVoter(${i},'weight',+this.value)">${wopts}</select>${x.auto?`<span class="auto-w" title="из карточки">↩ ${esc(String(x.auto).slice(0,18))}</span>`:''}</div>
+      <input class="voter-choice" value="${esc(x.choice||'')}" placeholder="Позиция: За / Против / Вариант A" oninput="setVoter(${i},'choice',this.value)">
+      <button class="icon-btn del" onclick="delVoter(${i})">&times;</button>
+    </div>`;
+  }).join('');
+}
+function computeDecision(){
+  const el=document.getElementById('decResult'); if(!el)return;
+  const vs=curDecision.voters.filter(x=>x.choice&&x.choice.trim());
+  if(!vs.length){ el.innerHTML='<div class="pod-empty">Добавь участников с позициями — посчитаю взвешенный итог.</div>'; return; }
+  const g={}; vs.forEach(x=>{ const k=x.choice.trim().toLowerCase(); if(!g[k])g[k]={label:x.choice.trim(),weight:0,count:0}; g[k].weight+=(+x.weight||1); g[k].count++; });
+  const arr=Object.values(g); const maxW=Math.max.apply(null,arr.map(x=>x.weight));
+  const byW=arr.slice().sort((a,b)=>b.weight-a.weight); const byC=arr.slice().sort((a,b)=>b.count-a.count);
+  let html=byW.map((x,i)=>{ const pct=Math.round(x.weight/maxW*100); return `<div class="dec-bar ${i===0?'top':''}"><div class="dec-bar-head"><span class="dec-bar-label">${esc(x.label)}</span><span class="dec-bar-meta">вес ${x.weight} · голосов ${x.count}</span></div><div class="dec-bar-track"><div class="dec-bar-fill" style="width:${pct}%"></div></div></div>`; }).join('');
+  if(byW[0].label.toLowerCase()!==byC[0].label.toLowerCase()) html+=`<div class="dec-note">По головам впереди «${esc(byC[0].label)}», но по компетентности — «${esc(byW[0].label)}». Это и есть момент, ради которого нужно доверие по вопросам.</div>`;
+  else html+=`<div class="dec-note ok">И большинство, и компетентность сходятся на «${esc(byW[0].label)}».</div>`;
+  el.innerHTML=html;
+}
+function renderDecPicker(){ const sel=document.getElementById('decPicker'); if(!sel)return; let h=`<option value="">Сохранённые решения…</option>`; decisions.slice().sort((a,b)=>(b.savedAt||0)-(a.savedAt||0)).forEach(m=>{ h+=`<option value="${m.id}">${esc((m.title||'Без названия').slice(0,38))} · ${fmtDate(m.savedAt)}</option>`; }); sel.innerHTML=h; sel.value=''; }
+function populateDec(){ setV('dec-question',curDecision.question); const t=document.getElementById('decTitle'); if(t) t.value=curDecision.title||''; renderVoters(); computeDecision(); renderDecPicker(); }
+function onDecPick(id){ if(!id)return; const m=decisions.find(x=>x.id===id); if(!m)return; curDecision=JSON.parse(JSON.stringify(m)); if(!Array.isArray(curDecision.voters))curDecision.voters=[]; populateDec(); saveDecDraft(); toast('Решение открыто'); }
+function decDirty(){ return !!(curDecision.question||(curDecision.voters||[]).some(x=>x.name||x.choice)); }
+function saveDec(){
+  pullDec(); if(!curDecision.id) curDecision.id=uid();
+  if(!curDecision.title||!curDecision.title.trim()){ curDecision.title=curDecision.question?curDecision.question.trim().slice(0,38):'Решение от '+new Date().toLocaleDateString('ru-RU'); const t=document.getElementById('decTitle'); if(t) t.value=curDecision.title; }
+  curDecision.savedAt=Date.now();
+  const i=decisions.findIndex(x=>x.id===curDecision.id); const snap=JSON.parse(JSON.stringify(curDecision));
+  if(i>=0) decisions[i]=snap; else decisions.push(snap);
+  saveArr(K_DEC,decisions); saveDecDraft(); renderDecPicker(); toast('Решение сохранено');
+}
+function newDec(){ pullDec(); if(decDirty()){ if(!confirm('Новое решение? Текущее сохранится, только если ты нажал «Сохранить».'))return; } curDecision=freshDecision(); populateDec(); saveDecDraft(); }
+function exportDec(){
+  pullDec(); const vs=curDecision.voters.filter(x=>x.choice&&x.choice.trim());
+  const L=['РЕШЕНИЕ'+(curDecision.title?' — '+curDecision.title:''), fmtDate(Date.now()), ''];
+  if(curDecision.question) L.push('ВОПРОС: '+curDecision.question);
+  if(vs.length){ L.push(''); L.push('УЧАСТНИКИ:'); vs.forEach(x=>L.push('  • '+(x.name||'—')+' [вес '+(x.weight||1)+']: '+x.choice)); }
+  const g={}; vs.forEach(x=>{ const k=x.choice.trim().toLowerCase(); if(!g[k])g[k]={label:x.choice.trim(),weight:0,count:0}; g[k].weight+=(+x.weight||1); g[k].count++; });
+  const byW=Object.values(g).sort((a,b)=>b.weight-a.weight);
+  if(byW.length){ L.push(''); L.push('ИТОГ ПО КОМПЕТЕНТНОСТИ:'); byW.forEach(x=>L.push('  '+x.label+' — вес '+x.weight+', голосов '+x.count)); }
+  copyText(L.join('\n'));
+}
+/* ── ОБЗОР ── */
+function renderDashboard(){
+  const s=document.getElementById('dashStats');
+  if(s) s.innerHTML=`
+    <div class="stat"><div class="stat-num">${principles.length}</div><div class="stat-lbl">Принципов</div></div>
+    <div class="stat"><div class="stat-num">${people.length}</div><div class="stat-lbl">Людей</div></div>
+    <div class="stat"><div class="stat-num">${machines.length}</div><div class="stat-lbl">Разборов</div></div>
+    <div class="stat"><div class="stat-num">${decisions.length}</div><div class="stat-lbl">Решений</div></div>`;
+  renderPrincipleOfDay();
+}
+function renderPrincipleOfDay(reroll){
+  const el=document.getElementById('dashPod'); if(!el)return;
+  if(!principles.length){ el.innerHTML='<div class="pod-empty">Добавь принципы — и здесь появится ежедневное напоминание.</div>'; return; }
+  if(reroll||podIndex<0||podIndex>=principles.length) podIndex=Math.floor(Math.random()*principles.length);
+  const p=principles[podIndex]; const c=catOf(p.category);
+  el.innerHTML=`<div class="pod-card">
+    <div class="pod-top"><span class="cat-tag ${c.cls}"><span class="dot"></span>${c.label}</span><button class="info" onclick="renderPrincipleOfDay(true)" title="Другой принцип">&#8635;</button></div>
+    ${p.trigger?`<div class="p-trigger"><span class="tw">Когда</span>${esc(p.trigger)}</div>`:''}
+    <div class="p-rule">${esc(p.rule)}</div>
+    ${p.why?`<div class="p-why"><span class="ww">Почему</span>${esc(p.why)}</div>`:''}
+  </div>`;
+}
+function extractPrincipleFromMachine(){
+  pullMachine(); switchTab('principles'); openPrinEditor();
+  const cat=document.getElementById('pe-cat'); if(cat) cat.value='company';
+  const trig=document.getElementById('pe-trigger'); if(trig&&curMachine.problems) trig.value=curMachine.problems.replace(/\s+/g,' ').trim().slice(0,140);
+  const rule=document.getElementById('pe-rule'); if(rule&&curMachine.design) rule.value=curMachine.design.replace(/\s+/g,' ').trim().slice(0,180);
+  const why=document.getElementById('pe-why'); if(why&&curMachine.root) why.value=curMachine.root.replace(/\s+/g,' ').trim().slice(0,180);
+  if(rule) rule.focus();
+  toast('Сформулируй принцип из этого разбора');
+}
+function toggleFav(id){ const p=principles.find(x=>x.id===id); if(!p)return; p.fav=!p.fav; saveArr(K_PRIN,principles); renderPrinciples(); }
+function downloadText(name,text){ try{ const b=new Blob([text],{type:'text/plain;charset=utf-8'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(u),1000); }catch(e){ copyText(text); } }
+function exportPrinciplesDoc(){
+  if(!principles.length){ toast('Принципов пока нет'); return; }
+  const byCat={}; principles.forEach(p=>{ (byCat[p.category]=byCat[p.category]||[]).push(p); });
+  const L=['МОИ ПРИНЦИПЫ', new Date().toLocaleDateString('ru-RU'), ''];
+  CATS.forEach(c=>{ const a=byCat[c.id]; if(!a||!a.length)return; L.push('## '+c.label.toUpperCase()); a.forEach(p=>{ L.push('• '+(p.trigger?('Когда '+p.trigger+' → '):'')+p.rule); if(p.why) L.push('   ('+p.why+')'); }); L.push(''); });
+  downloadText('moi-principy.txt', L.join('\n')); toast('Документ скачан');
+}
+function exportAll(){
+  const data={ app:'principles-dalio', version:3, exportedAt:Date.now(), principles, people, machines, decisions, trash };
+  try{ const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='principles-backup-'+new Date().toISOString().slice(0,10)+'.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(u),1000); toast('Резервная копия скачана'); }catch(e){ toast('Не удалось скачать'); }
+}
+function importAll(input){
+  const f=input.files&&input.files[0]; if(!f){ return; }
+  const r=new FileReader();
+  r.onload=function(){ try{ const d=JSON.parse(r.result);
+      if(!confirm('Импортировать данные из файла? Текущие принципы, люди, разборы и решения будут заменены.')){ input.value=''; return; }
+      if(Array.isArray(d.principles)) principles=d.principles;
+      if(Array.isArray(d.people)) people=d.people.map(migratePerson);
+      if(Array.isArray(d.machines)) machines=d.machines;
+      if(Array.isArray(d.decisions)) decisions=d.decisions;
+      if(Array.isArray(d.trash)) { trash=d.trash; saveArr(K_TRASH,trash); }
+      saveArr(K_PRIN,principles); saveArr(K_PEOPLE,people); saveArr(K_MACH,machines); saveArr(K_DEC,decisions);
+      renderDashboard(); toast('Данные импортированы');
+    }catch(e){ toast('Не удалось прочитать файл'); }
+    input.value='';
+  };
+  r.readAsText(f);
+}
+function switchTab(name){
+  if(document.getElementById('panel-machine').classList.contains('active')) pullMachine();
+  if(document.getElementById('panel-decision').classList.contains('active')) pullDec();
+  document.querySelectorAll('.tab').forEach((t,i)=>{ const ns=['overview','principles','machine','people','decision']; t.classList.toggle('active',ns[i]===name); });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='overview') renderDashboard();
+  else if(name==='principles') renderPrinciples();
+  else if(name==='machine') populateMachine();
+  else if(name==='people') renderPeople();
+  else if(name==='decision') populateDec();
+}
+document.addEventListener('input', e=>{ if(e.target&&e.target.closest&&e.target.closest('#panel-machine')) pullMachine(); });
+(function init(){
+  if(!LS.get(K_SEED)){ if(!principles.length){ principles=SEED.slice(); saveArr(K_PRIN,principles); } LS.set(K_SEED,'1'); }
+  saveArr(K_PEOPLE,people);
+  const d=LS.get(K_MACH_CUR); if(d){ try{ curMachine=Object.assign(freshMachine(),JSON.parse(d)); }catch(e){ curMachine=freshMachine(); } }
+  const dd=LS.get(K_DEC_CUR); if(dd){ try{ curDecision=Object.assign(freshDecision(),JSON.parse(dd)); if(!Array.isArray(curDecision.voters)) curDecision.voters=[]; }catch(e){ curDecision=freshDecision(); } }
+  renderDashboard();
+})();
+</script>
+</body>
+</html>
