@@ -1612,6 +1612,21 @@ document.addEventListener('input', e=>{ if(e.target&&e.target.closest&&e.target.
   const dd=LS.get(K_DEC_CUR); if(dd){ try{ curDecision=Object.assign(freshDecision(),JSON.parse(dd)); if(!Array.isArray(curDecision.voters)) curDecision.voters=[]; }catch(e){ curDecision=freshDecision(); } }
   renderDashboard(); renderSyncBox();
 })();
+
+/* ── если открыто внутри iframe: сообщаем высоту родителю ── */
+(function(){
+  if(window.self===window.top) return;
+  document.documentElement.classList.add('in-frame');
+  var last=0;
+  function send(){
+    var h=Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.scrollHeight);
+    if(Math.abs(h-last)>12){ last=h; try{ parent.postMessage({yadroHeight:h},'*'); }catch(e){} }
+  }
+  window.addEventListener('load',send);
+  window.addEventListener('resize',send);
+  setInterval(send,500);
+  send();
+})();
 </script>
 </body>
 </html>
