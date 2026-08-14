@@ -783,10 +783,11 @@ const ROLES=[
   {id:'specialist', nm:'Специалист · ведение', pos:'СПЕЦ', w:{vyn:25,sis:25,obu:15,kom:15,avt:15,nap:5}},
   {id:'diagnost',   nm:'Диагност · продажи',   pos:'ДИАГ', w:{nap:30,kom:30,obu:15,avt:10,vyn:10,sis:5}},
   {id:'coordinator',nm:'Координатор · заявки', pos:'КООР', w:{kom:25,sis:25,vyn:20,nap:15,obu:10,avt:5}},
+  {id:'setter',     nm:'Сеттер · переписка',    pos:'СЕТ',  w:{kom:30,vyn:25,sis:20,nap:15,obu:7,avt:3}},
   {id:'manager',    nm:'Руководитель',         pos:'РУК',  w:{avt:25,nap:20,sis:20,kom:20,obu:10,vyn:5}},
   {id:'universal',  nm:'Универсал',            pos:'УНИВ', w:{nap:17,kom:17,sis:17,vyn:17,obu:16,avt:16}}
 ];
-function roleOf(id){ return ROLES.find(r=>r.id===id)||ROLES[4]; }
+function roleOf(id){ return ROLES.find(r=>r.id===id)||ROLES.find(r=>r.id==='universal'); }
 function ovrFor(p,roleId){
   const w=roleOf(roleId).w; let sum=0,tot=0;
   ATTRS.forEach(a=>{ const v=parseInt(p.attrs&&p.attrs[a.k],10); if(!isNaN(v)){ sum+=v*w[a.k]; tot+=w[a.k]; } });
@@ -1142,7 +1143,7 @@ const AI_PROMPT = `Ты помогаешь собрать карточку со�
 {
   "name": "Имя Фамилия",
   "role": "должность словами",
-  "roleId": "specialist | diagnost | coordinator | manager | universal",
+  "roleId": "specialist | diagnost | coordinator | setter | manager | universal",
   "status": "learning | testing | trusted | wrong",
   "metric": "одна цифра, по которой судим этого человека",
   "attrs": { "nap": 50, "kom": 50, "sis": 50, "vyn": 50, "obu": 50, "avt": 50 },
@@ -1164,7 +1165,7 @@ const AI_PROMPT = `Ты помогаешь собрать карточку со�
 Правила:
 - vTag: ok — подтверждено фактами, q — под вопросом, no — данных нет
 - bel.lv: 0 нет данных, 1 низкое, 2 ниже среднего, 3 среднее, 4 высокое, 5 эталон. Новому человеку без результатов ставь 0 — это честно, а не обидно
-- noBase: массив id ролей, под которые у человека НЕТ предметной базы — экспертизы, навыка, инструмента. Атрибуты описывают характер и не знают про знания, поэтому роль, где человек не владеет предметом, надо отметить здесь, иначе рейтинг соврёт. Возможные значения: "specialist", "diagnost", "coordinator", "manager". Пример: сеттер без фитнес-экспертизы и без опыта продаж голосом → ["specialist","diagnost"]
+- noBase: массив id ролей, под которые у человека НЕТ предметной базы — экспертизы, навыка, инструмента. Атрибуты описывают характер и не знают про знания, поэтому роль, где человек не владеет предметом, надо отметить здесь, иначе рейтинг соврёт. Возможные значения: "specialist", "diagnost", "coordinator", "setter", "manager". Пример: сеттер без фитнес-экспертизы и без опыта продаж голосом → ["specialist","diagnost"]
 - Не выдумывай. Если атрибут оценить не по чему — ставь 50 и напиши об этом в gaps
 - Не смягчай выводы. Если человек не подходит под роль — так и напиши
 - В track складывай только факты с датами, без интерпретаций
@@ -1200,7 +1201,7 @@ function buildUpdatePrompt(p){
 Верни ТОЛЬКО валидный JSON без markdown-обёртки. Формат тот же, что у карточки выше, плюс поле "changed" — одной строкой, что именно изменилось и почему:
 
 {
-  "roleId": "specialist | diagnost | coordinator | manager | universal",
+  "roleId": "specialist | diagnost | coordinator | setter | manager | universal",
   "status": "learning | testing | trusted | wrong",
   "metric": "",
   "attrs": { "nap": 50, "kom": 50, "sis": 50, "vyn": 50, "obu": 50, "avt": 50 },
