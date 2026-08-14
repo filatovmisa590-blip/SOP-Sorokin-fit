@@ -476,6 +476,7 @@ header{ padding:52px 0 26px; }
 .conf-bar{height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
 .conf-bar i{display:block;height:100%;border-radius:3px}
 .conf-l{margin-top:6px;font-size:12px;color:var(--muted)}
+.sync-line{margin-top:8px;font-size:12.5px;color:var(--muted);font-family:'Manrope',sans-serif}
 </style>
 </head>
 <body>
@@ -598,8 +599,10 @@ header{ padding:52px 0 26px; }
     <button class="btn btn-ghost btn-sm" onclick="exportAll()">Скачать копию</button>
     <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importAll(this)">
     <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()">Импорт из копии</button>
+    <button class="btn btn-primary btn-sm" onclick="openSync()">Выгрузить в таблицу</button>
   </div>
   <div class="backup-note">Данные хранятся в этом браузере. Чтобы перенести на другое устройство — скачай копию и импортируй её там.</div>
+  <div id="syncBox"></div>
 </div>
 <!-- РЕШЕНИЕ -->
 <div class="panel" id="panel-decision">
@@ -1486,6 +1489,88 @@ function exportPrinciplesDoc(){
   CATS.forEach(c=>{ const a=byCat[c.id]; if(!a||!a.length)return; L.push('## '+c.label.toUpperCase()); a.forEach(p=>{ L.push('• '+(p.trigger?('Когда '+p.trigger+' → '):'')+p.rule); if(p.why) L.push('   ('+p.why+')'); }); L.push(''); });
   downloadText('moi-principy.txt', L.join('\n')); toast('Документ скачан');
 }
+/* ── ВЫГРУЗКА В ТАБЛИЦУ ── */
+const K_SYNC='dalio_sync_v1';
+function syncCfg(){ try{ return JSON.parse(LS.get(K_SYNC)||'{}')||{}; }catch(e){ return {}; } }
+function saveSyncCfg(c){ LS.set(K_SYNC, JSON.stringify(c)); }
+function belTxtOf(p){ return Array.isArray(p.bel)?p.bel.map(function(b){ return b.area+' — '+(BEL_LABEL[+b.lv||0]||'нет данных'); }).join('\n'):''; }
+function histTxtOf(p){ return Array.isArray(p.history)?p.history.map(function(h){ return fmtDate(h.t)+': '+h.from+' → '+h.to+(h.why?' — '+h.why:''); }).join('\n'):''; }
+function buildSheets(){
+  var L=[['Имя','Должность','Позиция','Рейтинг','Сильнее как','Статус','Проверено %',
+    'Напор','Коммуникация','Системность','Выносливость','Обучаемость','Автономность',
+    'Метрика роли','Ценности','Способности','Навыки','Играет сильно','Ломается',
+    'Доверие','Трек-рекорд','Контрольные точки','Конфликты','Пробелы','Динамика рейтинга','Заметки']];
+  people.forEach(function(p){
+    var r=roleOf(p.roleId), bp=bestPos(p);
+    var av=ATTRS.map(function(a){ var v=parseInt(p.attrs&&p.attrs[a.k],10); return isNaN(v)?'':v; });
+    L.push([ p.name||'', p.role||'', r.nm, hasAttrs(p)?ovrFor(p,p.roleId):'',
+      (bp&&bp.role.id!==p.roleId)?(bp.role.nm+' · '+bp.ovr):(hasAttrs(p)?'на своей позиции':''),
+      statusOf(p.status).label, hasAttrs(p)?confOf(p):'',
+      av[0],av[1],av[2],av[3],av[4],av[5],
+      p.metric||'', p.values||'', p.abilities||'', p.skills||'', p.fitGood||'', p.fitBad||'',
+      belTxtOf(p), p.track||'', p.watch||'', p.conflicts||'', p.gaps||'', histTxtOf(p), p.notes||'' ]);
+  });
+  var PR=[['Категория','Когда (триггер)','Правило','Почему так','В избранном']];
+  principles.forEach(function(x){ PR.push([catOf(x.category).label, x.trigger||'', x.rule||'', x.why||'', x.fav?'да':'']); });
+  var M=[['Название разбора','Цели','Проблемы','Причина','Корень','Что меняем','Действия','Сохранён']];
+  machines.forEach(function(x){ M.push([x.title||'', x.goals||'', x.problems||'', x.cause||'', x.root||'', x.design||'', x.actions||'', x.savedAt?fmtDate(x.savedAt):'']); });
+  var D=[['Вопрос','Участник','Позиция','Вес голоса','Сохранено']];
+  decisions.forEach(function(x){
+    var vs=Array.isArray(x.voters)?x.voters:[];
+    if(!vs.length){ D.push([x.question||x.title||'','','','',x.savedAt?fmtDate(x.savedAt):'']); return; }
+    vs.forEach(function(v,i){ D.push([ i===0?(x.question||x.title||''):'', v.name||'', v.pos||v.opinion||'', v.w||v.weight||'', i===0&&x.savedAt?fmtDate(x.savedAt):'' ]); });
+  });
+  var T=[['Имя','Должность','Удалена']];
+  trash.forEach(function(p){ T.push([p.name||'', p.role||'', fmtDate(p._delAt)]); });
+  var out={ 'Люди':L, 'Принципы':PR, 'Разборы':M, 'Решения':D };
+  if(trash.length) out['Корзина']=T;
+  return out;
+}
+function renderSyncBox(){
+  var el=document.getElementById('syncBox'); if(!el) return;
+  var c=syncCfg();
+  if(!c.url&&!c.token){ el.innerHTML=''; return; }
+  el.innerHTML='<div class="sync-line">Таблица подключена'+(c.lastAt?' · последняя выгрузка '+fmtDate(c.lastAt):' · выгрузок ещё не было')+'</div>';
+}
+function openSync(){
+  var c=syncCfg();
+  document.querySelector('.sheet-kicker').textContent='Выгрузка данных';
+  document.getElementById('modalTitle').textContent='Google-таблица';
+  document.getElementById('modalBody').innerHTML=
+    '<div class="ai-steps"><div class="ai-step">Один раз настраиваешь приёмник в Google-таблице по инструкции, получаешь адрес и ключ.</div>'+
+    '<div class="ai-step">Вставляешь их сюда. Они хранятся только в этом браузере — в файле их нет, поэтому выкладывать файл куда угодно безопасно.</div>'+
+    '<div class="ai-step">Дальше жмёшь «Выгрузить сейчас» — таблица перезаписывается свежими данными, а полная копия падает в лист «Архив» отдельной строкой.</div></div>'+
+    '<div class="ed-row"><label class="ed-label">Адрес приёмника</label><input id="sy-url" type="text" placeholder="https://script.google.com/macros/s/.../exec" value="'+esc(c.url||'')+'"></div>'+
+    '<div class="ed-row"><label class="ed-label">Ключ</label><input id="sy-token" type="text" placeholder="тот же, что вписал в скрипт" value="'+esc(c.token||'')+'"></div>'+
+    '<div class="ed-actions" style="margin-top:16px"><button class="btn btn-red btn-sm" onclick="saveSync()">Сохранить</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="pushToSheet()">Выгрузить сейчас</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="closeHelp()">Закрыть</button></div>'+
+    '<div class="ed-hint" style="margin-top:12px">Выгрузка односторонняя: приложение пишет в таблицу и никогда из неё не читает. Данные в браузере остаются нетронутыми.</div>';
+  document.getElementById('modalOverlay').classList.add('open'); document.body.style.overflow='hidden';
+}
+function saveSync(){
+  var c=syncCfg();
+  c.url=(document.getElementById('sy-url').value||'').trim();
+  c.token=(document.getElementById('sy-token').value||'').trim();
+  saveSyncCfg(c); renderSyncBox(); toast('Настройки сохранены');
+}
+function pushToSheet(){
+  var c=syncCfg();
+  var u=document.getElementById('sy-url'), t=document.getElementById('sy-token');
+  if(u&&t){ c.url=(u.value||'').trim(); c.token=(t.value||'').trim(); saveSyncCfg(c); }
+  if(!c.url||!c.token){ toast('Нужен адрес и ключ'); return; }
+  if(!people.length&&!principles.length){ toast('Выгружать пока нечего'); return; }
+  toast('Отправляю в таблицу...');
+  var payload={ token:c.token, sheets:buildSheets(),
+    backup:JSON.stringify({ app:'principles-dalio', version:3, exportedAt:Date.now(), principles:principles, people:people, machines:machines, decisions:decisions, trash:trash }) };
+  fetch(c.url,{ method:'POST', body:JSON.stringify(payload) })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d&&d.ok){ c.lastAt=Date.now(); saveSyncCfg(c); renderSyncBox(); toast('Выгружено: '+people.length+' карточек'); }
+      else toast('Таблица ответила: '+((d&&d.error)||'ошибка'));
+    })
+    .catch(function(){ toast('Не дозвонился до таблицы — проверь адрес и что доступ открыт «для всех»'); });
+}
 function exportAll(){
   const data={ app:'principles-dalio', version:3, exportedAt:Date.now(), principles, people, machines, decisions, trash };
   try{ const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='principles-backup-'+new Date().toISOString().slice(0,10)+'.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(u),1000); toast('Резервная копия скачана'); }catch(e){ toast('Не удалось скачать'); }
@@ -1513,7 +1598,7 @@ function switchTab(name){
   document.querySelectorAll('.tab').forEach((t,i)=>{ const ns=['overview','principles','machine','people','decision']; t.classList.toggle('active',ns[i]===name); });
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
-  if(name==='overview') renderDashboard();
+  if(name==='overview'){ renderDashboard(); renderSyncBox(); }
   else if(name==='principles') renderPrinciples();
   else if(name==='machine') populateMachine();
   else if(name==='people') renderPeople();
@@ -1525,7 +1610,7 @@ document.addEventListener('input', e=>{ if(e.target&&e.target.closest&&e.target.
   saveArr(K_PEOPLE,people);
   const d=LS.get(K_MACH_CUR); if(d){ try{ curMachine=Object.assign(freshMachine(),JSON.parse(d)); }catch(e){ curMachine=freshMachine(); } }
   const dd=LS.get(K_DEC_CUR); if(dd){ try{ curDecision=Object.assign(freshDecision(),JSON.parse(dd)); if(!Array.isArray(curDecision.voters)) curDecision.voters=[]; }catch(e){ curDecision=freshDecision(); } }
-  renderDashboard();
+  renderDashboard(); renderSyncBox();
 })();
 </script>
 </body>
