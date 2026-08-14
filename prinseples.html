@@ -477,6 +477,14 @@ header{ padding:52px 0 26px; }
 .conf-bar i{display:block;height:100%;border-radius:3px}
 .conf-l{margin-top:6px;font-size:12px;color:var(--muted)}
 .sync-line{margin-top:8px;font-size:12.5px;color:var(--muted);font-family:'Manrope',sans-serif}
+.nb-chips{ display:flex; flex-wrap:wrap; gap:7px; }
+.nb-chip{ padding:7px 13px; border:1px solid var(--line); background:var(--card); border-radius:999px; cursor:pointer;
+  font-family:'Manrope',sans-serif; font-size:12.5px; color:var(--muted); transition:all .18s var(--ez); }
+.nb-chip:hover{ border-color:var(--ink); color:var(--ink); }
+.nb-chip.on{ background:var(--acc); border-color:var(--acc); color:#fff; font-weight:700; }
+.pos-row.nobase{ opacity:.45; }
+.pos-row.nobase .pos-bar{ background:transparent; }
+.pos-v.nb{ font-family:'Manrope',sans-serif; font-size:11.5px; font-weight:600; white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -785,9 +793,10 @@ function ovrFor(p,roleId){
   return tot?Math.round(sum/tot):0;
 }
 function hasAttrs(p){ return ATTRS.some(a=>{ const v=parseInt(p.attrs&&p.attrs[a.k],10); return !isNaN(v); }); }
+function noBaseFor(p,roleId){ return Array.isArray(p.noBase) && p.noBase.indexOf(roleId)>=0; }
 function bestPos(p){
   if(!hasAttrs(p)) return null;
-  let best=null; ROLES.forEach(r=>{ if(r.id==='universal')return; const o=ovrFor(p,r.id); if(!best||o>best.ovr) best={role:r,ovr:o}; });
+  let best=null; ROLES.forEach(r=>{ if(r.id==='universal')return; if(noBaseFor(p,r.id))return; const o=ovrFor(p,r.id); if(!best||o>best.ovr) best={role:r,ovr:o}; });
   return best;
 }
 function confOf(p){
@@ -823,6 +832,7 @@ function migratePerson(p){
   if(p.fitGood===undefined) p.fitGood=p.strengths||'';
   if(p.fitBad===undefined) p.fitBad=p.weaknesses||'';
   if(!Array.isArray(p.bel)) p.bel = p.believable ? [{area:p.believable, lv:2}] : [];
+  if(!Array.isArray(p.noBase)) p.noBase = [];
   return p;
 }
 people=people.map(migratePerson);
@@ -914,11 +924,14 @@ function watchBlock(p){
 }
 function posTable(p){
   if(!hasAttrs(p)) return '';
-  const rows=ROLES.filter(r=>r.id!=='universal').map(r=>({r,o:ovrFor(p,r.id)})).sort((a,b)=>b.o-a.o);
-  const mx=rows[0].o||1;
-  return `<div class="pc-block"><div class="pc-h">Рейтинг по позициям</div><div class="pos-tbl">${
-    rows.map((x,i)=>`<div class="pos-row ${i===0?'best':''}"><div class="pos-nm">${x.r.nm}</div><div class="pos-bar"><i style="width:${Math.round(x.o/mx*100)}%"></i></div><div class="pos-v">${x.o}</div></div>`).join('')
-  }</div><div class="ed-hint" style="margin-top:9px">Один и тот же человек может быть слабым на одной позиции и сильным на другой — цифры считаются по весам роли.</div></div>`;
+  const all=ROLES.filter(r=>r.id!=='universal').map(r=>({r,o:ovrFor(p,r.id),nb:noBaseFor(p,r.id)}));
+  const rows=all.filter(x=>!x.nb).sort((a,b)=>b.o-a.o);
+  const off=all.filter(x=>x.nb);
+  const mx=(rows[0]&&rows[0].o)||1;
+  const body=rows.map((x,i)=>`<div class="pos-row ${i===0?'best':''}"><div class="pos-nm">${x.r.nm}</div><div class="pos-bar"><i style="width:${Math.round(x.o/mx*100)}%"></i></div><div class="pos-v">${x.o}</div></div>`).join('')
+    + off.map(x=>`<div class="pos-row nobase"><div class="pos-nm">${x.r.nm}</div><div class="pos-bar"></div><div class="pos-v nb">нет базы</div></div>`).join('');
+  return `<div class="pc-block"><div class="pc-h">Рейтинг по позициям</div><div class="pos-tbl">${body}</div>`
+    + `<div class="ed-hint" style="margin-top:9px">Цифра считается по весам роли и показывает, подходит ли <b>характер</b>. Она не знает, владеет ли человек предметом.${off.length?` Там, где базы нет — ${off.map(x=>x.r.nm.toLowerCase()).join(', ')} — рейтинг не показан: без экспертизы он не значит ничего.`:''}</div></div>`;
 }
 function openPersonDetail(id){
   const p=people.find(x=>x.id===id); if(!p)return;
@@ -954,6 +967,18 @@ function vTagBtns(cur){
 }
 function setVTag(val,btn){ const wrap=btn.parentNode.parentNode; Array.from(btn.parentNode.children).forEach(b=>b.classList.remove('on')); btn.classList.add('on'); wrap.setAttribute('data-v',val); }
 function getVTag(id){ const el=document.getElementById(id); return el?(el.getAttribute('data-v')||''):''; }
+let edNoBase=[];
+function renderNoBase(p){
+  edNoBase = (p&&Array.isArray(p.noBase)) ? p.noBase.slice() : [];
+  const el=document.getElementById('pp-nobase'); if(!el) return;
+  el.innerHTML = ROLES.filter(r=>r.id!=='universal').map(r=>
+    `<button type="button" class="nb-chip ${edNoBase.indexOf(r.id)>=0?'on':''}" onclick="toggleNoBase('${r.id}',this)">${r.nm}</button>`).join('');
+}
+function toggleNoBase(id,btn){
+  const i=edNoBase.indexOf(id);
+  if(i>=0){ edNoBase.splice(i,1); btn.classList.remove('on'); }
+  else { edNoBase.push(id); btn.classList.add('on'); }
+}
 function renderBelEditor(){
   const el=document.getElementById('belEditor'); if(!el)return;
   el.innerHTML=edBel.map((b,i)=>{
@@ -985,6 +1010,9 @@ function openPersonEditor(id){
       <div class="ed-row"><label class="ed-label">Статус</label><select id="pp-status">${sOpts}</select></div>
     </div>
     <div class="ed-row"><label class="ed-label">Метрика роли — одна цифра, по которой судим</label><input type="text" id="pp-metric" value="${p?esc(p.metric):''}" placeholder="Напр.: доходимость клиентов до результата"></div>
+    <div class="ed-row"><label class="ed-label">Нет предметной базы под эти позиции</label>
+      <div class="nb-chips" id="pp-nobase"></div>
+      <div class="ed-hint">Отметь роли, где человек не владеет предметом — экспертизой, навыком, инструментом. Рейтинг там показан не будет: характер подходит, а делать работу нечем.</div></div>
     <div class="ed-sep"></div><div class="ed-sec">Атрибуты · 1–99</div>
     <div class="attr-edit">${sliders}</div>
     <div class="ed-hint">Ставь по наблюдениям, тест не нужен. 50 — средний человек, 75+ — заметно сильная сторона, 40 и ниже — слабое место.</div>
@@ -1008,7 +1036,7 @@ function openPersonEditor(id){
     <div class="ed-row"><label class="ed-label">Заметки</label><textarea id="pp-note" placeholder="Наблюдения, договорённости">${p?esc(p.notes):''}</textarea></div>
     <div class="ed-actions"><button class="btn btn-red btn-sm" onclick="savePerson()">Сохранить</button><button class="btn btn-ghost btn-sm" onclick="closePersonEditor()">Отмена</button></div>
   </div>`;
-  renderBelEditor(); document.getElementById('pp-name').focus();
+  renderNoBase(p); renderBelEditor(); document.getElementById('pp-name').focus();
   document.getElementById('personEditor').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function savePerson(){
@@ -1020,8 +1048,13 @@ function savePerson(){
     vTag:{ values:getVTag('pp-values-tag'), abilities:getVTag('pp-abilities-tag'), skills:getVTag('pp-skills-tag') },
     fitGood:v('pp-fitgood').trim(), fitBad:v('pp-fitbad').trim(),
     bel: edBel.filter(b=>b.area&&b.area.trim()).map(b=>({area:b.area.trim(), lv:+b.lv||0})),
-    track:v('pp-track').trim(), watch:v('pp-watch').trim(), notes:v('pp-note').trim(), createdAt:Date.now() };
-  if(personEditId){ const i=people.findIndex(x=>x.id===personEditId); if(i>=0){ obj.createdAt=people[i].createdAt; people[i]=obj; } } else people.unshift(obj);
+    track:v('pp-track').trim(), watch:v('pp-watch').trim(), notes:v('pp-note').trim(),
+    noBase: edNoBase.slice(), createdAt:Date.now() };
+  if(personEditId){ const i=people.findIndex(x=>x.id===personEditId); if(i>=0){
+    const prev=people[i];
+    obj.createdAt=prev.createdAt;
+    obj.conflicts=prev.conflicts||''; obj.gaps=prev.gaps||''; obj.history=Array.isArray(prev.history)?prev.history:[];
+    people[i]=obj; } } else people.unshift(obj);
   saveArr(K_PEOPLE,people); closePersonEditor(); renderPeople(); renderVoters(); toast('Карточка сохранена');
 }
 function delPerson(id){
@@ -1131,6 +1164,7 @@ const AI_PROMPT = `Ты помогаешь собрать карточку со�
 Правила:
 - vTag: ok — подтверждено фактами, q — под вопросом, no — данных нет
 - bel.lv: 0 нет данных, 1 низкое, 2 ниже среднего, 3 среднее, 4 высокое, 5 эталон. Новому человеку без результатов ставь 0 — это честно, а не обидно
+- noBase: массив id ролей, под которые у человека НЕТ предметной базы — экспертизы, навыка, инструмента. Атрибуты описывают характер и не знают про знания, поэтому роль, где человек не владеет предметом, надо отметить здесь, иначе рейтинг соврёт. Возможные значения: "specialist", "diagnost", "coordinator", "manager". Пример: сеттер без фитнес-экспертизы и без опыта продаж голосом → ["specialist","diagnost"]
 - Не выдумывай. Если атрибут оценить не по чему — ставь 50 и напиши об этом в gaps
 - Не смягчай выводы. Если человек не подходит под роль — так и напиши
 - В track складывай только факты с датами, без интерпретаций
@@ -1243,6 +1277,7 @@ function applyAiUpdate(){
   // простые поля — только если пришли непустыми
   ['metric','values','abilities','skills','notes'].forEach(k=>{ if(d[k]&&String(d[k]).trim()) p[k]=String(d[k]).trim(); });
   if(d.roleId&&ROLES.some(r=>r.id===d.roleId)) p.roleId=d.roleId;
+  if(Array.isArray(d.noBase)) p.noBase=d.noBase.filter(x=>ROLES.some(r=>r.id===x));
   if(d.status&&STATUSES.some(x=>x.id===d.status)) p.status=d.status;
   if(d.vTag) ['values','abilities','skills'].forEach(k=>{ if(d.vTag[k]) p.vTag[k]=d.vTag[k]; });
   // списки-замены
@@ -1336,7 +1371,8 @@ function importFromAi(){
     vTag:{ values:(d.vTag&&d.vTag.values)||'', abilities:(d.vTag&&d.vTag.abilities)||'', skills:(d.vTag&&d.vTag.skills)||'' },
     fitGood:arr(d.fitGood), fitBad:arr(d.fitBad),
     bel: Array.isArray(d.bel)?d.bel.filter(b=>b&&b.area).map(b=>({area:String(b.area).trim(), lv:Math.max(0,Math.min(5,parseInt(b.lv,10)||0))})):[],
-    track:arr(d.track), watch:arr(d.watch), conflicts:arr(d.conflicts), gaps:arr(d.gaps), notes:String(d.notes||'').trim(), createdAt:Date.now() };
+    track:arr(d.track), watch:arr(d.watch), conflicts:arr(d.conflicts), gaps:arr(d.gaps), notes:String(d.notes||'').trim(),
+    noBase: Array.isArray(d.noBase)?d.noBase.filter(x=>ROLES.some(r=>r.id===x)):[], createdAt:Date.now() };
   const dup=findPersonByName(obj.name);
   if(dup && !confirm('Карточка «'+obj.name+'» уже есть. Добавить ещё одну?')) return;
   people.unshift(obj); saveArr(K_PEOPLE,people);
