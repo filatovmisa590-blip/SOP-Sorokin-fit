@@ -86,6 +86,13 @@ body>*{position:relative;z-index:1;}
 .step-badge.price{background:linear-gradient(135deg,var(--gold),#c99420);color:#1a1205;}
 .step-caret{width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2.4;flex-shrink:0;}
 .step-dots{display:flex;justify-content:center;gap:5px;margin-top:9px;}
+.calltimer{display:flex;align-items:center;justify-content:center;gap:8px;margin:9px auto 0;padding:5px 12px;border-radius:9px;border:1px solid var(--line2);background:var(--surface);font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;width:fit-content;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.calltimer:hover{border-color:var(--accent);}
+.calltimer b{color:var(--text);font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.5px;}
+.calltimer.run b{color:var(--ok);}
+.calltimer.warn b{color:var(--gold);}
+.calltimer.over{border-color:var(--warn-bd);background:var(--warn-bg);}
+.calltimer.over b{color:var(--warn);}
 .step-dot{width:6px;height:6px;border-radius:50%;background:var(--line2);transition:all .2s;cursor:pointer;}
 .step-dot.active{background:var(--accent2);width:20px;border-radius:3px;}
 .step-dot.done{background:var(--accent-deep);}
@@ -96,6 +103,12 @@ body>*{position:relative;z-index:1;}
 .ctl-row .mode-btn{margin:0;}
 body.saymode .tab[data-tab="cheat"],
 body.saymode .tab[data-tab="nosale"]{display:none;}
+#panel-script.saymode .collapse-body.open .note{display:flex;}
+#panel-script.saymode .collapse-body.open .callout{display:flex;}
+#panel-script.saymode .collapse-body.open .blist{display:block;}
+#panel-script.saymode .blist.keep{display:block;}
+.blist.keep li{background:var(--say-bg);border-color:var(--say-bd);color:var(--say-tx);font-weight:600;}
+.blist.keep li::before{background:var(--accent2);}
 #panel-script.saymode .callout.tip{display:none;}
 #panel-script.saymode .callout.warn{display:none;}
 #panel-script.saymode .blist{display:none;}
@@ -344,6 +357,7 @@ html.sflocked,html.sflocked body{overflow:hidden;height:100%;}
       <button class="step-arrow" id="stepNext" aria-label="Вперёд"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
     </div>
     <div class="step-dots" id="stepDots"></div>
+    <div class="calltimer" id="callTimer" title="Тап, чтобы запустить или сбросить"><b>00:00</b><span id="ctHint">тап, чтобы запустить</span></div>
     <div class="ctl-row">
       <button class="mode-btn" id="modeBtn">
         <svg id="modeIc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
@@ -544,11 +558,7 @@ const STAGES = [
     {tip:'<b>Проверка, что этап отработан:</b> ты можешь назвать его боль одной фразой и его же словами. Не «хочет похудеть», а «в сорок два не может поиграть с сыном десять минут и стыдится этого». Нет такой фразы, значит копал вширь и не докопался.'},
     {sub:'🔧 Инструмент, чем копать любой короткий ответ'},
     {note:'Человек почти всегда отвечает общо: «форма не очень», «пробовал, не пошло». На таком ответе нельзя ни назначить формат, ни зацепить боль. Эти пять фраз работают в любой теме, это твоя лопата.'},
-    {say:'Расскажите подробнее.'},
-    {say:'Что вы имеете в виду, когда говорите [его слово]?'},
-    {say:'Можете привести пример?'},
-    {say:'Как думаете, почему так вышло?'},
-    {say:'И к чему это в итоге привело?'},
+    {tools:['Расскажите подробнее.','Что вы имеете в виду, когда говорите [его слово]?','Можете привести пример?','Как думаете, почему так вышло?','И к чему это в итоге привело?']},
     {warn:'Правило: не двигайся дальше, пока ответ остаётся общим. На каждый важный ответ минимум один уточняющий, часто два. Новую тему поднимаешь только тогда, когда предыдущая доведена до конкретики.'},
     {tip:'Самый сильный ход это перевести общее в конкретный эпизод: «вспомните последний раз, когда так было, и расскажите по шагам, что произошло». Человек заново проживает ситуацию, и двигает к решению именно это, а не рассуждения про форму вообще.'},
     {sub:'Тема 1 из 4. Тело сейчас, находишь боль'},
@@ -591,6 +601,15 @@ const STAGES = [
     {warn:'Не выходи из диагностики без этой фразы. Дальше она нужна везде: в разборе, в назначении формата, в отработке возражений. Без неё ты будешь говорить общими словами, а он их не примет.'},
     {sub:'🚩 Отмечай красные флаги'},
     {note:'Параллельно держи в голове критерии отказа из этапа 0. Увидел красный флаг, не гони дальше по скрипту, готовь честный отказ. Это не провал звонка, это твоя работа.'},
+    {sub:'🗣 Если говорит очень много',collapse:true},
+    {note:'Не перебивай сразу. Первую минуту слушай: в этом потоке обычно и лежит настоящая боль, а если оборвёшь, человек закроется и дальше будет отвечать сухо.'},
+    {note:'Дальше перехватывай на вдохе, а не в середине фразы. Заходишь его же словами, тогда это выглядит как интерес, а не как «хватит».'},
+    {say:'Стоп, вот это важно, дайте зафиксирую. Вы сказали [его слово]. Вот про это подробнее.'},
+    {say:'Смотрите, вы много рассказали, и это полезно. Давайте я задам пару конкретных вопросов, чтобы мы точно успели дойти до главного.'},
+    {note:'Если растекается второй раз, перейди на закрытые вопросы. Вместо «расскажите про режим» спроси «во сколько ложитесь?». Открытый вопрос многословному человеку это приглашение ещё на пять минут.'},
+    {note:'И сошлись на рамке, вы про это договаривались:'},
+    {say:'Мы с вами договаривались примерно на час. Я хочу успеть до самого важного, поэтому местами буду возвращать нас в русло, не обижайтесь.'},
+    {warn:'Не пытайся выслушать всё. Многословный человек может говорить час, и ты уйдёшь без разбора, без назначения и без решения. Вести разговор это твоя работа, а не невежливость.'},
     {sub:'😐 Если закрытый, отвечает односложно',collapse:true},
     {note:'Не дави. Заходи мягче, через простые вопросы. Поделись: «ко мне часто приходят мужчины с [ситуация], вам знакомо?». Снимает ощущение, что он один такой.'}
   ]},
@@ -1271,6 +1290,7 @@ function renderOne(b){
   if(b.branch!==undefined) return '<div class="branch'+(b.yes?' yes':'')+'"><span class="branch-arrow">&#8594;</span><div>'+b.branch+'</div></div>';
   if(b.sub!==undefined) return '<div class="substep">'+b.sub+'</div>';
   if(b.steps!==undefined) return '<ol class="blist bnum">'+b.steps.map(x=>'<li>'+x+'</li>').join('')+'</ol>';
+  if(b.tools!==undefined) return '<ul class="blist bdot keep">'+b.tools.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
   if(b.list!==undefined) return '<ul class="blist bdot">'+b.list.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
   if(b.warn!==undefined) return '<div class="callout warn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div>'+b.warn+'</div></div>';
   if(b.tip!==undefined) return '<div class="callout tip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><circle cx="12" cy="8" r=".6" fill="currentColor" stroke="none"/></svg><div>'+b.tip+'</div></div>';
@@ -1329,6 +1349,28 @@ document.getElementById('stepDots').addEventListener('click',e=>{ const d=e.targ
   var saved='0'; try{ saved=localStorage.getItem(KEY)||'0'; }catch(e){}
   apply(saved==='1');
   btn.addEventListener('click', function(){ apply(!panel.classList.contains('saymode')); btn.blur(); });
+})();
+
+/* таймер звонка: тап запускает, повторный тап сбрасывает */
+(function(){
+  var el=document.getElementById('callTimer'); if(!el) return;
+  var hint=document.getElementById('ctHint'), num=el.querySelector('b'), t0=null;
+  function fmt(s){var m=Math.floor(s/60);return (m<10?'0':'')+m+':'+((s%60)<10?'0':'')+(s%60);}
+  function tick(){
+    if(!t0){ num.textContent='00:00'; hint.textContent='тап, чтобы запустить';
+             el.classList.remove('run','warn','over'); return; }
+    var s=Math.floor((Date.now()-t0)/1000), m=Math.floor(s/60);
+    num.textContent=fmt(s);
+    var st=STAGES[cur]; hint.textContent = st && st.time ? 'этап: '+st.time : '';
+    el.classList.toggle('run', m<45);
+    el.classList.toggle('warn', m>=45 && m<60);
+    el.classList.toggle('over', m>=60);
+  }
+  el.addEventListener('click', function(){
+    t0 = t0 ? null : Date.now();
+    tick(); el.blur();
+  });
+  setInterval(tick, 1000); tick();
 })();
 
 /* листание клавишами: стрелки, пробел, PageUp/PageDown */
